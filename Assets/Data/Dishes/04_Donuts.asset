@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 410c376eb89b5e5408eb2e171f9ec489, type: 3}
+  m_Name: 04_Donuts
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.DishData
+  dishId: 4
+  englishName: Donuts
+  russianName: "\u041F\u043E\u043D\u0447\u0438\u043A\u0438"
+  saleValue: 18
+  recipeCost: 450
+  clickRequirement: 20
+  documentedAvailableLocations:
+  - {fileID: 11400000, guid: 1e0a1e2a278a51649b83341ce04117a8, type: 2}
+  - {fileID: 11400000, guid: 26e940511391de74599659b74b5445f5, type: 2}

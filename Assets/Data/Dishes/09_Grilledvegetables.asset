@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 410c376eb89b5e5408eb2e171f9ec489, type: 3}
+  m_Name: 09_Grilledvegetables
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.DishData
+  dishId: 9
+  englishName: Grilled vegetables
+  russianName: "\u041E\u0432\u043E\u0449\u0438 \u043D\u0430 \u0433\u0440\u0438\u043B\u0435"
+  saleValue: 120
+  recipeCost: 3500
+  clickRequirement: 110
+  documentedAvailableLocations:
+  - {fileID: 11400000, guid: 78972f75293f39047a884b3f6c820a47, type: 2}
+  - {fileID: 11400000, guid: f79081db3e4e3e34ab007e1520da1e56, type: 2}
+  - {fileID: 11400000, guid: 237586ed74915c147be2c47709f2653a, type: 2}

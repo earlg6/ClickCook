@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 542bb7d3ee8e66e42921f3af6c333d91, type: 3}
+  m_Name: 09_Fashionrestaurant
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.LocationData
+  levelRequirement: 9
+  englishName: Fashion restaurant
+  russianName: "\u0444\u0435\u0448\u043D \u0440\u0435\u0441\u0442\u043E\u0440\u0430\u043D"
+  passiveIncomePerSecond: 180
+  documentedAvailableDishes:
+  - {fileID: 11400000, guid: 6a851a0cebbad65489556e870d18517e, type: 2}
+  - {fileID: 11400000, guid: 95a9bdf41ef08804488f80b7e53e4f0d, type: 2}
+  - {fileID: 11400000, guid: 78d081a43bd00aa40be0ec3cfc77436c, type: 2}
+  - {fileID: 11400000, guid: 020b8b37a4b0b8d42b94d57777c5c643, type: 2}
+  - {fileID: 11400000, guid: fcfa863f7a0f069438a0efa644d2fc9f, type: 2}
+  - {fileID: 11400000, guid: f24c8f2268ee41245a065e302efac04f, type: 2}
+  - {fileID: 11400000, guid: edd0aa76e03e6c748bc3f60d51992f9f, type: 2}
+  - {fileID: 11400000, guid: 68ddc0c296eeb1c46a83c77c42b030b8, type: 2}
+  - {fileID: 11400000, guid: e7f359c08b87017469d34591f10d57a0, type: 2}

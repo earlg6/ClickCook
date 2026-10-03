@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 542bb7d3ee8e66e42921f3af6c333d91, type: 3}
+  m_Name: 06_Italianrestaurant
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.LocationData
+  levelRequirement: 6
+  englishName: Italian restaurant
+  russianName: "\u0438\u0442\u0430\u043B\u044C\u044F\u043D\u0441\u043A\u0438\u0439
+    \u0440\u0435\u0441\u0442\u043E\u0440\u0430\u043D"
+  passiveIncomePerSecond: 75
+  documentedAvailableDishes:
+  - {fileID: 11400000, guid: 084ba320fb1bf5c4ca9cf12a0bb4ba48, type: 2}
+  - {fileID: 11400000, guid: ee3c8c795af07534e855e4307f17068e, type: 2}
+  - {fileID: 11400000, guid: 64da7fc292ad6f04e92fb0bcd3c8088a, type: 2}
+  - {fileID: 11400000, guid: 58c2301af9c07f64a88813af0747b3d8, type: 2}
+  - {fileID: 11400000, guid: 9f621595842a5ed4d96bab8ffa887e49, type: 2}
+  - {fileID: 11400000, guid: 21de85728fe2bf649a3f936c1b22d466, type: 2}

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 542bb7d3ee8e66e42921f3af6c333d91, type: 3}
+  m_Name: 04_Shashlik-grillrestaurant
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.LocationData
+  levelRequirement: 4
+  englishName: Shashlik/grill restaurant
+  russianName: "\u0448\u0430\u0448\u043B\u044B\u0447\u043D\u0430\u044F"
+  passiveIncomePerSecond: 30
+  documentedAvailableDishes:
+  - {fileID: 11400000, guid: 8704533c1692def47a5b8eb718799dd2, type: 2}
+  - {fileID: 11400000, guid: 1ddc6bdd9f2ec2f49bfec726e49ac166, type: 2}
+  - {fileID: 11400000, guid: 3b19ac0dbd74e514aa6e131a2fb391fa, type: 2}
+  - {fileID: 11400000, guid: 5e3edacba450f83479a3c670010ed6a3, type: 2}
+  - {fileID: 11400000, guid: 084ba320fb1bf5c4ca9cf12a0bb4ba48, type: 2}

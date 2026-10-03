@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 542bb7d3ee8e66e42921f3af6c333d91, type: 3}
+  m_Name: 07_Pastryshop
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.LocationData
+  levelRequirement: 7
+  englishName: Pastry shop
+  russianName: "\u043A\u043E\u043D\u0434\u0438\u0442\u0435\u0440\u0441\u043A\u0430\u044F"
+  passiveIncomePerSecond: 105
+  documentedAvailableDishes:
+  - {fileID: 11400000, guid: 7607a1c809842674981a71c19a8e9b73, type: 2}
+  - {fileID: 11400000, guid: 58c2301af9c07f64a88813af0747b3d8, type: 2}
+  - {fileID: 11400000, guid: 9f621595842a5ed4d96bab8ffa887e49, type: 2}
+  - {fileID: 11400000, guid: 21de85728fe2bf649a3f936c1b22d466, type: 2}
+  - {fileID: 11400000, guid: adde62cd303a4914181df07d63e31932, type: 2}
+  - {fileID: 11400000, guid: 6a851a0cebbad65489556e870d18517e, type: 2}
+  - {fileID: 11400000, guid: f36ba0c8050a59f48a8616bcdc6fd6e4, type: 2}

@@ -11,6 +11,8 @@ namespace ClickCook.Runtime
         public LocationData Location { get; }
         public int SlotIndex { get; }
         public bool IsReserved { get; internal set; }
+        public bool IsCompleted { get; internal set; }
+        public int RemainingClicks { get; internal set; }
 
         internal PrototypeOrder(DishData dish, LocationData location, int slotIndex)
         {

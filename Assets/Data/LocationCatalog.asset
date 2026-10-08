@@ -12,4 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed564d0fcfcb33549beaf515fe5d0f50, type: 3}
   m_Name: LocationCatalog
   m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Runtime.Locations.LocationCatalog
-  locations: []
+  locations:
+  - {fileID: 11400000, guid: 5c006ca3fbd27984682e45c74f322aeb, type: 2}
+  - {fileID: 11400000, guid: 1e0a1e2a278a51649b83341ce04117a8, type: 2}
+  - {fileID: 11400000, guid: 26e940511391de74599659b74b5445f5, type: 2}
+  - {fileID: 11400000, guid: 4ddf528d7117825499d2e7dabe89dc2d, type: 2}
+  - {fileID: 11400000, guid: 78972f75293f39047a884b3f6c820a47, type: 2}
+  - {fileID: 11400000, guid: f79081db3e4e3e34ab007e1520da1e56, type: 2}
+  - {fileID: 11400000, guid: 217901a5ba4d816439673f6c58f455cf, type: 2}
+  - {fileID: 11400000, guid: 91f0215bafb66e1439a5d47aa1a10976, type: 2}
+  - {fileID: 11400000, guid: 237586ed74915c147be2c47709f2653a, type: 2}
+  - {fileID: 11400000, guid: 47e6bfb1c69cec74eb9567d44e3d06da, type: 2}
+  - {fileID: 11400000, guid: c68f281662ecebc4686689236a9253df, type: 2}

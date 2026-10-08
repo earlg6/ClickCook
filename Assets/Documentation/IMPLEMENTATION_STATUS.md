@@ -89,11 +89,12 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 
 ### Partially implemented
 
-- Core game flow: Location Selection → Work Day board → base click cooking → completion/replacement → day end exists (4B); rarity, rewards and final summary remain absent.
+- Core game flow: Location Selection → Work Day board → base click cooking → informational Dish Result for completions 1–9 → replacement / day end exists (5A); rarity, rewards and final summary remain absent.
 - Location system: static data and browsing exist; unlocking, ownership, real progress, passive-income accrual, and recipe gating do not.
 - Dish system: static data and base click cooking exist; runtime recipes, dish XP/progression, final dish art and effects do not.
 - Work Day: documented candidates, dynamic orders, base cooking/completion/replacement, ten-dish limit, early finish and cleanup exist; earnings, dates, final summary and next-day progression do not.
 - UI: temporary prototype screens exist; final navigation, styling, responsiveness, feedback, and all other screens do not.
+- Dish Result: temporary completed-dish name/base-value display and Continue exist (5A); rarity, payouts, XP and final presentation do not.
 
 ### Not implemented
 
@@ -230,11 +231,46 @@ Before 4B, approve the prototype end-state behavior at ten completions and the F
 - Serialized scene diff contains only prototype UI/controller changes and added dish UI, with no existing block removed. Dormitory, camera, lighting, URP, static dish/location data, catalog and project settings are unchanged.
 - SampleScene is saved, clean, left out of Play Mode, and retains the new serialized dish-button/label bindings.
 
-### Intentionally unfinished and recommended next step
+### Intentionally unfinished and recommended next step at the Milestone 4B checkpoint
 
 This is base cooking and a temporary day-ending flow, not the complete game. Final models, animation/effects/audio, rarity/result presentation, economy/rewards, XP, upgrades, recipes/unlocks, save/load and final End-of-Day summary remain unimplemented. Capacity values remain the existing provisional proposal; no timing or click-count balancing was invented.
 
 Recommended next step: approve the minimal rarity/result and payout contract in GDD Sections 11 and 14 before implementing those systems. Questions include base rarity probabilities, dish-XP influence, currency multipliers and payout timing. Do not infer them from the now-working base cooking loop.
+
+## Completed Milestone 5A — Informational Dish Result
+
+### Approved scope (GDD Sections 7 and 11)
+
+- For completed dishes 1–9, show the exact completed dish name and base `DishData.SaleValue`, explicitly reference-only, not a payout.
+- Display `Rarity: not implemented` and `No currency or XP awarded.` Do not assign a fixed Common tier or invent rarity probabilities/multipliers.
+- Continue returns to the existing replacement board. Completion/counting/replacement still occur exactly once at the final cooking click; Continue does not modify order state.
+- The tenth dish immediately ends the day as in 4B, without a Dish Result screen. No additional Finish Day/Back/navigation action is exposed during the result screen.
+
+### Implementation and files (modified only; no new files)
+
+- `Assets/Scripts/Runtime/ClickCookPrototypeController.cs` — captures the completed order before clearing cooking state, populates the informational result, guards Continue by screen/day state and clears stale text on Continue/end/new day.
+- `Assets/Scenes/SampleScene.unity` — adds `ClickCook_Prototype_DishResult` under the existing Canvas with title, details and Continue button, using the project's legacy uGUI Text. No TMP resources or dependencies added.
+- `Assets/Documentation/ClickCook_GDD.md`
+- `Assets/Documentation/IMPLEMENTATION_STATUS.md`
+
+The existing order/session classes, static data, capacity configuration and all cooking/replacement formulas are unchanged. No economy, XP or rarity code introduced.
+
+### Executed verification
+
+- Unity 6000.3.14f1 recompiled successfully, without C# compilation failures.
+- Play Mode suite passed twice across fresh sessions. Each run checked all 11 locations, 52 informational result screens, and exact name/base-value text for all 32 real dish assets using transient unsaved fixtures.
+- Results appear only after the exact final cooking click. While a result is visible, hidden/stale order, Cook, navigation, Finish Day, Back and dish-click callbacks do not change the session.
+- Continue returns to the same replacement instances/count; repeated Continue does not increment completion or regenerate orders. All untouched slots, pool/capacity rules, Back/full-HP reset, manual finish, fresh-day clearing, empty pools and carousel wrapping passed regression checks.
+- Real cooking button callbacks tested the complete ten-dish path: results 1–9, then immediate automatic end/cleanup at ten with no result screen or stale result text.
+- Continue EventSystem raycast/pointer dispatch and label-height bounds passed. The initial pointer check failed immediately after the UI/test transition; subsequent inspection and retest after Game View updated passed without code changes. Physical mouse input was NOT tested.
+- Rendered result screen was inspected. SampleScene is saved, clean, stopped, and retains all result bindings. No ClickCook runtime exception observed; the pre-existing Plastic/UVCS configuration exception remains.
+- Scene serialization comparison shows only the prototype Canvas child list/controller bindings changed, plus new result UI blocks; no existing blocks removed. Dormitory, camera, lighting/URP, static data, catalog and project settings remain unchanged.
+
+### Remaining limitations and recommended next step
+
+This is a partial Dish Result system, not implemented rarity or economy. Base value is informational only. Final graphics/animations/audio, actual rarity, rewards, XP, upgrades, recipes/unlocks, persistence and final End-of-Day summary remain absent. The provisional capacities and 70,000-click values were not rebalanced; human pacing remains unverified.
+
+Recommended next step: a read-only design decision checkpoint for rarity/payout (GDD Sections 11 and 14): base probabilities or non-random progression policy, dish-XP influence, currency multipliers, payout timing and starting wallet. Do not implement these systems without approved values.
 
 ## Documentation policy
 

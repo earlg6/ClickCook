@@ -36,6 +36,9 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Button backToBoardButton;
         [SerializeField] private UnityEngine.UI.Button cookingDishButton;
         [SerializeField] private UnityEngine.UI.Text cookingDishLabel;
+        [SerializeField] private GameObject dishResultScreen;
+        [SerializeField] private UnityEngine.UI.Text dishResultText;
+        [SerializeField] private UnityEngine.UI.Button continueFromResultButton;
 
         private readonly PrototypeOrderSession session = new();
         private PrototypeOrder displayedCookingOrder;
@@ -58,6 +61,7 @@ namespace ClickCook.Runtime
             finishDayButton.onClick.AddListener(FinishDay);
             backToBoardButton.onClick.AddListener(BackToBoard);
             cookingDishButton.onClick.AddListener(ClickCookingDish);
+            continueFromResultButton.onClick.AddListener(ContinueFromDishResult);
             for (int i = 0; i < orderButtons.Length; i++)
             {
                 int slot = i;
@@ -67,6 +71,7 @@ namespace ClickCook.Runtime
             locationSelectionScreen.SetActive(true);
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(false);
+            ClearDishResult();
             RefreshLocationSelection();
         }
 
@@ -97,7 +102,8 @@ namespace ClickCook.Runtime
                    cookButton != null &&
                    finishDayButton != null && orderBoardStatusText != null &&
                    cookingPrototypeScreen != null && cookingOrderText != null &&
-                   backToBoardButton != null && cookingDishButton != null && cookingDishLabel != null;
+                   backToBoardButton != null && cookingDishButton != null && cookingDishLabel != null &&
+                   dishResultScreen != null && dishResultText != null && continueFromResultButton != null;
         }
 
         public void ShowPreviousLocation()
@@ -122,6 +128,7 @@ namespace ClickCook.Runtime
             int capacity = level >= 0 && level < prototypeCapacities.Length ? prototypeCapacities[level] : 0;
             session.StartDay(selectedLocation, capacity);
             displayedCookingOrder = null;
+            ClearDishResult();
             locationSelectionScreen.SetActive(false);
             workDayScreen.SetActive(true);
             workDayLocationText.text = $"Selected location: {selectedLocation.EnglishName}";
@@ -179,8 +186,9 @@ namespace ClickCook.Runtime
 
         public void ClickCookingDish()
         {
+            PrototypeOrder completedOrder = displayedCookingOrder;
             if (!enabled || !cookingPrototypeScreen.activeSelf ||
-                !session.TryCookClick(displayedCookingOrder)) return;
+                !session.TryCookClick(completedOrder)) return;
             displayedCookingOrder = null;
             if (session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY)
             {
@@ -188,8 +196,24 @@ namespace ClickCook.Runtime
                 return;
             }
             cookingPrototypeScreen.SetActive(false);
+            dishResultText.text = $"Dish: {completedOrder.Dish.EnglishName}\n" +
+                $"Base sale value (reference only): {completedOrder.Dish.SaleValue} у.е.\n" +
+                "Rarity: not implemented\nNo currency or XP awarded.";
+            dishResultScreen.SetActive(true);
+        }
+
+        public void ContinueFromDishResult()
+        {
+            if (!enabled || !dishResultScreen.activeSelf || !session.IsDayActive) return;
+            ClearDishResult();
             workDayScreen.SetActive(true);
             RefreshOrderBoard();
+        }
+
+        private void ClearDishResult()
+        {
+            dishResultScreen.SetActive(false);
+            dishResultText.text = string.Empty;
         }
 
         private void EndWorkDay(bool limitReached)
@@ -197,6 +221,7 @@ namespace ClickCook.Runtime
             string location = session.SelectedLocation != null ? session.SelectedLocation.EnglishName : string.Empty;
             int completed = session.CompletedDishes;
             session.EndDay();
+            ClearDishResult();
             displayedCookingOrder = null;
             cookingOrderText.text = string.Empty;
             cookingDishLabel.text = string.Empty;

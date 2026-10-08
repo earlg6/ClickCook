@@ -92,80 +92,42 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 - Core game flow: only Location Selection → Work Day placeholder exists.
 - Location system: static data and browsing exist; unlocking, ownership, real progress, passive-income accrual, and recipe gating do not.
 - Dish system: static data exists; runtime recipes, dish progression, cooking, and presentation do not.
-- Work Day: selected-location context and a Finish Day placeholder exist; orders, earnings, completion rules, summary, and next-day behavior do not.
+- Work Day: selected-location context, documented dish candidates (Milestone 3), and a Finish Day placeholder exist; orders, earnings, completion rules, summary, and next-day behavior do not.
 - UI: temporary prototype screens exist; final navigation, styling, responsiveness, feedback, and all other screens do not.
 
 ### Not implemented
 
 - Main Menu, order board, order lifecycle, cooking/clicking, dish results, rarity, economy, rewards, XP/progression, unlock systems, upgrades, save/load, achievements, journal, settings, pause, final animations, and audio content.
 
-## Proposed Milestone 3 — Documented Work Day Dish Candidates
+## Completed Milestone 3 — Documented Work Day Dish Candidates
 
-### Objective
+Supporting GDD Sections 2, 5, and 8, the existing Work Day placeholder now displays the selected location's complete documented dish-candidate list. This is a data-to-runtime prototype, not an order board or a resolution of order eligibility.
 
-Extend the existing Work Day placeholder to display the complete documented dish-candidate list for the selected location. This is a small data-to-runtime validation step; it does **not** implement the order board, order generation, dish selection, cooking, rewards, or recipe gating.
+### Implemented functionality
 
-### Relevant GDD sections
+- One read-only legacy uGUI label, `ClickCook_Prototype_WorkDay_DishCandidates`, added to the existing Work Day panel.
+- Cook populates the count, dish IDs, and English names directly from the session's `LocationData.DocumentedAvailableDishes`, preserving every entry and stored order without randomization or filtering.
+- Missing dish references are explicitly labeled instead of silently omitted; all 11 current locations have valid references.
+- The Work Day placeholder layout was enlarged to fit the complete lists; the Dormitory environment is unchanged.
+- Existing in-memory session and prototype-only Finish Day response are retained. No order instances, eligibility rules, cooking, economy, progression, or persistence were added.
 
-- Section 2 — Core Gameplay Loop.
-- Section 5 — Location System.
-- Section 6 — Work Day.
-- Section 7 — Order Board.
-- Section 8 — Dish System.
-- Section 21 — UI/UX.
-- Sections 26–27 — Game States and Conceptual Data Model.
-- Section 31 — unresolved order, recipe, and availability rules.
-
-### Documented requirements
-
-- A Work Day begins after selecting a location and pressing `Cook`.
-- Locations determine which dishes can appear on the order board.
-- Orders are eventually selected before cooking.
-- Order generation, refill/removal, timing, repeats, weights, selection limits, rewards, and recipe gating remain TBD.
-
-### Implementation recommendation
-
-- Add one temporary read-only dish-candidate area to the existing Work Day placeholder.
-- Populate it directly from the selected `LocationData.DocumentedAvailableDishes`, preserving asset order and showing every documented entry without randomization, filtering, truncation, or recipe assumptions.
-- Label the area clearly as documented candidates, not active orders.
-- Keep the existing in-memory session and Finish Day placeholder behavior.
-- Do not create order instances or mark the GDD Order Board state complete.
-
-### Existing systems and assets to reuse
-
-- `LocationData` and its documented dish references.
-- `DishData` display names and IDs.
-- `LocationCatalog.asset`.
-- `ClickCookPrototypeController` and its selected-location session.
-- Existing `ClickCook_Prototype_WorkDay` uGUI panel in `SampleScene`.
-
-### Expected files to modify
+### Files modified (no new files)
 
 - `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`
 - `Assets/Scenes/SampleScene.unity`
 - `Assets/Documentation/ClickCook_GDD.md`
 - `Assets/Documentation/IMPLEMENTATION_STATUS.md`
 
-No new static data assets or gameplay architecture are expected for this slice.
+### Executed Unity verification
 
-### Acceptance criteria
-
-- Selecting any of the 11 locations and pressing `Cook` opens Work Day and still shows the selected location.
-- Work Day shows exactly that location's non-null `DocumentedAvailableDishes`, in stored order, with the displayed count matching the data asset.
-- All 11 locations can be checked without exceptions, stale list entries, randomization, or hidden filtering.
-- The UI identifies the entries as documented dish candidates, not generated orders.
-- Previous/Next, Cook, and Finish Day behavior from Milestone 2B remains functional.
-- No order generation, recipe gating, economy, reward, XP, cooking, timer, or persistence behavior is introduced.
-- Unity compiles without milestone-caused errors; `SampleScene` is saved and the Dormitory environment remains unchanged.
-
-### Unity verification plan
-
-- Recompile and confirm no C# compilation failures.
-- Inspect all serialized references on `ClickCookPrototypeController`.
-- In Play Mode, browse each catalog location, press `Cook`, and compare the displayed candidate names/count against the selected `LocationData` asset.
-- Verify no null/stale entries when switching locations across repeated Play Mode runs.
-- Re-run the Milestone 2B Previous/Next wrap, Cook transition, and Finish Day smoke tests.
-- Confirm `SampleScene` is saved and clean after verification.
+- Unity 6000.3.14f1 recompiled successfully with no C# compilation failures.
+- All 15 serialized controller references are assigned; the catalog retains exactly 11 valid locations, ordered by levels 0–10.
+- Play Mode tests invoked the actual button callbacks over two complete carousel passes (22 Cook transitions). Every candidate list matched the data's count, IDs, names, and order; text-height checks confirmed the lists fit without vertical truncation.
+- Location name, level, count, income, placeholder progress, both wrap directions, selected-location handoff, screen visibility, and Finish Day response passed regression checks.
+- A fresh Play Mode session reset correctly and displayed the Michelin location's candidates and Finish Day response. Rendered Pastry shop and Michelin Work Day views were inspected.
+- Tests used button callbacks, not physical mouse input; final responsiveness and device support remain unverified and out of scope.
+- SampleScene is saved, clean, and left out of Play Mode with the new serialized label binding retained. Static data assets were not modified.
+- No ClickCook runtime exception occurred. The pre-existing Plastic/UVCS client configuration exception remains unrelated and unresolved.
 
 ### Unresolved design decisions intentionally deferred
 
@@ -174,6 +136,10 @@ No new static data assets or gameplay architecture are expected for this slice.
 - Order count, six-slot interpretation, generation weights, refill/removal, repeats, timeout, and selection limits.
 - Work-day completion, early-finish consequences, earnings, rewards, and XP.
 - Cooking click/hidden-HP semantics and rarity behavior.
+
+### Recommended next step
+
+Resolve the minimum order-lifecycle and recipe-eligibility contract in GDD Sections 6–7 and 31 before implementing an order board: initial count, six-slot meaning, dish selection/repeats, refill/removal, and whether owned recipes gate candidates. Do not infer these rules from the candidate display.
 
 ## Documentation policy
 

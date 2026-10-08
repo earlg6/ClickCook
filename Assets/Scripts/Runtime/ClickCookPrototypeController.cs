@@ -1,5 +1,6 @@
 using ClickCook.Data;
 using ClickCook.Runtime.Locations;
+using System.Text;
 using UnityEngine;
 
 namespace ClickCook.Runtime
@@ -19,6 +20,7 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Text dishSlotsText;
         [SerializeField] private UnityEngine.UI.Text incomeText;
         [SerializeField] private UnityEngine.UI.Text workDayLocationText;
+        [SerializeField] private UnityEngine.UI.Text workDayDishCandidatesText;
         [SerializeField] private UnityEngine.UI.Text finishDayMessageText;
         [SerializeField] private UnityEngine.UI.Button previousButton;
         [SerializeField] private UnityEngine.UI.Button nextButton;
@@ -58,6 +60,7 @@ namespace ClickCook.Runtime
                    dishSlotsText != null &&
                    incomeText != null &&
                    workDayLocationText != null &&
+                   workDayDishCandidatesText != null &&
                    finishDayMessageText != null &&
                    previousButton != null &&
                    nextButton != null &&
@@ -87,7 +90,24 @@ namespace ClickCook.Runtime
             locationSelectionScreen.SetActive(false);
             workDayScreen.SetActive(true);
             workDayLocationText.text = $"Selected location: {selectedLocation.EnglishName}";
+            RefreshWorkDayDishCandidates();
             finishDayMessageText.text = string.Empty;
+        }
+
+        private void RefreshWorkDayDishCandidates()
+        {
+            var dishes = session.SelectedLocation.DocumentedAvailableDishes;
+            var text = new StringBuilder();
+            text.AppendLine($"Documented dish candidates: {dishes.Count}");
+            foreach (DishData dish in dishes)
+            {
+                // Preserve every stored entry; missing data must not silently change eligibility.
+                text.AppendLine(dish != null
+                    ? $"{dish.DishId}. {dish.EnglishName}"
+                    : "[Missing DishData reference]");
+            }
+
+            workDayDishCandidatesText.text = text.ToString();
         }
 
         public void FinishDay()

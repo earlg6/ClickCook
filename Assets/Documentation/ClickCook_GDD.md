@@ -490,6 +490,7 @@ This checklist records verified Unity implementation without changing the design
 - [ ] Main Menu is not implemented.
 - [ ] Partially implemented — Location Selection has a verified temporary uGUI carousel with one current location, Previous/Next wraparound across all 11 locations, name, documented level, placeholder progress, documented dish count, passive income/sec, and `Cook`. Unlock/ownership rules, real progress, dish-slot contents, and final visual design remain unimplemented. — **Milestone 2B**
 - [ ] Partially implemented — Pressing `Cook` stores the selected `LocationData` in memory and opens a Work Day placeholder showing the selected location. The order board and real work-day lifecycle remain unimplemented. — **Milestone 2B**
+- [x] Work Day displays the selected location's complete `DocumentedAvailableDishes` list as read-only documented candidates, with count, dish IDs, and English names in stored order. This is not an order board or an eligibility rule. — **Milestone 3**, supporting Sections 2, 5, and 8; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
 - [ ] Partially implemented — A `Finish Day` button can be triggered and displays a prototype-only response. End-of-day rules, summary, rewards, date advancement, and next-day behavior remain unimplemented. — **Milestone 2B**
 - [ ] Order Board is not implemented.
 - [ ] Cooking / clicking is not implemented.

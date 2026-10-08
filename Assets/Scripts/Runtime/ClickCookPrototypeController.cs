@@ -26,9 +26,19 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Button nextButton;
         [SerializeField] private UnityEngine.UI.Button cookButton;
         [SerializeField] private UnityEngine.UI.Button finishDayButton;
+        [Header("Milestone 4A — provisional capacities by documented level (0–10)")]
+        [SerializeField] private int[] prototypeCapacities = { 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6 };
+        [SerializeField] private UnityEngine.UI.Text orderBoardStatusText;
+        [SerializeField] private UnityEngine.UI.Button[] orderButtons;
+        [SerializeField] private UnityEngine.UI.Text[] orderLabels;
+        [SerializeField] private GameObject cookingPrototypeScreen;
+        [SerializeField] private UnityEngine.UI.Text cookingOrderText;
+        [SerializeField] private UnityEngine.UI.Button backToBoardButton;
 
-        private readonly PrototypeSession session = new();
+        private readonly PrototypeOrderSession session = new();
         private int currentLocationIndex;
+
+        public PrototypeOrderSession OrderSession => session;
 
         private void Awake()
         {
@@ -43,14 +53,30 @@ namespace ClickCook.Runtime
             nextButton.onClick.AddListener(ShowNextLocation);
             cookButton.onClick.AddListener(CookSelectedLocation);
             finishDayButton.onClick.AddListener(FinishDay);
+            backToBoardButton.onClick.AddListener(BackToBoard);
+            for (int i = 0; i < orderButtons.Length; i++)
+            {
+                int slot = i;
+                orderButtons[i].onClick.AddListener(() => SelectOrder(slot));
+            }
 
             locationSelectionScreen.SetActive(true);
             workDayScreen.SetActive(false);
+            cookingPrototypeScreen.SetActive(false);
             RefreshLocationSelection();
         }
 
         private bool HasRequiredReferences()
         {
+            if (orderButtons == null || orderLabels == null ||
+                orderButtons.Length != PrototypeOrderSession.MaximumBoardCapacity ||
+                orderLabels.Length != orderButtons.Length || prototypeCapacities == null ||
+                prototypeCapacities.Length != 11) return false;
+            for (int i = 0; i < orderButtons.Length; i++)
+            {
+                if (orderButtons[i] == null || orderLabels[i] == null) return false;
+            }
+
             return locationCatalog != null &&
                    locationSelectionScreen != null &&
                    workDayScreen != null &&
@@ -65,7 +91,9 @@ namespace ClickCook.Runtime
                    previousButton != null &&
                    nextButton != null &&
                    cookButton != null &&
-                   finishDayButton != null;
+                   finishDayButton != null && orderBoardStatusText != null &&
+                   cookingPrototypeScreen != null && cookingOrderText != null &&
+                   backToBoardButton != null;
         }
 
         public void ShowPreviousLocation()
@@ -81,16 +109,20 @@ namespace ClickCook.Runtime
         public void CookSelectedLocation()
         {
             LocationData selectedLocation = CurrentLocation;
-            if (selectedLocation == null)
+            if (!enabled || !locationSelectionScreen.activeSelf || selectedLocation == null)
             {
                 return;
             }
 
-            session.SetSelectedLocation(selectedLocation);
+            int level = selectedLocation.LevelRequirement;
+            int capacity = level >= 0 && level < prototypeCapacities.Length ? prototypeCapacities[level] : 0;
+            session.StartDay(selectedLocation, capacity);
             locationSelectionScreen.SetActive(false);
             workDayScreen.SetActive(true);
             workDayLocationText.text = $"Selected location: {selectedLocation.EnglishName}";
             RefreshWorkDayDishCandidates();
+            RefreshOrderBoard();
+            cookingPrototypeScreen.SetActive(false);
             finishDayMessageText.text = string.Empty;
         }
 
@@ -112,7 +144,48 @@ namespace ClickCook.Runtime
 
         public void FinishDay()
         {
+            if (!enabled || !workDayScreen.activeSelf || session.ActiveOrder != null) return;
             finishDayMessageText.text = "Finish Day is a prototype-only action.";
+        }
+
+        public void SelectOrder(int slotIndex)
+        {
+            if (!enabled || !workDayScreen.activeSelf || !session.TrySelect(slotIndex)) return;
+            PrototypeOrder order = session.ActiveOrder;
+            cookingOrderText.text = $"Location: {order.Location.EnglishName}\n" +
+                                    $"Dish ID: {order.Dish.DishId}\nDish: {order.Dish.EnglishName}\n" +
+                                    $"Slot: {order.SlotIndex + 1}\nOrder: {order.Identity}";
+            RefreshOrderBoard();
+            workDayScreen.SetActive(false);
+            cookingPrototypeScreen.SetActive(true);
+        }
+
+        public void BackToBoard()
+        {
+            if (!enabled || !cookingPrototypeScreen.activeSelf) return;
+            session.ReturnToBoard();
+            cookingPrototypeScreen.SetActive(false);
+            workDayScreen.SetActive(true);
+            RefreshOrderBoard();
+        }
+
+        private void RefreshOrderBoard()
+        {
+            orderBoardStatusText.text = "Currency: not implemented\n" +
+                $"Available orders: {session.Orders.Count}\n" +
+                $"Board capacity: {session.BoardCapacity} / {PrototypeOrderSession.MaximumBoardCapacity} (provisional)\n" +
+                $"Completed dishes: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
+                (session.Orders.Count == 0 ? "\nNo documented dishes available." : string.Empty);
+            for (int i = 0; i < orderButtons.Length; i++)
+            {
+                bool populated = i < session.Orders.Count;
+                orderButtons[i].gameObject.SetActive(i < session.BoardCapacity);
+                orderButtons[i].interactable = populated && session.ActiveOrder == null && session.Orders[i].Dish != null;
+                orderLabels[i].text = populated
+                    ? $"Slot {i + 1}\n" + (session.Orders[i].Dish != null
+                        ? session.Orders[i].Dish.EnglishName : "Missing DishData")
+                    : $"Slot {i + 1}\nEmpty";
+            }
         }
 
         private LocationData CurrentLocation =>
@@ -122,7 +195,7 @@ namespace ClickCook.Runtime
 
         private void SelectRelativeLocation(int offset)
         {
-            if (locationCatalog == null || locationCatalog.Locations.Count == 0)
+            if (!enabled || !locationSelectionScreen.activeSelf || locationCatalog == null || locationCatalog.Locations.Count == 0)
             {
                 return;
             }
@@ -147,14 +220,5 @@ namespace ClickCook.Runtime
             incomeText.text = $"Income/sec: {location.PassiveIncomePerSecond}";
         }
 
-        private sealed class PrototypeSession
-        {
-            public LocationData SelectedLocation { get; private set; }
-
-            public void SetSelectedLocation(LocationData location)
-            {
-                SelectedLocation = location;
-            }
-        }
     }
 }

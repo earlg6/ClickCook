@@ -41,7 +41,7 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 
 - Location unlocking and ownership.
 - Recipe ownership/gating.
-- Order generation or an order board.
+- Real order completion/replacement, daily-limit enforcement, and day-ending cleanup.
 - Economy, rewards, XP, save/load, persistence, cooking, timers, scoring, final UI, and final animations.
 
 ## Known GDD ambiguities / TBDs retained
@@ -50,7 +50,7 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 - Several location descriptions use incomplete phrases such as “also serves selected ... dishes.” No extra dishes were inferred.
 - The Michelin restaurant says “all dishes starting from the third restaurant,” which conflicts with / is less precise than its criteria dish list. No additional earlier dishes are inferred.
 - The click requirement’s relationship to future hidden HP/progress remains TBD.
-- Location ownership/unlock state, passive-income accrual/collection, recipes, order generation, and all other runtime rules remain unimplemented by design.
+- Location ownership/unlock state, passive-income accrual/collection, recipes, and runtime rules beyond initial prototype order population/selection remain unimplemented by design.
 
 ## Files created
 
@@ -89,15 +89,15 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 
 ### Partially implemented
 
-- Core game flow: only Location Selection → Work Day placeholder exists.
+- Core game flow: Location Selection → Work Day board → order selection → cooking placeholder / Back exists (4A); actual cooking and completion remain absent.
 - Location system: static data and browsing exist; unlocking, ownership, real progress, passive-income accrual, and recipe gating do not.
 - Dish system: static data exists; runtime recipes, dish progression, cooking, and presentation do not.
-- Work Day: selected-location context, documented dish candidates (Milestone 3), and a Finish Day placeholder exist; orders, earnings, completion rules, summary, and next-day behavior do not.
+- Work Day: selected-location context, documented dish candidates (Milestone 3), initial orders/selection (4A), and a Finish Day placeholder exist; earnings, completion/replacement, summary, and next-day behavior do not.
 - UI: temporary prototype screens exist; final navigation, styling, responsiveness, feedback, and all other screens do not.
 
 ### Not implemented
 
-- Main Menu, order board, order lifecycle, cooking/clicking, dish results, rarity, economy, rewards, XP/progression, unlock systems, upgrades, save/load, achievements, journal, settings, pause, final animations, and audio content.
+- Main Menu, completed-order lifecycle/replacement, cooking/clicking, dish results, rarity, economy, rewards, XP/progression, unlock systems, upgrades, save/load, achievements, journal, settings, pause, final animations, and audio content.
 
 ## Completed Milestone 3 — Documented Work Day Dish Candidates
 
@@ -129,7 +129,9 @@ Supporting GDD Sections 2, 5, and 8, the existing Work Day placeholder now displ
 - SampleScene is saved, clean, and left out of Play Mode with the new serialized label binding retained. Static data assets were not modified.
 - No ClickCook runtime exception occurred. The pre-existing Plastic/UVCS client configuration exception remains unrelated and unresolved.
 
-### Unresolved design decisions intentionally deferred
+### Design decisions deferred at the Milestone 3 checkpoint
+
+Historical checkpoint list; Milestone 4 approvals and implementation below supersede the order count/selection/replacement questions where explicitly resolved.
 
 - Whether recipe ownership gates order eligibility.
 - Exact interpretation of incomplete “also serves selected ... dishes” statements and Michelin availability.
@@ -137,9 +139,62 @@ Supporting GDD Sections 2, 5, and 8, the existing Work Day placeholder now displ
 - Work-day completion, early-finish consequences, earnings, rewards, and XP.
 - Cooking click/hidden-HP semantics and rarity behavior.
 
-### Recommended next step
+### Recommended next step at the Milestone 3 checkpoint
 
 Resolve the minimum order-lifecycle and recipe-eligibility contract in GDD Sections 6–7 and 31 before implementing an order board: initial count, six-slot meaning, dish selection/repeats, refill/removal, and whether owned recipes gate candidates. Do not infer these rules from the candidate display.
+
+## Completed Milestone 4A — Dynamic Order Board and Order Selection
+
+### Approved design, separately recorded in GDD Sections 6–7
+
+- Location-dependent simultaneous capacity, at most six; smaller boards early and larger boards later.
+- Uniform random selection from existing `DocumentedAvailableDishes`, independent duplicates allowed, no recipe/progression/economy/rarity gating.
+- One active order, immediate handoff, reservation without completion, prototype Back preserving the board.
+- Baseline daily completion limit ten (not simultaneous capacity); successful completion/removal/counting/replacement, no replacement at the limit, and early Finish Day/discard are approved future lifecycle rules, NOT implemented in 4A.
+- 60–90 seconds is a pacing target, not an implemented timer.
+- Designer clarified to follow the GDD: Dormitory retains its existing two candidates, Sandwiches and Mug cakes. No static data assets were altered.
+
+### Provisional implementation choices
+
+No location-to-capacity mapping existed in the GDD. Inspector field `prototypeCapacities` on the existing controller centralizes an editable proposal for levels 0–10: **2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6**. These values are not approved balancing thresholds. The temporary board uses two columns and up to three rows on the right of Work Day; this is not final UI.
+
+### Implemented functionality and runtime architecture
+
+- `PrototypeOrder` is a plain transient instance with GUID identity, immutable dish/location/slot references, and reservation state. Duplicate dish references never share order identity.
+- `PrototypeOrderSession` holds the fresh initial board and one active order. Capacity is clamped to 0–6; null candidates are excluded for safety, empty pools create no orders, and new days release reservations and clear old orders. It contains no completion/replacement API.
+- Existing controller/session handoff extended rather than rebuilding the carousel or data architecture. Button callbacks validate state, prevent double selection/hidden navigation, reserve the exact instance, and release only its reservation on Back.
+- Existing candidate display retained separately from generated orders. Board shows location, available orders, capacity, `Completed dishes: 0 / 10`, and `Currency: not implemented`.
+- Clearly labeled cooking placeholder shows location, dish ID/name, slot and full runtime order identity. It has Back, not cooking or completion controls.
+- Existing Finish Day message is unchanged; full early-finish cleanup, end-state flow, and Finish Day inside cooking remain deferred.
+
+### Files created
+
+- `Assets/Scripts/Runtime/PrototypeOrder.cs` and Unity-generated `.meta`
+- `Assets/Scripts/Runtime/PrototypeOrderSession.cs` and Unity-generated `.meta`
+
+### Files modified
+
+- `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`
+- `Assets/Scenes/SampleScene.unity`
+- `Assets/Documentation/ClickCook_GDD.md`
+- `Assets/Documentation/IMPLEMENTATION_STATUS.md`
+
+### Executed Unity verification
+
+- Unity 6000.3.14f1 recompiled successfully, without C# compilation failures.
+- Final Play Mode suite checked all 11 locations twice and 92 order selection/Back cycles: capacity, candidate membership, unique identities, independent duplicates, selected dish/location/identity, one active reservation, repeated/invalid callbacks, unchanged board after Back, fresh-day state, zero completed count, and existing carousel/Cook/Finish Day behavior passed.
+- Transient, unsaved test fixtures verified empty/all-null/mixed-null candidate pools, missing location, capacity clamping, and resetting an active reservation on a fresh day. No extra persistent data assets were created.
+- Layout checks passed for the six-card board and candidate text, with Finish Day separated from cards. EventSystem raycast and pointer-click dispatch selected the correct order. Physical mouse input was NOT tested.
+- Rendered Dormitory and Michelin boards and the cooking placeholder were inspected. A fresh Play Mode session reran the full suite after final code/layout changes.
+- Initial environment test incorrectly assumed `Camera.main`; inspection confirmed the existing camera is untagged. The assertion was corrected to inspect the actual Camera without changing its tag. Retest passed.
+- No ClickCook runtime exception observed; the pre-existing Plastic/UVCS client configuration exception remains. SampleScene is saved, clean, stopped, and retains the new bindings.
+- Serialized scene diff confirms only prototype UI/controller blocks changed or were added; no existing blocks were removed. Dormitory, camera, lighting, volume, location/dish assets, catalog, and project settings are unchanged.
+
+### Remaining limitations and recommended Milestone 4B
+
+Actual cooking, order completion/replacement, daily counting/limit enforcement, end-of-day cleanup/summary, economy, progression, rarity, and persistence remain unimplemented. Recommend a separate 4B prototype lifecycle slice for explicit simulated completion, exact-instance removal/counting/replacement up to ten, and early-day order cleanup, without cooking formulas or rewards.
+
+Before 4B, approve the prototype end-state behavior at ten completions and the Finish Day destination. Final capacity balancing, future daily-limit increases, final recipe eligibility/availability, timers, click/HP math, rarity, and rewards remain open. No 4B implementation was started.
 
 ## Documentation policy
 

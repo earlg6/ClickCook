@@ -6,7 +6,7 @@
 **Genre:** Restaurant/cooking clicker with collection, progression, and upgrade systems.
 
 - [DESIGNED] The player selects a location, begins a work day, selects orders, prepares dishes through close-up clicking, receives a rarity result, earns currency/XP, and progresses through upgrades and locations.
-- [IMPLEMENTED] Unity contains the early 3D environment/camera prototype, static location/dish data, and verified Location Selection → Work Day orders → base click cooking → informational Dish Result (completions 1–9) → replacement/day-ending flow. Rarity, payouts, final results, economy, and progression are not implemented.
+- [IMPLEMENTED] Unity contains static location/dish data and verified Location Selection → Work Day orders → base click cooking → rarity/Dish XP/payout result → replacement/day-ending flow (5B). The tenth result ends the day on Continue. Wallet and dish mastery are run-local; final visuals, full economy, Player XP and persistent progression remain unimplemented.
 - [INFERRED] The intended experience combines a persistent restaurant-management loop with focused, tactile dish-completion moments.
 - [TBD] Platform, session length, target audience, monetization, and final scope.
 
@@ -32,7 +32,7 @@ Main Menu
 - [DESIGNED] Each dish has hidden HP / required click progress.
 - [DESIGNED] Completion produces a rarity result.
 - [DESIGNED] Daily XP formula: `Daily Earnings / 100 = XP`.
-- [TBD] Work-day completion transition, timing, failure, and rarity calculations. Approved replacement and baseline daily-limit rules are specified in Sections 6–7; implementation is separate from design approval.
+- [TBD] Final work-day transition, timing and failure. Approved prototype lifecycle and baseline rarity calculations are specified in Sections 6–7 and 10–11.
 
 ## 3. Complete Game Flow / State Machine
 
@@ -95,6 +95,7 @@ Main Menu
 - [APPROVED PACING TARGET] Approximately 60–90 seconds per Work Day, not a hard timer or automatic timeout.
 - [HISTORICAL 4A SCOPE] Completion, daily counting/limit enforcement, cleanup, and end-state transitions were deferred in 4A, which retained a Finish Day placeholder message. Milestone 4B implements the approved base cooking/day lifecycle below; Finish Day still is not exposed inside cooking.
 - [APPROVED — Milestone 4B] At ten completed dishes, automatically end the day. Both automatic completion and manual Finish Day clear unfinished orders and temporary session state, return to Location Selection, and display a day-finished message. This temporary return replaces an End-of-Day screen for this milestone only; no financial penalty, reward, XP, or date advancement is added. Finish Day is available on the board, not inside cooking.
+- [IMPLEMENTED — Milestone 5B, supersedes the immediate 4B automatic transition/no-reward scope] The tenth completed dish is paid and shows its rarity/Dish XP result; Continue ends the day. Retain earned run-local wallet/mastery across day cleanup. Final End-of-Day summary, Player XP and date advancement remain unimplemented.
 - [TBD] Day duration/timer policy, failure states, penalties, other daily reset behavior, date advancement, and earnings formula. No penalties, rewards, or XP are inferred for the prototype.
 
 ## 7. Order Board
@@ -111,10 +112,11 @@ Main Menu
 - [APPROVED PROTOTYPE CHOICE — 4A] Use a screen labeled `Cooking Prototype — Not Implemented`, showing the selected order identity, dish ID/name, and location. Back releases the active reservation and returns to the unchanged board without completion, regeneration, or counter changes. Final close-up art and clicking remain deferred.
 - [APPROVED — Milestone 4B, supersedes the 4A cooking placeholder] A large clickable dish placeholder implements basic cooking, while final art remains unimplemented. Back resets cooking progress to its starting state but preserves the exact order and all other board entries. Successful cooking returns directly to the board with a replacement order, unless it reaches the daily limit. No intermediate result screen, rarity, or rewards in this milestone.
 - [APPROVED — Milestone 5A, supersedes direct board return for dishes 1–9] After a dish completes below the daily limit, show a temporary Dish Result screen with its name, documented base `SaleValue` explicitly labeled reference-only, `Rarity: not implemented`, and Continue. Continue returns to the existing board/replacement without another completion, increment, or regeneration. No currency/XP is awarded. The tenth completed dish bypasses this screen and immediately ends the day as approved in Section 6. Other board/cooking actions are unavailable during the result screen.
+- [IMPLEMENTED — Milestone 5B, supersedes the 5A result/no-payout and 4B immediate end at ten] Every completed dish shows its name, rolled rarity, payout, wallet, Dish XP award, old/new dish level and next-level progress (or mastery cap). Pay and award XP once at successful completion, before Continue. Continue returns to the same replacement board for completions 1–9; after the tenth result it ends/clears the day. Hidden/stale actions cannot repeat rewards. Retain earned wallet/XP on early Finish Day; discard unfinished orders without rewards.
 - [APPROVED LIFECYCLE — 4B] Successful completion marks the exact instance completed, removes it, increments the daily completed count, and generates a replacement for the freed slot using the same pool/duplicate rules. No replacements after the daily limit is reached. Selection alone never triggers replacement.
 - [PROVISIONAL BALANCING PROPOSAL — 4A] Configured capacities for documented levels 0–10: `2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6`. These are editable prototype values, not approved thresholds. Dormitory uses its two existing documented dishes (Sections 5 and 8); no empty-location override is applied.
-- [PROTOTYPE UI — 4A/4B] Display available order count, configured capacity, and completed dishes separately. The 4A `0 / 10` placeholder now updates with real base cooking completions in 4B. Currency is explicitly unimplemented, not an invented wallet balance. Keep the read-only documented candidate list distinct from active orders.
-- [TBD] Final capacity mapping, final recipe eligibility/availability reconciliation, order timeout policy, future weights/rarity influence, rewards timing, and final selection feedback. No hard timer or expiry is implemented in 4A.
+- [PROTOTYPE UI — 4A/4B/5B] Display available order count, configured capacity, and completed dishes separately. The 4A `0 / 10` placeholder updates with real completions; 5B replaces the unimplemented currency label with the run-local wallet. Keep the read-only documented candidate list distinct from active orders.
+- [TBD] Final capacity mapping, final recipe eligibility/availability reconciliation, order timeout policy, future weights/rarity influence on order generation, and final selection feedback. No hard timer or expiry is implemented.
 
 ## 8. Dish System
 
@@ -155,7 +157,7 @@ Main Menu
 
 - [DESIGNED] The table label is `Количество кликов` / number of clicks.
 - [APPROVED — Milestone 4B] Base hidden HP equals the documented `ClickRequirement`; each discrete click subtracts one HP, and zero completes the selected dish. All documented values are preserved, including 70,000 for the final dish.
-- [TBD] Recipe-purchase behavior, dish unlock representation, recipe UI, dish art, dish-specific XP awards, and future modifiers.
+- [TBD] Recipe-purchase behavior, dish unlock representation, recipe UI, dish art, and future modifiers. Base Dish XP awards are approved in Section 10.
 
 ## 9. Cooking / Clicking Mechanics
 
@@ -164,13 +166,16 @@ Main Menu
 - [DESIGNED] Relevant upgrade branches: click strength, critical hit, click hold, auto-click strength, auto-click frequency.
 - [DESIGNED] Screen 2 shows a central vertical feedback area with example values `67` and `23`, plus flame/impact graphics.
 - [APPROVED — Milestone 4B] Without upgrades, hidden HP = `DishData.ClickRequirement`, click damage = 1, completion occurs at zero. Do not display HP or a numerical progress counter. Back resets partial progress; reselecting the same order starts at full HP. The prototype uses a large clickable placeholder showing the dish name rather than final models or effects.
-- [TBD] Meaning of `67` and `23`; future click modifiers/feedback, critical formula, hold behavior, auto-click activation, and accessibility considerations. Rarity and payout remain deferred; base cooking does not resolve their formulas.
+- [TBD] Meaning of `67` and `23`; future click modifiers/feedback, critical formula, hold behavior, auto-click activation, and accessibility considerations. 5B rarity and payouts use separately approved Sections 10–11 and 14, not inferred click formulas.
 
 ## 10. Dish XP
 
 - [DESIGNED] Upgrade tree includes XP branches: Character, Restaurant, Dish.
 - [DESIGNED] Higher rarity should depend on player progression/experience with that specific dish.
-- [TBD] Dish XP gain, level thresholds, max level, persistence, UI, rewards, and exact rarity relationship.
+- [APPROVED DESIGN — Milestone 5B] Rarity is randomly selected using Section 11.1 and the specific dish's level before this completion's XP award. Each dish starts at level 1 / 0 XP, independently of player/location levels. Maximum dish level = 18 for this version; historical rows 19–21 are retained for possible future expansion, not extra implemented levels.
+- [APPROVED DESIGN — Milestone 5B] Transition cost from level L is `round(20 × 1.18^(L − 1))` XP, using nearest-integer rounding (half away from zero). This is a per-transition cost, not a cumulative threshold. Carry excess XP across levels, allowing multiple level-ups. Cap total XP at the sum of transition costs 1–17 (1,744 XP); at level 18 no more Dish XP is awarded, but payouts continue.
+- [APPROVED DESIGN — Milestone 5B] Dish XP awards by Common / Uncommon / Rare / Fantastic / Legendary are `10 / 12 / 16 / 22 / 30`, truncated if necessary to the mastery cap. Unfinished dishes/Back do not award XP. Track dish XP and the wallet across Work Days only within the current game run; stopping/restarting the game or Play Mode resets them. No save/load or Player XP in this milestone.
+- [TBD] Persistent progression, future level-cap expansion, XP upgrade modifiers and final UI. Approved numeric values are an initial playtest balance, not a verified guarantee of player engagement or human pacing.
 
 ## 11. Rarity System
 
@@ -185,7 +190,36 @@ Canonical intended tiers from player-provided gameplay context:
 - [DESIGNED] Completed-dish wireframe example: Sandwich, `Обычное`, value `5 у.е.`
 - [APPROVED PROTOTYPE SCOPE — Milestone 5A] Implement only the informational completed-dish name/base-value screen for completions 1–9. Do not assign even a fixed Common tier: rarity is explicitly unimplemented, base value is not a payout, and no money or XP is granted. Final rarity reveal remains TBD.
 - [INFERRED] Sparkles and opened cloche indicate a celebratory reveal.
-- [TBD] Whether `Обычное` is the canonical equivalent of Common; probability curves; thresholds; dish-XP modifiers; currency multipliers; colors; animations; audiovisual feedback; mechanical effects.
+- [TBD] Whether `Обычное` is the canonical equivalent of Common; future probability/reward modifiers; colors; animations; audiovisual feedback and further mechanical effects. Baseline XP thresholds and payout multipliers are approved in Sections 10 and 14; the baseline probability table is below.
+
+### 11.1 Approved baseline rarity probabilities — implemented for levels 1–18 in 5B
+
+- [APPROVED DESIGN — after Milestone 5A] The designer supplied a historical table and then explicitly approved these changes: use Fantastic instead of Epic; level 3 Common = 57%; level 11 Legendary = 24%; explicitly copy level 11 to 12, level 13 to 14 and level 15 to 16. All other supplied percentages remain unchanged. Every row totals 100%.
+- Values are percentages, indexed by Dish Level, not player level or location level. Milestone 5B verifies every integer percent roll for levels 1–18 against this table; no interpolation or added modifiers.
+- Use levels 1–18 in the approved 5B runtime. Retain the historical 18–21 row unchanged; levels 19–21 are reserved for possible expansion. Do not interpolate or extrapolate beyond the documented table.
+
+| Dish Level | Common | Uncommon | Rare | Fantastic | Legendary |
+|------------|--------|----------|------|-----------|-----------|
+| 1 | 85 | 13 | 2 | 0 | 0 |
+| 2 | 71 | 27 | 2 | 0 | 0 |
+| 3 | 57 | 36 | 7 | 0 | 0 |
+| 4 | 42 | 42 | 16 | 0 | 0 |
+| 5 | 28 | 44 | 25 | 3 | 0 |
+| 6 | 14 | 42 | 35 | 9 | 0 |
+| 7 | 0 | 38 | 44 | 17 | 1 |
+| 8 | 0 | 26 | 46 | 24 | 4 |
+| 9 | 0 | 14 | 45 | 32 | 9 |
+| 10 | 0 | 2 | 42 | 39 | 17 |
+| 11 | 0 | 2 | 33 | 41 | 24 |
+| 12 | 0 | 2 | 33 | 41 | 24 |
+| 13 | 0 | 2 | 14 | 40 | 44 |
+| 14 | 0 | 2 | 14 | 40 | 44 |
+| 15 | 0 | 2 | 5 | 30 | 63 |
+| 16 | 0 | 2 | 5 | 30 | 63 |
+| 17 | 0 | 2 | 5 | 16 | 77 |
+| 18–21 | 0 | 2 | 5 | 9 | 84 |
+
+- [IMPLEMENTED — Milestone 5B, supersedes the 5A tenth-dish bypass] Show the result for the tenth completed dish too; Continue then ends the day. No replacement after the tenth completion, and no additional payout on Continue.
 
 ## 12. Player XP and Level Progression
 
@@ -251,7 +285,8 @@ Passives / Пассивки
 - [DESIGNED] Recipe costs: `0` to `1,100,000 у.е.`
 - [DESIGNED] Location passive income: `0` to `220 у.е./sec`.
 - [DESIGNED] Daily XP conversion: daily earnings divided by `100`.
-- [TBD] Starting balance, transaction timing, passive-income accrual/collection, bonus calculations, sale-value modifiers, price-reduction order, upgrade spending, and loss/penalty systems.
+- [APPROVED DESIGN — Milestone 5B] Initial wallet balance = 0 у.е.; pay `SaleValue × rarity multiplier` immediately on successful completion, exactly once. Multipliers by Common / Uncommon / Rare / Fantastic / Legendary are `×1 / ×1.25 / ×1.75 / ×2.5 / ×4`. With the documented integer SaleValue these produce exact amounts to at most two decimal places; display two decimal places without floating-point money arithmetic. Continue/Back/Finish Day do not repeat payments, and early Finish Day retains already-earned money/XP without paying unfinished orders. No Player XP, passive income or save/load in this milestone.
+- [TBD] Passive-income accrual/collection, future bonus calculations and sale-value modifiers, rounding for future finer-precision modifiers, price-reduction order, upgrade spending, and loss/penalty systems.
 
 ## 15. Recipe and Location Unlock System
 
@@ -380,17 +415,17 @@ This is a design-to-technical mapping, not existing implementation.
 
 | System | Current Unity state | Likely Unity representation | Notes |
 |---|---|---|---|
-| Game flow | Partially implemented: Location Selection → board → base cooking → informational result / day end | Existing prototype controller/session | Rarity, rewards, final summary and progression remain unimplemented |
+| Game flow | Partially implemented: Location Selection → board → base cooking → rarity/payout/XP result → board or day end | Existing prototype controller/session/rewards | Final summary, visuals and persistent progression remain unimplemented |
 | Locations | Partially implemented: 11 static data assets, ordered catalog, placeholder carousel | Data assets/serializable location definitions | Unlocks, ownership, progress, and income runtime remain TBD/unimplemented |
 | Dishes/recipes | Partially implemented: 32 static dish data assets; no runtime recipe system | Data assets/serializable dish and recipe definitions | Recipe ownership/purchase behavior remains TBD/unimplemented |
 | Orders | Partially implemented: random instances, reservation, completion/replacement, daily cap and cleanup (4B) | PrototypeOrder / PrototypeOrderSession | Final capacities and advanced eligibility remain TBD |
-| Cooking | Partially implemented: hidden base HP and one-damage clicks on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects, upgraded click formulas and rarity remain absent |
-| Rarity | Not implemented | Result resolver/data table | Probability model TBD |
-| Economy | Not implemented | Player economy service/data | Payout rules TBD |
-| XP | Not implemented | Player/location/dish progression data | Dish/restaurant details TBD |
+| Cooking | Partially implemented: hidden base HP and one-damage clicks on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects and upgraded click formulas remain absent |
+| Rarity | Baseline levels 1–18 implemented (5B) | PrototypeDishRewards / approved table | Future modifiers and final reveal presentation |
+| Economy | Partially implemented: exact run-local wallet/payouts (5B) | PrototypeDishRewards | Spending, passive income and persistence |
+| XP | Partially implemented: run-local Dish XP/mastery (5B) | PrototypeDishRewards | Player/restaurant XP, upgrades and persistence |
 | Upgrades | Not implemented | Upgrade graph/data definitions + UI | Costs/effects TBD |
 | Save/load | Not implemented | Persistence service | Format/slots TBD |
-| UI | Partially implemented: temporary uGUI Location Selection, Work Day, base cooking and informational Dish Result screens | Existing Canvas/prototype controller | Final UI and remaining screens are unimplemented |
+| UI | Partially implemented: temporary uGUI Location Selection, Work Day, base cooking and rarity/XP/payout Dish Result screens | Existing Canvas/prototype controller | Final UI and remaining screens are unimplemented |
 | Environment | Dormitory scene/model | Scene/environment presentation layer | Reuse undecided |
 | Camera | One camera with cursor-follow script | Gameplay presentation camera | Existing script may be reusable |
 | Input | Input System asset, direct mouse read | Central input bindings | Current asset unwired |
@@ -408,11 +443,13 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] Dormitory FBX with two materials and 17 supporting texture maps.
 - [IMPLEMENTED] Global post-processing includes bloom, film grain, vignette, chromatic aberration, and color grading.
 - [IMPLEMENTED] Static data contains 32 `DishData` assets, 11 `LocationData` assets, and one ordered `LocationCatalog` asset.
-- [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → board → base click cooking → informational Dish Result / day end flow (5A), with Back resetting partial progress and Continue preserving the replacement board.
-- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, actual rarity/reward system or final result presentation, economy, upgrades, progression, or complete gameplay architecture.
+- [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → board → base click cooking → rarity/Dish XP/payout result / day end flow (5B), with Back resetting partial progress and Continue preserving replacement orders without duplicate rewards.
+- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, final result presentation, complete economy, upgrades, Player XP/progression, or complete gameplay architecture.
 - [TBD] Whether the Dormitory environment is retained, adapted, or replaced.
 
 ## 30. Contradictions and Design Risks
+
+- [OBSERVED — Milestone 5B verification, unresolved existing data/design discrepancy] The current Dormitory LocationData candidate pool is empty (zero documented dishes at runtime), whereas the earlier Section 7 capacity note says it uses two dishes and Section 8 lists Dormitory availability. The prototype preserves the existing assets and supports the approved empty-board state; no dishes or eligibility rules were invented to reconcile this. Decide the final location availability separately.
 
 1. **Rarity naming**
    - [DESIGNED] User context gives Common, Uncommon, Rare, Fantastic, Legendary.
@@ -449,11 +486,11 @@ This is a design-to-technical mapping, not existing implementation.
 - Work-day duration/timer, failure, order timeout, final capacity mapping, and future daily-limit progression. Baseline limit, early finish/discard, generation, selection, completion replacement, and automatic end transition are approved in Sections 6–7 but design approval alone does not establish implementation.
 - Future upgraded click-damage calculations. Base hidden HP and damage are approved in Sections 8–9.
 - Critical, click-hold, and auto-click formulas.
-- Rarity probabilities, dish-XP relationship, rewards, and canonical terminology.
+- Baseline rarity probabilities, dish-XP relationship and payout multipliers are approved/implemented in 5B; future modifiers, persistent progression and localized terminology remain open.
 - Recipe purchase/unlock rules and location unlock rules.
 - Upgrade costs, effects, levels, prerequisites, and caps.
 - Save/load, New Game, Continue, reset-data behavior.
-- Exact economic payout timing and modifier order.
+- Future economic modifiers/order and spending rules; base payout timing is approved/implemented in 5B.
 - Final environmental/3D content scope and Dormitory prototype decision.
 
 ### Important
@@ -503,27 +540,29 @@ This checklist records verified Unity implementation without changing the design
 
 ### Game flow and UI
 
-- [ ] Partially implemented — The core loop covers Location Selection → board → base click cooking → informational Dish Result for completions 1–9 → replacement / day end. The tenth completion ends immediately. Rarity, rewards, final end-of-day summary, upgrades, and date-based next-day progression remain unimplemented. — **Milestones 2B–5A**
+- [ ] Partially implemented — The core loop covers Location Selection → board → base click cooking → rarity/Dish XP/payout result → replacement / day end. The tenth result ends on Continue. Final summary, upgrades, persistence and date-based next-day progression remain unimplemented. — **Milestones 2B–5B**
 - [ ] Main Menu is not implemented.
 - [ ] Partially implemented — Location Selection has a verified temporary uGUI carousel with one current location, Previous/Next wraparound across all 11 locations, name, documented level, placeholder progress, documented dish count, passive income/sec, and `Cook`. Unlock/ownership rules, real progress, dish-slot contents, and final visual design remain unimplemented. — **Milestone 2B**
-- [ ] Partially implemented — Cook starts a fresh in-memory day/board; base completion, replacement, ten-dish limit and cleanup work. Earnings, dates and final day summary remain unimplemented. — **Milestones 2B–4B**
+- [ ] Partially implemented — Cook starts a fresh in-memory day/board; completion, replacement, ten-dish limit, run-local payouts/XP and cleanup work. Dates and final day summary remain unimplemented. — **Milestones 2B–5B**
 - [x] Work Day displays the selected location's complete `DocumentedAvailableDishes` list as read-only documented candidates, with count, dish IDs, and English names in stored order. This is not an order board or an eligibility rule. — **Milestone 3**, supporting Sections 2, 5, and 8; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
-- [x] Manual Finish Day clears unfinished orders and temporary day state, returns to Location Selection, and displays a day-finished message; ten completions trigger the same cleanup automatically. No Finish Day action during cooking. — **Milestone 4B**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scenes/SampleScene.unity`
-- [x] Initial Order Board population: location-configured capacity capped at six, uniform random documented candidates, independent duplicate order identities, empty-state handling, separate available/capacity/0-of-10 counters, and unimplemented currency label. — **Milestone 4A**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
+- [x] Manual Finish Day clears unfinished orders and temporary day state, returns to Location Selection, and displays a day-finished message; since 5B, ten completions trigger cleanup on result Continue. Earned run-local wallet/Dish XP survive day cleanup. No Finish Day action during cooking/results. — **Milestones 4B/5B**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scenes/SampleScene.unity`
+- [x] Initial Order Board population: location-configured capacity capped at six, uniform random documented candidates, independent duplicate order identities, empty-state handling and separate available/capacity/completed counters. 5B replaces the original unimplemented currency label with a real run-local wallet. — **Milestones 4A/5B**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
 - [x] Single-order reservation and selected-order/dish/location handoff; Back preserves the board without completion/regeneration and resets partial cooking progress. — **Milestones 4A–4B**, same files as initial board population.
 - [x] Base cooking: hidden HP equals `ClickRequirement`, one damage per discrete dish-button click, exact-instance completion at zero, replacement in the same slot before the ten-dish cap, and no replacement at the cap. — **Milestone 4B**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
 - [ ] Partially implemented — Order Board/basic day lifecycle works; final balancing, eligibility, economy, expiry rules and presentation remain unfinished. — **Milestones 4A–4B**
 - [ ] Partially implemented — Basic click cooking works on a large temporary dish placeholder; final close-up dish art, effects, critical/hold/auto-click upgrades and final input support remain unfinished. — **Milestone 4B**
-- [x] Informational Dish Result for completions 1–9 displays the exact completed dish name and reference-only base SaleValue, explicit unimplemented rarity/no-reward labels, and Continue back to the unchanged replacement board. Tenth completion bypasses the result screen and ends immediately; stale result text is cleared on Continue/end/new day. — **Milestone 5A**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
-- [ ] Partially implemented — Dish Result has a temporary informational screen; actual rarity generation/reveal, payouts, XP, final visuals and result feedback remain unimplemented. — **Milestone 5A**
+- [x] Dish Result foundation (5A) is extended in 5B: exact dish identity/name, resolved rarity, earned payout/wallet, Dish XP gain and old/new level/progress; Continue preserves the replacement board without repeat rewards. All ten dishes show results; tenth Continue ends the day. Stale text clears on Continue/end/new day. — **Milestones 5A–5B**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scenes/SampleScene.unity`
+- [ ] Partially implemented — Dish Result uses temporary uGUI text/buttons; final reveal art, audiovisual feedback and animations remain unimplemented. — **Milestones 5A–5B**
 - [ ] End-of-Day Summary is not implemented.
 - [ ] Final UI/UX styling, transitions, responsiveness, and animations are not implemented.
 
 ### Runtime systems
 
 - [ ] Partially implemented — Location and dish design data are available at runtime, but location unlocking/ownership, passive-income accrual, recipe ownership/gating, and order eligibility rules are not implemented. — **Milestones 1 and 2A**
-- [ ] Economy is not implemented.
-- [ ] Player, restaurant, and dish XP/progression are not implemented.
+- [x] Baseline rarity resolved by the approved dish-level table (1–18), before awarding Dish XP; independently tracked dish mastery, carry-over XP and level-18 cap. — **Milestone 5B**; file: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`
+- [x] Exact decimal payouts once per successful completion into a zero-starting run-local wallet; wallet/Dish XP survive day changes, not game restart. — **Milestone 5B**; files: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`
+- [ ] Partially implemented — Economy has baseline payouts/wallet only; spending, passive income and persistence remain unimplemented. — **Milestone 5B**
+- [ ] Partially implemented — Dish XP/mastery works in memory; Player/restaurant XP, XP upgrade effects and persistent progression remain unimplemented. — **Milestone 5B**
 - [ ] Recipe and location unlock systems are not implemented.
 - [ ] Upgrade system is not implemented.
 - [ ] Save/load, New Game, Continue, and Reset Data behavior are not implemented.

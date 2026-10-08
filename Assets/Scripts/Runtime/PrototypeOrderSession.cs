@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ClickCook.Runtime
 {
-    /// <summary>In-memory prototype orders, base cooking and daily-limit lifecycle; no rewards.</summary>
+    /// <summary>In-memory prototype orders, cooking and daily lifecycle with run-local rewards.</summary>
     public sealed class PrototypeOrderSession
     {
         public const int MaximumBoardCapacity = 6;
@@ -19,6 +19,8 @@ namespace ClickCook.Runtime
         public bool IsDayActive { get; private set; }
         public IReadOnlyList<PrototypeOrder> Orders => readOnlyOrders;
         public PrototypeOrder ActiveOrder { get; private set; }
+        public PrototypeDishRewards Rewards { get; } = new();
+        public PrototypeDishResult LastResult { get; private set; }
 
         public PrototypeOrderSession()
         {
@@ -76,6 +78,7 @@ namespace ClickCook.Runtime
             int index = orders.IndexOf(expectedOrder);
             orders.RemoveAt(index);
             CompletedDishes++;
+            LastResult = Rewards.Complete(expectedOrder.Dish);
             if (CompletedDishes < MAX_COMPLETED_DISHES_PER_DAY)
             {
                 var candidates = GetValidCandidates();
@@ -106,6 +109,7 @@ namespace ClickCook.Runtime
             BoardCapacity = 0;
             CompletedDishes = 0;
             IsDayActive = false;
+            LastResult = null;
         }
 
         private List<DishData> GetValidCandidates()

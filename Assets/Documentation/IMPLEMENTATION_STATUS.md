@@ -42,15 +42,16 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 - Location unlocking and ownership.
 - Recipe ownership/gating.
 - Final end-of-day summary and date-based next-day progression.
-- Economy, rewards, XP, save/load, persistence, upgraded cooking mechanics, rarity, timers, scoring, final UI, and final animations.
+- Full economy/spending/passive income, Player/restaurant XP, save/load, persistence, upgraded cooking mechanics, timers, scoring, final UI, and final animations. Baseline rarity, Dish XP and run-local payouts/wallet are implemented in 5B.
 
 ## Known GDD ambiguities / TBDs retained
 
 - The GDD separately describes new recipe groups and dishes served by locations; their precise relationship and recipe purchase gating are TBD.
 - Several location descriptions use incomplete phrases such as “also serves selected ... dishes.” No extra dishes were inferred.
+- Current Dormitory LocationData has zero candidate dishes at runtime, while an earlier GDD Section 7 note says two and the dish table lists Dormitory availability. 5B preserves the existing data/empty-board behavior; final availability reconciliation remains a separate design/data decision.
 - The Michelin restaurant says “all dishes starting from the third restaurant,” which conflicts with / is less precise than its criteria dish list. No additional earlier dishes are inferred.
 - Base hidden HP now equals ClickRequirement, with one damage per click (approved and implemented in 4B); future upgrade modifiers remain TBD.
-- Location ownership/unlock state, passive-income accrual/collection, recipes, rewards, rarity, and progression remain unimplemented by design.
+- Location ownership/unlock state, passive-income accrual/collection, recipes, Player/restaurant progression and persistent progression remain unimplemented by design. Base rarity, Dish XP and payouts use the approved 5B rules.
 
 ## Files created
 
@@ -58,6 +59,7 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 - `Assets/Scripts/Data/LocationData.cs`
 - `Assets/Scripts/Runtime/Locations/LocationCatalog.cs`
 - `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`
+- `Assets/Scripts/Runtime/PrototypeDishRewards.cs` and `.meta` — Milestone 5B
 - `Assets/Data/Dishes/` — 32 `DishData` assets
 - `Assets/Data/Locations/` — 11 `LocationData` assets
 - `Assets/Data/LocationCatalog.asset`
@@ -89,16 +91,16 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 
 ### Partially implemented
 
-- Core game flow: Location Selection → Work Day board → base click cooking → informational Dish Result for completions 1–9 → replacement / day end exists (5A); rarity, rewards and final summary remain absent.
+- Core game flow: Location Selection → Work Day board → base click cooking → rarity/Dish XP/payout result → replacement / day end exists (5B). The tenth result ends on Continue; final summary remains absent.
 - Location system: static data and browsing exist; unlocking, ownership, real progress, passive-income accrual, and recipe gating do not.
-- Dish system: static data and base click cooking exist; runtime recipes, dish XP/progression, final dish art and effects do not.
-- Work Day: documented candidates, dynamic orders, base cooking/completion/replacement, ten-dish limit, early finish and cleanup exist; earnings, dates, final summary and next-day progression do not.
+- Dish system: static data, base click cooking, approved rarity and independent run-local Dish XP/mastery exist; runtime recipes, persistent progression, final dish art and effects do not.
+- Work Day: documented candidates, dynamic orders, base cooking/completion/replacement, ten-dish limit, payouts, early finish and cleanup exist; daily summary, dates and date-based next-day progression do not.
 - UI: temporary prototype screens exist; final navigation, styling, responsiveness, feedback, and all other screens do not.
-- Dish Result: temporary completed-dish name/base-value display and Continue exist (5A); rarity, payouts, XP and final presentation do not.
+- Dish Result: dish name, rolled rarity, payout/wallet, earned Dish XP, level/progress and Continue exist (5B); final presentation does not.
 
 ### Not implemented
 
-- Main Menu, final dish results, rarity, economy, rewards, XP/progression, unlock systems, upgrades, save/load, achievements, journal, settings, pause, final animations, and audio content.
+- Main Menu, final result presentation, full economy, Player/restaurant XP/progression, unlock systems, upgrades, save/load, achievements, journal, settings, pause, final animations, and audio content.
 
 ## Completed Milestone 3 — Documented Work Day Dish Candidates
 
@@ -271,6 +273,49 @@ The existing order/session classes, static data, capacity configuration and all 
 This is a partial Dish Result system, not implemented rarity or economy. Base value is informational only. Final graphics/animations/audio, actual rarity, rewards, XP, upgrades, recipes/unlocks, persistence and final End-of-Day summary remain absent. The provisional capacities and 70,000-click values were not rebalanced; human pacing remains unverified.
 
 Recommended next step: a read-only design decision checkpoint for rarity/payout (GDD Sections 11 and 14): base probabilities or non-random progression policy, dish-XP influence, currency multipliers, payout timing and starting wallet. Do not implement these systems without approved values.
+
+## Approved post-5A design decisions — historical approval checkpoint, implemented by 5B below
+
+- GDD Section 11.1 records the designer-approved rarity probability table. Fantastic is canonical for the historical Epic column. Level 3 Common is corrected to 57%, level 11 Legendary to 24%; levels 12/14/16 explicitly repeat 11/13/15. All rows total 100%. No interpolation or runtime rarity implementation was performed.
+- Random rarity uses the specific dish's level; Dish XP awards depend on rarity. XP-to-level thresholds, initial/max level, XP awards and calculation timing still need approval.
+- Wallet starts at 0 у.е.; payout is SaleValue × the approved future rarity multiplier, once at successful completion, with amounts to two decimal places. Multiplier values and any finer-precision rounding remain unresolved. No wallet/reward code implemented.
+- The future tenth-dish result will remain visible until Continue ends the day. This supersedes the 5A bypass only when implemented and verified; current runtime behavior is unchanged.
+- Next step: approve remaining numeric progression/reward rules before implementation. Only GDD and this tracker changed; no new Unity verification or gameplay milestone completion claimed.
+
+## Completed Milestone 5B — Dish Rarity, Mastery and Run-Local Payouts
+
+### Approved scope and balance
+
+- Implement GDD Sections 10, 11.1 and 14 together. No further roadmap system is included.
+- Per-dish initial level 1 / 0 XP, maximum 18. Transition cost is round(20 × 1.18^(L − 1)), half away from zero; carry excess XP. Total XP cap is 1,744; no additional XP at mastery, payouts continue.
+- Common / Uncommon / Rare / Fantastic / Legendary award 10 / 12 / 16 / 22 / 30 Dish XP and pay SaleValue × 1 / 1.25 / 1.75 / 2.5 / 4. XP gains are truncated to the mastery cap.
+- Use the approved chance row for the dish level before awarding new XP. Historical levels 19–21 remain in the GDD, not implemented levels. No extra rarity weighting, pity system or click-based XP.
+- Zero-starting wallet and Dish XP persist between days in the current run, not across stopping/restarting game/Play Mode. Unfinished orders/Back pay nothing; completed dishes pay exactly once at completion. All ten results are shown; tenth Continue ends the day. No Player XP or save/load.
+
+### Files
+
+- Created: `Assets/Scripts/Runtime/PrototypeDishRewards.cs` and Unity-generated `.meta` — approved probability table/resolver, mastery thresholds, per-dish XP dictionary, decimal wallet and immutable completion receipt.
+- Modified: `Assets/Scripts/Runtime/PrototypeOrderSession.cs` — rewards only in the exact completion branch; retain mastery/wallet when day orders/receipt clear.
+- Modified: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs` — show real receipt/mastery/wallet, tenth result Continue ends day; stale-screen guards retained.
+- Modified: `Assets/Scenes/SampleScene.unity` — only result details font size 28 → 24 for the additional text. Existing hierarchy/bindings, environment, camera, lighting and static data unchanged.
+- Modified: `Assets/Documentation/ClickCook_GDD.md` and this tracker — approved rules and verified partial-system progress.
+
+### Executed verification
+
+- Unity 6000.3.14f1 recompiled successfully; no C# compilation failures.
+- Play Mode controller suite passed twice in fresh sessions: all 11 locations, carousel wrapping, Cook, candidate pools/capacities, empty Dormitory, Back/full-HP reset, exact click completion, hidden/double/stale callbacks, replacement preservation, early Finish, retained wallet/XP and all ten result screens. The tenth has no replacement and ends only on Continue; repeated Continue does not award again.
+- Enumerated all 100 integer rolls at each level 1–18 (1,800 checks) against the designer's exact table. Zero-probability tiers cannot appear. This tests the resolver mapping, not statistical player enjoyment.
+- Separate Play Mode model suite passed 160 full-cooking completions: all 32 actual DishData assets × all five tiers using seeded rolls and transient unsaved candidate fixtures. Exact decimal payouts and XP awards, pre-award rarity, duplicate-completion protection and cross-day retention passed.
+- Every XP level boundary, overflow carry, cap truncation, no XP at maximum with continued payout, independent dish progress, invalid resolver inputs and fresh session zero-state passed. All game-run progress reset on a fresh Play Mode session.
+- Result text preferred-height checks passed across all location results. Continue raycast/EventSystem pointer dispatch passed without changing wallet/count. Physical mouse input was NOT tested.
+- SampleScene is saved/clean outside Play Mode; bindings retained and new script recognized by Unity. No ClickCook runtime exceptions observed. Pre-existing Plastic/UVCS NotConfiguredClientException remains unrelated.
+- A later Unity MCP request encountered a transport disconnect/server error; subsequent Editor/eval calls recovered. This is not a ClickCook gameplay exception. Game View capture showed Location Selection, but result-screen screenshot requests did not reliably capture the active result; visual screenshot verification of that screen is NOT claimed. Its active state, text contents, layout bounds and EventSystem interaction were verified separately.
+
+### Limitations and next step
+
+This is baseline rarity/mastery and payout, not a complete economy or persistent progression system. Spending, passive income, Player/restaurant XP, saves, final result art/audio/animations and End-of-Day summary remain unimplemented. No DishData/LocationData/catalog values or click requirements were changed. Human pacing and the engagement of this initial balance are NOT verified; high click requirements still need separately approved upgrade mechanics.
+
+Recommended next step: a scoped design checkpoint for the documented upgrade/cooking-speed dependency (GDD Sections 9 and 13), including cost, click-strength effect and purchase rules, before coding an upgrade slice. No next milestone implementation started.
 
 ## Documentation policy
 

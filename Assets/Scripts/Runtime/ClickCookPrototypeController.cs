@@ -1,6 +1,7 @@
 using ClickCook.Data;
 using ClickCook.Runtime.Locations;
 using System.Text;
+using System.Globalization;
 using UnityEngine;
 
 namespace ClickCook.Runtime
@@ -190,21 +191,25 @@ namespace ClickCook.Runtime
             if (!enabled || !cookingPrototypeScreen.activeSelf ||
                 !session.TryCookClick(completedOrder)) return;
             displayedCookingOrder = null;
-            if (session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY)
-            {
-                EndWorkDay(true);
-                return;
-            }
             cookingPrototypeScreen.SetActive(false);
-            dishResultText.text = $"Dish: {completedOrder.Dish.EnglishName}\n" +
-                $"Base sale value (reference only): {completedOrder.Dish.SaleValue} у.е.\n" +
-                "Rarity: not implemented\nNo currency or XP awarded.";
+            PrototypeDishResult result = session.LastResult;
+            string progress = result.Level == PrototypeDishRewards.MaximumDishLevel
+                ? "Mastery: maximum level"
+                : $"Next level: {session.Rewards.GetLevelXp(result.Dish)} / {PrototypeDishRewards.RequiredXp(result.Level)} XP";
+            dishResultText.text = $"Dish: {result.Dish.EnglishName}\nRarity: {result.Rarity}\n" +
+                $"Earned: {Money(result.Payout)} | Wallet: {Money(session.Rewards.Wallet)}\n" +
+                $"Dish XP: +{result.XpGained}\nDish level: {result.PreviousLevel} -> {result.Level}\n{progress}";
             dishResultScreen.SetActive(true);
         }
 
         public void ContinueFromDishResult()
         {
             if (!enabled || !dishResultScreen.activeSelf || !session.IsDayActive) return;
+            if (session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY)
+            {
+                EndWorkDay(true);
+                return;
+            }
             ClearDishResult();
             workDayScreen.SetActive(true);
             RefreshOrderBoard();
@@ -237,7 +242,7 @@ namespace ClickCook.Runtime
 
         private void RefreshOrderBoard()
         {
-            orderBoardStatusText.text = "Currency: not implemented\n" +
+            orderBoardStatusText.text = $"Wallet: {Money(session.Rewards.Wallet)}\n" +
                 $"Available orders: {session.Orders.Count}\n" +
                 $"Board capacity: {session.BoardCapacity} / {PrototypeOrderSession.MaximumBoardCapacity} (provisional)\n" +
                 $"Completed dishes: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
@@ -282,10 +287,11 @@ namespace ClickCook.Runtime
 
             locationNameText.text = location.EnglishName;
             locationLevelText.text = $"Documented level: {location.LevelRequirement}";
-            progressText.text = "Progress: prototype placeholder";
+            progressText.text = $"Progress: prototype placeholder | Wallet: {Money(session.Rewards.Wallet)}";
             dishSlotsText.text = $"Documented dishes: {location.DocumentedAvailableDishes.Count}";
             incomeText.text = $"Income/sec: {location.PassiveIncomePerSecond}";
         }
 
+        private static string Money(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture) + " у.е.";
     }
 }

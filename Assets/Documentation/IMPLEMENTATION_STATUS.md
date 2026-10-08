@@ -67,12 +67,13 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 - `Assets/Scenes/SampleScene.unity`
 - `Assets/Documentation/IMPLEMENTATION_STATUS.md`
 
-## Working tree note
+## TextMesh Pro cleanup
 
-- A pre-existing interrupted import under `Assets/TextMesh Pro/` and `Assets/TextMesh Pro.meta` remains untracked.
-- The import contains 366 files, including TMP Essential Resources and Examples & Extras.
-- A project-wide dependency scan found no GUID references to any of its 193 imported asset GUIDs and no TMP type/resource-name references outside the imported folder.
-- The verified prototype uses `UnityEngine.UI.Text`, so the imported TMP content is currently unused. Safe cleanup is recommended after approval: delete the untracked `Assets/TextMesh Pro/` folder and `Assets/TextMesh Pro.meta`, refresh Unity, recompile, and re-run the Location Selection → Work Day smoke test.
+- The pre-existing untracked `Assets/TextMesh Pro/` import and `Assets/TextMesh Pro.meta` were removed after review.
+- The removed import contained 366 files, including TMP Essential Resources and Examples & Extras.
+- Before removal, a project-wide dependency scan found no GUID references to any of its 193 imported asset GUIDs and no TMP type/resource-name references outside the imported folder.
+- The verified prototype uses `UnityEngine.UI.Text`; Unity compiled successfully after cleanup and the Location Selection → Work Day smoke test passed.
+- The TextMesh Pro package remains installed; only unused imported project assets were removed.
 
 ## Post-Milestone 2B review
 

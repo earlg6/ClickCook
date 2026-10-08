@@ -6,7 +6,7 @@
 **Genre:** Restaurant/cooking clicker with collection, progression, and upgrade systems.
 
 - [DESIGNED] The player selects a location, begins a work day, selects orders, prepares dishes through close-up clicking, receives a rarity result, earns currency/XP, and progresses through upgrades and locations.
-- [IMPLEMENTED] Unity contains only an early 3D environment/camera prototype; no gameplay loop, UI, economy, or progression is implemented.
+- [IMPLEMENTED] Unity contains the early 3D environment/camera prototype, static location/dish data, and a verified placeholder Location Selection → Work Day flow. The complete gameplay loop, economy, and progression are not implemented.
 - [INFERRED] The intended experience combines a persistent restaurant-management loop with focused, tactile dish-completion moments.
 - [TBD] Platform, session length, target audience, monetization, and final scope.
 
@@ -363,9 +363,9 @@ This is a design-to-technical mapping, not existing implementation.
 
 | System | Current Unity state | Likely Unity representation | Notes |
 |---|---|---|---|
-| Game flow | Not implemented | Scene/state controller plus UI state machine | [TBD] Architecture choice |
-| Locations | Not implemented | Data assets/serializable location definitions | Must preserve location data |
-| Dishes/recipes | Not implemented | Data assets/serializable dish and recipe definitions | 32 records required |
+| Game flow | Partially implemented: Location Selection → Work Day placeholder | Scene/state controller plus UI state machine | [TBD] Architecture choice beyond the prototype |
+| Locations | Partially implemented: 11 static data assets, ordered catalog, placeholder carousel | Data assets/serializable location definitions | Unlocks, ownership, progress, and income runtime remain TBD/unimplemented |
+| Dishes/recipes | Partially implemented: 32 static dish data assets; no runtime recipe system | Data assets/serializable dish and recipe definitions | Recipe ownership/purchase behavior remains TBD/unimplemented |
 | Orders | Not implemented | Runtime order service/controller | Weights/rules TBD |
 | Cooking | Not implemented | Dish presentation controller + click input handler | Formula TBD |
 | Rarity | Not implemented | Result resolver/data table | Probability model TBD |
@@ -373,7 +373,7 @@ This is a design-to-technical mapping, not existing implementation.
 | XP | Not implemented | Player/location/dish progression data | Dish/restaurant details TBD |
 | Upgrades | Not implemented | Upgrade graph/data definitions + UI | Costs/effects TBD |
 | Save/load | Not implemented | Persistence service | Format/slots TBD |
-| UI | Not implemented | Canvas/UI framework and screen controllers | No Canvas currently |
+| UI | Partially implemented: temporary uGUI Location Selection and Work Day screens | Canvas/UI framework and screen controllers | Final UI and all other screens remain unimplemented |
 | Environment | Dormitory scene/model | Scene/environment presentation layer | Reuse undecided |
 | Camera | One camera with cursor-follow script | Gameplay presentation camera | Existing script may be reusable |
 | Input | Input System asset, direct mouse read | Central input bindings | Current asset unwired |
@@ -385,12 +385,14 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] URP `17.3.0`.
 - [IMPLEMENTED] Product: ClickCook.
 - [IMPLEMENTED] One enabled scene: `Assets/Scenes/SampleScene.unity`.
-- [IMPLEMENTED] Scene roots: Directional Light, Dormitory, Global Volume, Camera, Directional Light (1).
-- [IMPLEMENTED] One authored runtime script: `Camera_Move.cs`, class `CameraCursorFollow`.
+- [IMPLEMENTED] Scene roots: Directional Light, Dormitory, Global Volume, Camera, Directional Light (1), and `ClickCook_Prototype`.
+- [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, and `ClickCookPrototypeController.cs`.
 - [IMPLEMENTED] Camera position approximately `(1.138, 1.184, -2.718)`, 60° perspective FOV, slight mouse-driven rotation.
 - [IMPLEMENTED] Dormitory FBX with two materials and 17 supporting texture maps.
 - [IMPLEMENTED] Global post-processing includes bloom, film grain, vignette, chromatic aberration, and color grading.
-- [IMPLEMENTED] No UI, Canvas, EventSystem, gameplay prefabs, audio, animation, save/load, orders, economy, upgrades, progression, or gameplay architecture.
+- [IMPLEMENTED] Static data contains 32 `DishData` assets, 11 `LocationData` assets, and one ordered `LocationCatalog` asset.
+- [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → Work Day placeholder flow.
+- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, orders, economy, upgrades, progression, or complete gameplay architecture.
 - [TBD] Whether the Dormitory environment is retained, adapted, or replaced.
 
 ## 30. Contradictions and Design Risks
@@ -470,4 +472,43 @@ This is a design-to-technical mapping, not existing implementation.
 12. Implement end-of-day summary, save/load, achievements, and journal.
 13. Add final 3D content, animation, audio, accessibility, and visual polish.
 
-No implementation has been performed, and no Unity or Figma assets were changed.
+## 33. Implementation Progress
+
+This checklist records verified Unity implementation without changing the design requirements above. Milestone labels identify the checkpoint that delivered each implemented or partial step.
+
+### Verified foundations
+
+- [x] Static data architecture for locations and dishes, preserving documented names, numeric values, and explicit availability relationships. — **Milestone 1**
+- [x] All 11 documented `LocationData` assets exist. — **Milestone 1**
+- [x] All 32 documented `DishData` assets exist. — **Milestone 1**
+- [x] A read-only `LocationCatalog` references exactly the 11 locations in documented level order 0–10 and supports lookup by documented level. — **Milestone 2A**
+- [x] The Dormitory environment, lighting, camera, URP volume, Input System presence, and `CameraCursorFollow` baseline remain available. — **Existing project baseline, retained through Milestone 2B**
+
+### Game flow and UI
+
+- [ ] Partially implemented — The core gameplay loop currently covers only Location Selection → Start Work Day placeholder. Order selection, cooking, dish completion, rarity, rewards, end-of-day summary, upgrades, and next-day flow remain unimplemented. — **Milestone 2B**
+- [ ] Main Menu is not implemented.
+- [ ] Partially implemented — Location Selection has a verified temporary uGUI carousel with one current location, Previous/Next wraparound across all 11 locations, name, documented level, placeholder progress, documented dish count, passive income/sec, and `Cook`. Unlock/ownership rules, real progress, dish-slot contents, and final visual design remain unimplemented. — **Milestone 2B**
+- [ ] Partially implemented — Pressing `Cook` stores the selected `LocationData` in memory and opens a Work Day placeholder showing the selected location. The order board and real work-day lifecycle remain unimplemented. — **Milestone 2B**
+- [ ] Partially implemented — A `Finish Day` button can be triggered and displays a prototype-only response. End-of-day rules, summary, rewards, date advancement, and next-day behavior remain unimplemented. — **Milestone 2B**
+- [ ] Order Board is not implemented.
+- [ ] Cooking / clicking is not implemented.
+- [ ] Dish Result and rarity reveal are not implemented.
+- [ ] End-of-Day Summary is not implemented.
+- [ ] Final UI/UX styling, transitions, responsiveness, and animations are not implemented.
+
+### Runtime systems
+
+- [ ] Partially implemented — Location and dish design data are available at runtime, but location unlocking/ownership, passive-income accrual, recipe ownership/gating, and order eligibility rules are not implemented. — **Milestones 1 and 2A**
+- [ ] Economy is not implemented.
+- [ ] Player, restaurant, and dish XP/progression are not implemented.
+- [ ] Recipe and location unlock systems are not implemented.
+- [ ] Upgrade system is not implemented.
+- [ ] Save/load, New Game, Continue, and Reset Data behavior are not implemented.
+- [ ] Achievements are not implemented.
+- [ ] Journal is not implemented.
+- [ ] Settings are not implemented.
+- [ ] Pause behavior is not implemented.
+- [ ] Audio content and runtime audio behavior are not implemented.
+
+Going forward, every completed and Unity-verified milestone must update this checklist and `Assets/Documentation/IMPLEMENTATION_STATUS.md`.

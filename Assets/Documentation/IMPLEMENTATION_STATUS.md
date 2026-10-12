@@ -410,6 +410,38 @@ The user confirmed physical Enter and arrow navigation work in the Unity Game Vi
 
 UI-A1 is complete; full UI/UX, final art and remaining screens are still unfinished. The checkpoint includes the related UI planning documents, scene/UI code/assets/metas and verification helpers. Recommended next separate step: UI-A2, Order Board/HUD, Cooking and Dish Result presentation using these shared components. No UI-A2 or 7A implementation started.
 
+## Completed UI-A2 — Work Day / Cooking / Dish Result presentation (2026-10-12)
+
+### Implemented
+
+- Reused the existing three screens, buttons, Canvas/EventSystem, UI-A1 sprites/font/focus outlines and current order/reward session. Work Day shows wallet, completed dishes / 10 and orders / actual capacity separately; six possible paper cards occupy a non-overlapping right-hand 3×2 area. Full documented candidate text remains populated but hidden in the Editor-inspectable component, separate from active orders. No eligibility or capacity values changed.
+- Cooking shows the selected dish/location, a large clickable plate sketch, a click instruction and an explicit Back reset warning. No HP, damage numbers, fake progress or new effects. Finish remains a board-only action.
+- Dish Result shows Ukrainian rarity copy plus color cue, exact immutable receipt payout, actual wallet, XP award and level change. A labeled mastery bar uses actual level XP / transition cost; cap reads maximum/full. Continue uses existing lifecycle; tenth-result label becomes Finish Day. New UI state clears with the existing result lifetime.
+- Focus transfers to the first available order (Finish for empty board), dish, Continue or Cook on state entry. Board navigation excludes disabled slots. All art is explicitly temporary; final food illustrations/models/audio/animations are not introduced.
+
+### Files created / modified
+
+- Created `Assets/Scripts/Editor/UiA2Setup.cs` (+ meta): explicit stopped-Editor authoring helper, preserving existing object bindings; paper-backed contrast corrections and draw order.
+- Created `Assets/Tests/Editor/UiA2Verification.cs` (+ meta): Editor-only MCP-invoked real-controller presentation/lifecycle, rendered-layout/raycast/focus and transient empty/mastery fixture checks; not registered NUnit tests.
+- Created `Assets/UI/Art/PlateCircle.png` and `Assets/UI/Prefabs/Components/OrderCard.prefab` (+ metas); circle is original procedural UI art, not a screenshot crop.
+- Modified `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`: five presentation references, Ukrainian day/cooking/receipt copy, real mastery fill, tenth CTA and focus/navigation only; order identity/completion/replacement/payout/XP/upgrade formulas unchanged.
+- Modified `Assets/Scripts/UI/ClickCookUiCopy.cs`: Ukrainian display labels for the five canonical rarity tiers; canonical enum/data IDs unchanged.
+- Modified `Assets/Scenes/SampleScene.unity`: UI authoring only. Serialization review found zero existing blocks removed; 83 modified existing blocks all belong to ClickCook prototype UI/controller. Dormitory/camera/lights/URP preserved; Data/ProjectSettings/Packages have no diff.
+- Updated GDD, this tracker, roadmap and UI/UX specification. No profile/save implementation started.
+
+### Verification actually executed
+
+- Unity 6000.3.14f1 compiled successfully with no C# errors. Existing 6A regression passed 237 assertions: all 11 locations before/after purchases, exact cooking, Back, rewards/replacement and full ten-result day. UI-A2 presentation checks passed 240 assertions across 11 boards and ten receipts/Continue; empty-pool/mastery-cap fixtures passed ten more. Fixtures were transient Play Mode state, never saved gameplay assets.
+- All three screens passed 795 total glyph/height/button-bounds/non-overlap/topmost-raycast/focus assertions at actual rendered Canvas 1280×720, 1920×1080, 2560×1440, 1920×1200 and 2560×1080. Game View preset was restored before stopping Play Mode. A zoomed Editor viewport screenshot during the fixed-resolution matrix was cropped by Game View scaling; this is not claimed as a complete visual inspection of every target resolution. Canvas checks and final fitted native-view inspection are separate evidence.
+- Computer Use native mouse executed Cook → order → cooking. Back after a partial click preserved that exact order identity and zero counter/wallet. In a fresh run, native 2+2+1 sandwich clicks completed on the fifth click: Common, payout/wallet 5.00, +10 XP, level 1 and 10/20 mastery. Native Continue preserved wallet 5, showed 1/10 and two orders with a new slot-0 identity; native Finish returned to Location Selection with the correct one-dish message. These are real pointer inputs, not callback-only claims.
+- Visually corrected low-contrast headings over the ceiling, cooking instruction obscured by the decorative plate, and tiny icon copy clipping. Retested after corrections. Keyboard focus/navigation used EventSystem move tests; physical keyboard input on the new screens was NOT tested (UI-A1 physical Enter/arrows were user-verified previously). Production build/human pacing were not tested.
+- No ClickCook runtime exceptions observed. Existing Plastic/UVCS client configuration errors remain; transient MCP network/domain-reload and main-thread timeout errors recovered, successful explicit reruns replace inconclusive tool calls.
+- Final SampleScene saved clean outside Play Mode, original six roots retained. Temporary run state reset, no test captures or test presets left in Assets.
+
+### Next separate step
+
+UI-A2 is complete for the defined presentation slice. Full UI, final dish/location art, End-of-Day report, saves and release polish remain unfinished. Return to roadmap 7A: one in-memory player profile with stable IDs and wallet/dish mastery/Click Strength ownership separated from day/screen lifetime; 7B save/load follows later. Do not implement 7A in this execution.
+
 ## Documentation policy
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

@@ -49,6 +49,12 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Button buyUpgradeButton;
         [SerializeField] private UnityEngine.UI.Text upgradeDetailsText;
         [SerializeField] private UnityEngine.UI.Text upgradeStatusText;
+        [Header("UI-A2 — Work Day / result presentation")]
+        [SerializeField] private UnityEngine.UI.Text dayWalletText;
+        [SerializeField] private UnityEngine.UI.Text dayCompletedText;
+        [SerializeField] private UnityEngine.UI.Text resultRarityText;
+        [SerializeField] private UnityEngine.UI.Text resultMasteryText;
+        [SerializeField] private UnityEngine.UI.Image resultMasteryFill;
         private UpgradePurchaseQuote displayedUpgradeQuote;
         private bool refreshUpgradeNextFrame;
 
@@ -133,7 +139,9 @@ namespace ClickCook.Runtime
                    dishResultScreen != null && dishResultText != null && continueFromResultButton != null &&
                    upgradeCatalog != null && upgradeScreen != null && openUpgradesButton != null &&
                    closeUpgradesButton != null && buyUpgradeButton != null &&
-                   upgradeDetailsText != null && upgradeStatusText != null;
+                   upgradeDetailsText != null && upgradeStatusText != null &&
+                   dayWalletText != null && dayCompletedText != null && resultRarityText != null &&
+                   resultMasteryText != null && resultMasteryFill != null;
         }
 
         public void OpenUpgrades()
@@ -232,11 +240,12 @@ namespace ClickCook.Runtime
             ClearDishResult();
             locationSelectionScreen.SetActive(false);
             workDayScreen.SetActive(true);
-            workDayLocationText.text = $"Selected location: {selectedLocation.EnglishName}";
+            workDayLocationText.text = ClickCookUiCopy.Location(selectedLocation);
             RefreshWorkDayDishCandidates();
             RefreshOrderBoard();
             cookingPrototypeScreen.SetActive(false);
             finishDayMessageText.text = string.Empty;
+            FocusBoard();
         }
 
         private void RefreshWorkDayDishCandidates()
@@ -266,13 +275,12 @@ namespace ClickCook.Runtime
             if (!enabled || !workDayScreen.activeSelf || !session.TrySelect(slotIndex)) return;
             PrototypeOrder order = session.ActiveOrder;
             displayedCookingOrder = order;
-            cookingDishLabel.text = $"{order.Dish.EnglishName}\nClick to cook\nTemporary dish placeholder";
-            cookingOrderText.text = $"Location: {order.Location.EnglishName}\n" +
-                                    $"Dish ID: {order.Dish.DishId}\nDish: {order.Dish.EnglishName}\n" +
-                                    $"Slot: {order.SlotIndex + 1}\nOrder: {order.Identity}";
+            cookingDishLabel.text = "Натискай на страву";
+            cookingOrderText.text = $"{ClickCookUiCopy.Dish(order.Dish)}\n{ClickCookUiCopy.Location(order.Location)}";
             RefreshOrderBoard();
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(true);
+            FocusUi(cookingDishButton);
         }
 
         public void BackToBoard()
@@ -283,6 +291,7 @@ namespace ClickCook.Runtime
             cookingPrototypeScreen.SetActive(false);
             workDayScreen.SetActive(true);
             RefreshOrderBoard();
+            FocusBoard();
         }
 
         public void ClickCookingDish()
@@ -293,13 +302,22 @@ namespace ClickCook.Runtime
             displayedCookingOrder = null;
             cookingPrototypeScreen.SetActive(false);
             PrototypeDishResult result = session.LastResult;
-            string progress = result.Level == PrototypeDishRewards.MaximumDishLevel
-                ? "Mastery: maximum level"
-                : $"Next level: {session.Rewards.GetLevelXp(result.Dish)} / {PrototypeDishRewards.RequiredXp(result.Level)} XP";
-            dishResultText.text = $"Dish: {result.Dish.EnglishName}\nRarity: {result.Rarity}\n" +
-                $"Earned: {Money(result.Payout)} | Wallet: {Money(session.Rewards.Wallet)}\n" +
-                $"Dish XP: +{result.XpGained}\nDish level: {result.PreviousLevel} -> {result.Level}\n{progress}";
+            bool mastered = result.Level == PrototypeDishRewards.MaximumDishLevel;
+            int xp = session.Rewards.GetLevelXp(result.Dish);
+            int needed = mastered ? 1 : PrototypeDishRewards.RequiredXp(result.Level);
+            resultMasteryText.text = mastered ? "Майстерність: максимум" : $"Досвід до наступного рівня: {xp} / {needed} XP";
+            resultMasteryFill.fillAmount = mastered ? 1f : (float)xp / needed;
+            resultRarityText.text = ClickCookUiCopy.Rarity(result.Rarity);
+            Color[] rarityInk = { new Color(.23f,.16f,.11f), new Color(.17f,.34f,.17f),
+                new Color(.10f,.25f,.46f), new Color(.36f,.17f,.46f), new Color(.44f,.27f,.03f) };
+            resultRarityText.color = rarityInk[(int)result.Rarity];
+            dishResultText.text = $"{ClickCookUiCopy.Dish(result.Dish)}\n\n" +
+                $"Зароблено: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n\n" +
+                $"Досвід страви: +{result.XpGained} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
+            continueFromResultButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
+                session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Завершити день" : "Продовжити";
             dishResultScreen.SetActive(true);
+            FocusUi(continueFromResultButton);
         }
 
         public void ContinueFromDishResult()
@@ -313,12 +331,15 @@ namespace ClickCook.Runtime
             ClearDishResult();
             workDayScreen.SetActive(true);
             RefreshOrderBoard();
+            FocusBoard();
         }
 
         private void ClearDishResult()
         {
             dishResultScreen.SetActive(false);
             dishResultText.text = string.Empty;
+            resultRarityText.text = resultMasteryText.text = string.Empty;
+            resultMasteryFill.fillAmount = 0f;
         }
 
         private void EndWorkDay(bool limitReached)
@@ -338,15 +359,15 @@ namespace ClickCook.Runtime
             finishDayMessageText.text = $"День завершено: {location}\n" +
                 $"Приготовано: {completed} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
                 (limitReached ? " — Ліміт дня досягнуто" : string.Empty);
+            FocusUi(cookButton);
         }
 
         private void RefreshOrderBoard()
         {
-            orderBoardStatusText.text = $"Wallet: {Money(session.Rewards.Wallet)}\n" +
-                $"Available orders: {session.Orders.Count}\n" +
-                $"Board capacity: {session.BoardCapacity} / {PrototypeOrderSession.MaximumBoardCapacity} (provisional)\n" +
-                $"Completed dishes: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
-                (session.Orders.Count == 0 ? "\nNo documented dishes available." : string.Empty);
+            dayWalletText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
+            dayCompletedText.text = $"Приготовано: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}";
+            orderBoardStatusText.text = $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
+                (session.Orders.Count == 0 ? "\nНемає доступних замовлень" : string.Empty);
             for (int i = 0; i < orderButtons.Length; i++)
             {
                 PrototypeOrder order = session.GetOrderAtSlot(i);
@@ -354,10 +375,38 @@ namespace ClickCook.Runtime
                 orderButtons[i].gameObject.SetActive(i < session.BoardCapacity);
                 orderButtons[i].interactable = populated && session.ActiveOrder == null && order.Dish != null;
                 orderLabels[i].text = populated
-                    ? $"Slot {i + 1}\n" + (order.Dish != null
-                        ? order.Dish.EnglishName : "Missing DishData")
-                    : $"Slot {i + 1}\nEmpty";
+                    ? $"Замовлення {i + 1}\n\n" + (order.Dish != null
+                        ? ClickCookUiCopy.Dish(order.Dish) : "Немає даних страви")
+                    : $"Місце {i + 1}\nПорожньо";
             }
+            ConfigureBoardNavigation();
+        }
+
+        private void FocusBoard()
+        {
+            foreach (var button in orderButtons)
+                if (button.gameObject.activeInHierarchy && button.interactable) { FocusUi(button); return; }
+            FocusUi(finishDayButton);
+        }
+
+        private void ConfigureBoardNavigation()
+        {
+            var available = new System.Collections.Generic.List<UnityEngine.UI.Button>();
+            foreach (var button in orderButtons)
+                if (button.gameObject.activeSelf && button.interactable) available.Add(button);
+            for (int i = 0; i < available.Count; i++)
+            {
+                var n = available[i].navigation; n.mode = UnityEngine.UI.Navigation.Mode.Explicit;
+                n.selectOnLeft = i > 0 ? available[i-1] : finishDayButton;
+                n.selectOnRight = i+1 < available.Count ? available[i+1] : finishDayButton;
+                n.selectOnUp = i >= 3 ? available[i-3] : finishDayButton;
+                n.selectOnDown = i+3 < available.Count ? available[i+3] : finishDayButton;
+                available[i].navigation = n;
+            }
+            var finish = finishDayButton.navigation; finish.mode = UnityEngine.UI.Navigation.Mode.Explicit;
+            finish.selectOnLeft = finish.selectOnUp = available.Count > 0 ? available[available.Count-1] : null;
+            finish.selectOnRight = finish.selectOnDown = available.Count > 0 ? available[0] : null;
+            finishDayButton.navigation = finish;
         }
 
         private LocationData CurrentLocation =>

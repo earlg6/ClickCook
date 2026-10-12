@@ -1,8 +1,9 @@
 # ClickCook — UI/UX specification for Unity
 
 Дата: 2026-10-12. База: завершений Milestone 6A, commit 1fa32ff.
-Статус: UI-A1 виконано та прийнято. Решта екранів — дизайн-план за п'ятьма наданими референсами.
-Оновлення UI-A1: Location Selection і Click Strength оформлені в Unity; component assets, copy та automated layout/input checks готові. Computer Use native mouse checks пройдено; виправлено втрату фокусу після покупки. Користувач підтвердив роботу фізичних Enter і стрілок у Game View. Синтетичні клавіші Computer Use не викликали runtime Input System дій — це обмеження автоматизації. Подальші розділи описують весь план, а не готовність усіх екранів; UI-A2 не розпочато.
+Статус: UI-A1 і UI-A2 виконано та перевірено в межах існуючого циклу. Решта екранів — дизайн-план за п'ятьма наданими референсами.
+Оновлення UI-A1: Location Selection і Click Strength оформлені в Unity; component assets, copy та automated layout/input checks готові. Computer Use native mouse checks пройдено; виправлено втрату фокусу після покупки. Користувач підтвердив роботу фізичних Enter і стрілок у Game View. Синтетичні клавіші Computer Use не викликали runtime Input System дій — це обмеження автоматизації.
+Оновлення UI-A2: оформлено Order Board/HUD, Cooking та Dish Result; українські назви/рідкість/receipt, окремі daily/orders counters, real mastery bar, state focus. П’ять розмірів Canvas/raycast/focus, regression і нативний цикл мишею перевірено; новий фізичний keyboard pass і build не виконано. Страви мають явно позначені тимчасові ескізи. Деталі виконаних перевірок — IMPLEMENTATION_STATUS.md. Подальші розділи описують весь план, а не готовність усіх екранів.
 Джерела: ClickCook_GDD.md (§3–7, 9–11, 13, 16–25), IMPLEMENTATION_STATUS.md та актуальний production roadmap.
 Пріоритет: затверджений gameplay GDD → нові візуальні референси → рекомендації цієї специфікації. Значення, намальовані на скріншотах, не змінюють дані гри.
 
@@ -262,4 +263,4 @@ UI-A можна поділити:
 
 До production потрібні: source art/license, мови/terminology, зміст location progress, значення colored bars референсів, settings defaults/pause policy, final dishes/environment scope. До отримання відповідних даних застосовувати явно підписані чи приховані поля.
 
-UI-A1 завершено. Рекомендація наступного виконання після окремої команди: UI-A2. Після UI-A2 повернутися до 7A/7B; full UI-C/UX screens завершувати з gameplay dependencies.
+UI-A1/A2 завершено. Рекомендація наступного виконання після окремої команди: 7A, єдиний in-memory профіль, потім 7B save/load; full UI-C/UX screens завершувати з gameplay dependencies.

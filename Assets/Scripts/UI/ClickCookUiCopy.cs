@@ -29,6 +29,15 @@ namespace ClickCook.UI
         public static string Dish(DishData dish) => dish != null && dish.DishId >= 1 && dish.DishId <= Dishes.Length
             ? Dishes[dish.DishId - 1] : dish?.EnglishName ?? "Немає даних";
         public static string Money(decimal value) => value.ToString("N2", Culture) + " у.е.";
+        public static string Rarity(ClickCook.Runtime.DishRarity rarity) => rarity switch
+        {
+            ClickCook.Runtime.DishRarity.Common => "Звичайна",
+            ClickCook.Runtime.DishRarity.Uncommon => "Незвичайна",
+            ClickCook.Runtime.DishRarity.Rare => "Рідкісна",
+            ClickCook.Runtime.DishRarity.Fantastic => "Фантастична",
+            ClickCook.Runtime.DishRarity.Legendary => "Легендарна",
+            _ => "Невідома"
+        };
         public static string DishPreview(LocationData location)
         {
             var dishes = location.DocumentedAvailableDishes;

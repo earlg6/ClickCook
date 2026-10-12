@@ -344,6 +344,8 @@ Passives / Пассивки
 
 ## 21. UI/UX
 
+- [IMPLEMENTED — UI-A1, 2026-10-12] Location Selection and Click Strength purchase have a blue/pergament/orange uGUI presentation, Ukrainian display copy, scalable panel/button assets, visible focus outlines and reusable component prefabs. Authored IDs, numeric data and gameplay rules are unchanged. The venue image is an explicitly labeled stylized placeholder. See [UI/UX Specification](ClickCook_UI_UX_Specification.md).
+- [VERIFIED — UI-A1] C# compilation, 237 current-loop Play Mode assertions, glyph/contrast checks, and layout/raycast/focus at five rendered Canvas sizes passed through Unity MCP. Native mouse checks through Computer Use passed for carousel wrapping, upgrades/Back, disabled purchase, successful purchase, Cook and early Finish Day. Fixed focus loss after a consumed purchase offer; native retest confirmed focus returns to Back when the next offer is unaffordable. The user confirmed physical Enter and arrow navigation work in Game View. Computer Use synthetic keys did not trigger runtime Input System actions; that automation limitation remains recorded. UI-A1 is accepted; final art, remaining screens and UI-A2 are unfinished.
 | Screen | Designed contents | Actions / feedback | TBD |
 |---|---|---|---|
 | Main Menu | Title, Continue, New Game, Settings, Exit, version, Discord | Navigate/select | Navigation input, transitions |
@@ -568,6 +570,7 @@ This checklist records verified Unity implementation without changing the design
 - [ ] Partially implemented — Dish Result uses temporary uGUI text/buttons; final reveal art, audiovisual feedback and animations remain unimplemented. — **Milestones 5A–5B**
 - [ ] End-of-Day Summary is not implemented.
 - [ ] Final UI/UX styling, transitions, responsiveness, and animations are not implemented.
+- [x] UI-A1 Location Selection/Click Strength visual and text layer is implemented and verified: automated/native mouse checks passed, including purchase focus recovery; physical Enter/arrows verified by the user. — **UI-A1 (2026-10-12)**. Files: `Assets/Scripts/UI/ClickCookUiCopy.cs`, `Assets/Scripts/UI/UiFocusOutline.cs`, `Assets/Scripts/Editor/UiA1Setup.cs`, `Assets/UI/Art/`, `Assets/UI/Prefabs/Components/`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`; verification: `Assets/Tests/Editor/UiA1Verification.cs`, `Assets/Tests/Editor/Milestone6AVerification.cs`. Remaining screens retain their prototype UI; full UI/UX remains partial.
 
 ### Runtime systems
 

@@ -198,7 +198,7 @@ namespace ClickCook.Verification
                     Press(c,"buyUpgradeButton");Press(c,"buyUpgradeButton");
                     Check(c.OrderSession.ClickStrengthRank==1 && c.OrderSession.Rewards.Wallet==wallet-20,"same-frame double callback buys once");
                     Press(c,"closeUpgradesButton");Press(c,"openUpgradesButton");
-                    Check(Field<UnityEngine.UI.Text>(c,"upgradeDetailsText").text.Contains("44.00"),"next price UI");
+                    Check(Field<UnityEngine.UI.Text>(c,"upgradeDetailsText").text.Contains(ClickCook.UI.ClickCookUiCopy.Money(44m)),"next price UI");
                     Press(c,"buyUpgradeButton");
                     Check(c.OrderSession.ClickStrengthRank==2 && c.OrderSession.ClickDamage==4,"second explicit purchase");
                     Press(c,"closeUpgradesButton");

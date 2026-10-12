@@ -3,6 +3,7 @@ using ClickCook.Runtime.Locations;
 using System.Text;
 using System.Globalization;
 using UnityEngine;
+using ClickCook.UI;
 
 namespace ClickCook.Runtime
 {
@@ -56,6 +57,17 @@ namespace ClickCook.Runtime
         private int currentLocationIndex;
 
         public PrototypeOrderSession OrderSession => session;
+
+        private void Start()
+        {
+            if (enabled && locationSelectionScreen.activeSelf) FocusUi(cookButton);
+        }
+
+        private static void FocusUi(UnityEngine.UI.Button button)
+        {
+            var events = UnityEngine.EventSystems.EventSystem.current;
+            if (events != null) events.SetSelectedGameObject(button.gameObject);
+        }
 
         private void Awake()
         {
@@ -129,8 +141,9 @@ namespace ClickCook.Runtime
             if (!enabled || !locationSelectionScreen.activeSelf || session.IsDayActive) return;
             locationSelectionScreen.SetActive(false);
             upgradeScreen.SetActive(true);
-            upgradeStatusText.text = "Progress lasts for this game run. Saving comes in a later milestone.";
+            upgradeStatusText.text = "Покращення діють у поточному запуску гри. Збереження — незабаром.";
             RefreshUpgrade();
+            FocusUi(buyUpgradeButton.interactable ? buyUpgradeButton : closeUpgradesButton);
         }
 
         public void CloseUpgrades()
@@ -141,6 +154,7 @@ namespace ClickCook.Runtime
             upgradeScreen.SetActive(false);
             locationSelectionScreen.SetActive(true);
             RefreshLocationSelection();
+            FocusUi(openUpgradesButton);
         }
 
         public void BuyUpgrade()
@@ -150,8 +164,8 @@ namespace ClickCook.Runtime
             displayedUpgradeQuote = null;
             buyUpgradeButton.interactable = false;
             upgradeStatusText.text = session.TryPurchaseUpgrade(quote)
-                ? $"Purchased Click Strength rank {session.ClickStrengthRank}."
-                : "Purchase unavailable. Check your balance and the current offer.";
+                ? $"Силу кліку покращено до рангу {session.ClickStrengthRank}!"
+                : "Не вдалося придбати. Перевір баланс і поточну ціну.";
             // Consume this offer for the rest of the frame: repeated callbacks cannot buy twice.
             refreshUpgradeNextFrame = true;
         }
@@ -160,21 +174,37 @@ namespace ClickCook.Runtime
         {
             if (!refreshUpgradeNextFrame) return;
             refreshUpgradeNextFrame = false;
-            if (upgradeScreen.activeSelf) RefreshUpgrade();
+            if (upgradeScreen.activeSelf)
+            {
+                RefreshUpgrade();
+                // Disabling the consumed offer can clear EventSystem selection immediately.
+                var events = UnityEngine.EventSystems.EventSystem.current;
+                if (events != null && events.currentSelectedGameObject == null)
+                    FocusUi(buyUpgradeButton.interactable ? buyUpgradeButton : closeUpgradesButton);
+            }
         }
 
         private void RefreshUpgrade()
         {
             var definition = upgradeCatalog.Find(UpgradeCatalog.ClickStrengthId);
             bool hasNext = session.TryQuoteUpgrade(UpgradeCatalog.ClickStrengthId, out displayedUpgradeQuote);
-            upgradeDetailsText.text = $"Wallet: {Money(session.Rewards.Wallet)}\n" +
-                $"Click Strength: {session.ClickStrengthRank} / {definition.MaximumRank}\n" +
-                $"Current strength: {session.ClickDamage}\n" +
-                (hasNext ? $"Next strength: {UpgradeCatalog.ClickDamageAtRank(session.ClickStrengthRank + 1)}\n" +
-                    $"Price: {Money(displayedUpgradeQuote.Price)}\n" +
-                    (session.Rewards.Wallet >= displayedUpgradeQuote.Price ? "Ready to purchase" : "Not enough currency")
-                    : "Maximum rank reached");
+            upgradeDetailsText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n\n" +
+                $"Ранг: {session.ClickStrengthRank} / {definition.MaximumRank}\n" +
+                $"Сила кліку: {session.ClickDamage}" +
+                (hasNext ? $" → {UpgradeCatalog.ClickDamageAtRank(session.ClickStrengthRank + 1)}\n\n" +
+                    $"Ціна: {ClickCookUiCopy.Money(displayedUpgradeQuote.Price)}\n" +
+                    (session.Rewards.Wallet >= displayedUpgradeQuote.Price ? "Можна придбати" : "Недостатньо коштів")
+                    : "\n\nМаксимальний ранг");
             buyUpgradeButton.interactable = hasNext && session.Rewards.Wallet >= displayedUpgradeQuote.Price;
+            buyUpgradeButton.GetComponentInChildren<UnityEngine.UI.Text>().text = hasNext
+                ? $"Придбати за {ClickCookUiCopy.Money(displayedUpgradeQuote.Price)}" : "Максимальний ранг";
+            var navigation = closeUpgradesButton.navigation;
+            var nextFocus = buyUpgradeButton.interactable ? buyUpgradeButton : null;
+            navigation.selectOnLeft = navigation.selectOnRight = navigation.selectOnUp = navigation.selectOnDown = nextFocus;
+            closeUpgradesButton.navigation = navigation;
+            var events = UnityEngine.EventSystems.EventSystem.current;
+            if (!buyUpgradeButton.interactable && events != null && events.currentSelectedGameObject == buyUpgradeButton.gameObject)
+                FocusUi(closeUpgradesButton);
         }
 
         public void ShowPreviousLocation()
@@ -293,7 +323,7 @@ namespace ClickCook.Runtime
 
         private void EndWorkDay(bool limitReached)
         {
-            string location = session.SelectedLocation != null ? session.SelectedLocation.EnglishName : string.Empty;
+            string location = ClickCookUiCopy.Location(session.SelectedLocation);
             int completed = session.CompletedDishes;
             session.EndDay();
             ClearDishResult();
@@ -305,9 +335,9 @@ namespace ClickCook.Runtime
             locationSelectionScreen.SetActive(true);
             RefreshOrderBoard();
             RefreshLocationSelection();
-            finishDayMessageText.text = $"Day finished: {location}\n" +
-                $"Completed dishes: {completed} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
-                (limitReached ? " — Daily limit reached" : string.Empty);
+            finishDayMessageText.text = $"День завершено: {location}\n" +
+                $"Приготовано: {completed} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
+                (limitReached ? " — Ліміт дня досягнуто" : string.Empty);
         }
 
         private void RefreshOrderBoard()
@@ -355,11 +385,11 @@ namespace ClickCook.Runtime
                 return;
             }
 
-            locationNameText.text = location.EnglishName;
-            locationLevelText.text = $"Documented level: {location.LevelRequirement}";
-            progressText.text = $"Progress: prototype placeholder | Wallet: {Money(session.Rewards.Wallet)}";
-            dishSlotsText.text = $"Documented dishes: {location.DocumentedAvailableDishes.Count}";
-            incomeText.text = $"Income/sec: {location.PassiveIncomePerSecond}";
+            locationNameText.text = ClickCookUiCopy.Location(location);
+            locationLevelText.text = $"Рівень локації: {location.LevelRequirement}";
+            progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
+            dishSlotsText.text = ClickCookUiCopy.DishPreview(location);
+            incomeText.text = $"Дохід локації: {location.PassiveIncomePerSecond} у.е./с";
         }
 
         private static string Money(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture) + " у.е.";

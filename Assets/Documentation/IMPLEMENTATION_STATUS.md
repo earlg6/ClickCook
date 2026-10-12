@@ -353,6 +353,63 @@ Prepared `Assets/Documentation/ClickCook_Upgrade_Design_Proposal.md`: all 16 GDD
 
 The draft uses the available FishSim screenshots and primary Kongregate/Orteil references; the remaining Figma screenshots were unavailable due to MCP quota. Executed 1,152 mathematical price checks and conditional economic simulations, NOT Unity tests or human pacing validation. Full economy balance depends on unresolved recipe/location progression. Bonus-choice windows, passive-income accrual policy and the numeric upgrade package require approval. Recommended first implementation slice after approval: 6A, run-local multilevel Click Strength and safe between-day purchases; other unsupported nodes remain unavailable. No runtime/scene/data changes, implementation commit or push performed by this design checkpoint.
 
+## UI/UX planning checkpoint — 2026-10-12 (not implemented)
+
+The user paused the next gameplay step and supplied five screenshots: three screen-flow prototypes and two visual references. Created `ClickCook_UI_UX_Specification.md` covering all screens, visual/text tokens, Ukrainian copy proposals, component states, layout/input/accessibility, data bindings and the distinction between illustrative screenshot values and approved GDD mechanics.
+
+Updated `ClickCook_Production_Roadmap.md`: recommend UI-A1 (shared visual components + Location Selection/Click Strength purchase), then UI-A2 (Board/Cooking/Result), before returning to 7A/7B. Complete other screens alongside their runtime dependencies. Both UI-A steps remain not started; no gameplay, Unity scenes/assets, Figma, commit or push changed by this planning checkpoint. Primary GDD rules and implementation checkboxes remain unchanged. Sample bars are not interpreted as hidden HP or new timers.
+
+## Completed UI-A1 — Location Selection / Click Strength UI (2026-10-12)
+
+### Implemented subset
+
+- Reused SampleScene Canvas/EventSystem and all controller bindings. Styled only Location Selection and Click Strength purchase with a blue backdrop, paper panels, orange controls, larger readable type, Ukrainian presentation copy and explicit focus navigation/outline. Disabled purchase is skipped by navigation. Gameplay math/ownership/order rules are unchanged.
+- Created three original procedural sprites with sliced paper/button borders (not cropped screenshots), and four reusable component prefabs. Shared venue shape is labeled as a stylized placeholder, not final location art. Used Unity's existing LegacyRuntime font after checking Ukrainian glyphs; no external font import, TMP resources or packages.
+- Location data fields show actual level, income and candidate count; display at most three candidate names plus remaining count. Income is explicitly unimplemented, progress bars are not invented. Static IDs/names/numeric assets are unchanged. Only these two screens and the day-finished message have Ukrainian copy; other screens remain for UI-A2.
+
+### Files
+
+- Created `Assets/Scripts/UI/ClickCookUiCopy.cs`, `UiFocusOutline.cs` (+ metas/folder meta).
+- Created `Assets/Scripts/Editor/UiA1Setup.cs` (+ metas): explicit one-time live-Editor authoring helper; refuses an already authored screen, clean-scene check, procedural art generation, component prefabs and scene layout. Not player runtime code.
+- Created `Assets/UI/Art/MenuBlue.png`, `PaperPanel.png`, `PrimaryButton.png` (+ metas).
+- Created `Assets/UI/Prefabs/Components/PaperPanel.prefab`, `PrimaryButton.prefab`, `SecondaryButton.prefab`, `WalletBadge.prefab` (+ metas/folder metas).
+- Modified `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`: presentation copy, formatted price labels, focus entry/return and disabled-control navigation; existing transaction/completion calls preserved.
+- Modified `Assets/Scenes/SampleScene.unity`: only prototype UI authoring. Serialization comparison: zero existing blocks removed, 60 existing blocks changed, 94 new blocks. Static data/project settings/packages have no diff. Environment/camera/lights/URP content retained.
+- Modified `Assets/Tests/Editor/Milestone6AVerification.cs`: price-text expectation uses the presentation formatter instead of a hardcoded English decimal string; gameplay assertions retained.
+- Created `Assets/Tests/Editor/UiA1Verification.cs` (+ meta): Editor-only assets/font/contrast, rendered Canvas bounds/text, topmost raycast, focus and temporary Game View resolution checks. Invoke SetResolution only after entering Play Mode, resume/focus Game View so it renders, and RestoreResolution before leaving Play Mode.
+- Updated GDD, UI/UX specification, roadmap and this tracker. Previous planning changes are preserved.
+
+### Executed verification
+
+- Unity recompiled successfully, compilationFailed=false; saved SampleScene, clean and stopped after testing.
+- 12 asset/font/palette contrast checks passed. LegacyRuntime includes UA glyphs; text-on-paper, secondary text, header-on-blue and primary-button text meet the tested 4.5:1 color-pair target. Rendered-texture inspection was separate.
+- Current-loop regression passed with 237 Play Mode assertions, including all 11 locations, wrapping, purchases, base/upgraded cooking, result/Continue, early Finish and a ten-dish day. Repeated after final focus/copy changes.
+- Glyph/label-height/button-bounds/focus/topmost-raycast checks passed for both screens at actual rendered Canvas sizes 1280×720, 1920×1080, 2560×1440, 1920×1200 and 2560×1080. Checked the longest Michelin title and large wallet/price states; rendered Location Selection and purchase screen inspected. Initial matrix attempts failed because paused/background Game View still had the previous Canvas size; resuming/focusing rendered the requested sizes and successful checks replaced those failed attempts. Resized screenshot dimensions alone were not counted as validation.
+- Max-rank fixture: rank-14 price 1,244,365.00, large wallet display, EventSystem pointer purchase to rank 15 and repeated dispatch protection passed; max-state text/button bounds passed. Fixture funding/rank setup occurred only in Play Mode verification; new-run progress is unchanged.
+- Back EventSystem raycast/pointer dispatch passed three assertions. Physical mouse/keyboard input is NOT VERIFIED.
+- Restored the original Game View selection and removed only the temporary test preset. Removed only eight generated failed-resolution captures and their metas from Assets/Temp/UI-A1, then its newly created empty parent; no user assets deleted.
+- No ClickCook runtime exception observed. Existing Plastic/UVCS NotConfiguredClientException recurs on domain reload. An early MCP main-thread timeout recovered; no gameplay fix was needed.
+
+### Initial blocker history (resolved below)
+
+Computer Use was explicitly attempted using the installed skill and @oai/sky through node_repl. Initialization failed with `failed to write kernel assets: The system cannot find the path specified. (os error 3)`; retry and kernel reset/reinitialize produced the same failure. No native inputs were issued and no substitute Windows automation was used.
+
+At that initial checkpoint, physical input acceptance remained pending and commit/push was deferred. This historical blocker was subsequently resolved by the recovery and acceptance checks below. No profile/save implementation started.
+
+### UI-A1 recovery and native-input review — 2026-10-12
+
+Computer Use initialized successfully and targeted the ClickCook Unity window. Native mouse checks passed for carousel 0→10→0 wrapping and long title/correct fields, opening/closing upgrades, disabled zero-wallet purchase, Cook into Dormitory Work Day, and early Finish with cleared day state. On a Play Mode-only wallet fixture of 60, a native purchase produced rank 1, damage 2 and wallet 40; the next price 44 was correctly unavailable. No fixture values were saved.
+
+Native purchase exposed a focus defect: disabling the consumed offer cleared EventSystem selection before the existing refresh guard ran. Updated controller LateUpdate to restore selection only when absent, choosing the next available Buy or Back. Recompiled successfully, reran all 237 Play Mode regression assertions and 12 static checks; native purchase retest confirmed Back focus and visible outline. SampleScene remains clean; six original root objects remain, static data/packages/project settings are unchanged.
+
+Computer Use keyboard chords operate Editor menus, but Right/Down/Left/D/Enter did not trigger runtime Navigate/Submit even with Game View focus and enabled correct bindings. This is not evidence that a physical keyboard works or fails. Requested a physical keyboard check from the user; keyboard acceptance and commit/push remain pending. Left Play Mode open on Upgrades with Back selected for that check; wallet 40/rank 1 are temporary fixture state and reset when Play Mode stops. No workaround input implementation or project-settings changes were introduced. One MCP observation timed out at 5000ms and logged a pipeline error, then recovered; one post-domain-reload connection reset also recovered. Existing UVCS configuration errors remain unrelated. No ClickCook exception observed.
+
+### Final acceptance — 2026-10-12
+
+The user confirmed physical Enter and arrow navigation work in the Unity Game View. Together with the executed native mouse, automated regression and layout checks, this closes UI-A1 acceptance. Keyboard verification is user-executed, not claimed as successful Computer Use key injection. Stopped Play Mode afterward: temporary wallet/rank/input-observation fixtures were discarded; SampleScene is saved/clean, with the six original roots intact and no C# compilation failures. Known unrelated UVCS configuration errors remain.
+
+UI-A1 is complete; full UI/UX, final art and remaining screens are still unfinished. The checkpoint includes the related UI planning documents, scene/UI code/assets/metas and verification helpers. Recommended next separate step: UI-A2, Order Board/HUD, Cooking and Dish Result presentation using these shared components. No UI-A2 or 7A implementation started.
+
 ## Documentation policy
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

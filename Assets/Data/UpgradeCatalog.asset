@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c496fac887829c34093fb38ee9f54505, type: 3}
+  m_Name: UpgradeCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ClickCook.Data.UpgradeCatalog
+  upgrades:
+  - id: click_strength
+    displayName: Click Strength
+    maximumRank: 15
+    basePrice: 20
+    priceGrowthPercent: 220
+  - id: critical_chance
+    displayName: Critical Frequency
+    maximumRank: 15
+    basePrice: 150
+    priceGrowthPercent: 190
+  - id: critical_multiplier
+    displayName: Critical Multiplier
+    maximumRank: 15
+    basePrice: 200
+    priceGrowthPercent: 190
+  - id: click_hold
+    displayName: Click Hold
+    maximumRank: 1
+    basePrice: 250
+    priceGrowthPercent: 100
+  - id: auto_strength
+    displayName: Auto-click Strength
+    maximumRank: 15
+    basePrice: 500
+    priceGrowthPercent: 200
+  - id: auto_frequency
+    displayName: Auto-click Frequency
+    maximumRank: 15
+    basePrice: 600
+    priceGrowthPercent: 180
+  - id: dish_value
+    displayName: Increase Dish Value
+    maximumRank: 15
+    basePrice: 100
+    priceGrowthPercent: 170
+  - id: selection_bonus
+    displayName: Increase Bonus
+    maximumRank: 15
+    basePrice: 150
+    priceGrowthPercent: 170
+  - id: recipe_discount
+    displayName: Reduce Recipe Prices
+    maximumRank: 5
+    basePrice: 150
+    priceGrowthPercent: 200
+  - id: upgrade_discount
+    displayName: Reduce Upgrade Prices
+    maximumRank: 5
+    basePrice: 300
+    priceGrowthPercent: 200
+  - id: passive_value
+    displayName: Increase Auto-income Value
+    maximumRank: 15
+    basePrice: 250
+    priceGrowthPercent: 170
+  - id: character_xp
+    displayName: Character XP
+    maximumRank: 15
+    basePrice: 200
+    priceGrowthPercent: 170
+  - id: restaurant_xp
+    displayName: Restaurant XP
+    maximumRank: 15
+    basePrice: 200
+    priceGrowthPercent: 170
+  - id: dish_xp
+    displayName: Dish XP
+    maximumRank: 15
+    basePrice: 100
+    priceGrowthPercent: 170
+  - id: passive_unlock
+    displayName: Restaurant Auto-income
+    maximumRank: 1
+    basePrice: 300
+    priceGrowthPercent: 100
+  - id: selection_window
+    displayName: Increase Dish-selection Time
+    maximumRank: 15
+    basePrice: 100
+    priceGrowthPercent: 170

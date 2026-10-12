@@ -4,6 +4,20 @@ using UnityEngine;
 
 namespace ClickCook.Runtime
 {
+    /// <summary>Immutable offer bound to one session and one owned rank.</summary>
+    public sealed class UpgradePurchaseQuote
+    {
+        internal PrototypeOrderSession Owner { get; }
+        public int OwnedRank { get; }
+        public decimal Price { get; }
+        internal UpgradePurchaseQuote(PrototypeOrderSession owner, int rank, decimal price)
+        {
+            Owner = owner;
+            OwnedRank = rank;
+            Price = price;
+        }
+    }
+
     /// <summary>In-memory prototype orders, cooking and daily lifecycle with run-local rewards.</summary>
     public sealed class PrototypeOrderSession
     {
@@ -21,6 +35,36 @@ namespace ClickCook.Runtime
         public PrototypeOrder ActiveOrder { get; private set; }
         public PrototypeDishRewards Rewards { get; } = new();
         public PrototypeDishResult LastResult { get; private set; }
+        private UpgradeCatalog upgradeCatalog;
+        public int ClickStrengthRank { get; private set; }
+        public int ClickDamage => UpgradeCatalog.ClickDamageAtRank(ClickStrengthRank);
+
+        public bool ConfigureUpgrades(UpgradeCatalog catalog)
+        {
+            if (IsDayActive || upgradeCatalog != null || catalog == null || !catalog.IsValid) return false;
+            upgradeCatalog = catalog;
+            return true;
+        }
+
+        public bool TryQuoteUpgrade(string id, out UpgradePurchaseQuote quote)
+        {
+            quote = null;
+            // Other catalog entries remain unavailable until their effects are implemented.
+            if (IsDayActive || id != UpgradeCatalog.ClickStrengthId || upgradeCatalog == null || !upgradeCatalog.IsValid) return false;
+            var definition = upgradeCatalog.Find(id);
+            if (ClickStrengthRank >= definition.MaximumRank) return false;
+            quote = new UpgradePurchaseQuote(this, ClickStrengthRank, definition.PriceForNextRank(ClickStrengthRank));
+            return true;
+        }
+
+        public bool TryPurchaseUpgrade(UpgradePurchaseQuote quote)
+        {
+            if (quote == null || quote.Owner != this || quote.OwnedRank != ClickStrengthRank ||
+                !TryQuoteUpgrade(UpgradeCatalog.ClickStrengthId, out var current) ||
+                quote.Price != current.Price || !Rewards.TrySpend(current.Price)) return false;
+            ClickStrengthRank++;
+            return true;
+        }
 
         public PrototypeOrderSession()
         {
@@ -69,7 +113,7 @@ namespace ClickCook.Runtime
                 expectedOrder.IsCompleted || expectedOrder.Dish == null || expectedOrder.RemainingClicks <= 0 ||
                 CompletedDishes >= MAX_COMPLETED_DISHES_PER_DAY) return false;
 
-            expectedOrder.RemainingClicks--;
+            expectedOrder.RemainingClicks = Mathf.Max(0, expectedOrder.RemainingClicks - ClickDamage);
             if (expectedOrder.RemainingClicks > 0) return false;
 
             expectedOrder.IsCompleted = true;

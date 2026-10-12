@@ -46,6 +46,13 @@ namespace ClickCook.Runtime
 
         public decimal Wallet { get; private set; }
 
+        internal bool TrySpend(decimal amount)
+        {
+            if (amount <= 0m || Wallet < amount) return false;
+            Wallet -= amount;
+            return true;
+        }
+
         public int GetTotalXp(DishData dish) => dish != null && dishXp.TryGetValue(dish.DishId, out int xp) ? xp : 0;
 
         public int GetLevel(DishData dish)

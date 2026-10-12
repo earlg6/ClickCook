@@ -40,6 +40,16 @@ namespace ClickCook.Runtime
         [SerializeField] private GameObject dishResultScreen;
         [SerializeField] private UnityEngine.UI.Text dishResultText;
         [SerializeField] private UnityEngine.UI.Button continueFromResultButton;
+        [Header("Milestone 6A — between-day upgrades")]
+        [SerializeField] private UpgradeCatalog upgradeCatalog;
+        [SerializeField] private GameObject upgradeScreen;
+        [SerializeField] private UnityEngine.UI.Button openUpgradesButton;
+        [SerializeField] private UnityEngine.UI.Button closeUpgradesButton;
+        [SerializeField] private UnityEngine.UI.Button buyUpgradeButton;
+        [SerializeField] private UnityEngine.UI.Text upgradeDetailsText;
+        [SerializeField] private UnityEngine.UI.Text upgradeStatusText;
+        private UpgradePurchaseQuote displayedUpgradeQuote;
+        private bool refreshUpgradeNextFrame;
 
         private readonly PrototypeOrderSession session = new();
         private PrototypeOrder displayedCookingOrder;
@@ -49,7 +59,7 @@ namespace ClickCook.Runtime
 
         private void Awake()
         {
-            if (!HasRequiredReferences())
+            if (!HasRequiredReferences() || !session.ConfigureUpgrades(upgradeCatalog))
             {
                 Debug.LogError("ClickCook prototype is missing required scene references.", this);
                 enabled = false;
@@ -63,6 +73,9 @@ namespace ClickCook.Runtime
             backToBoardButton.onClick.AddListener(BackToBoard);
             cookingDishButton.onClick.AddListener(ClickCookingDish);
             continueFromResultButton.onClick.AddListener(ContinueFromDishResult);
+            openUpgradesButton.onClick.AddListener(OpenUpgrades);
+            closeUpgradesButton.onClick.AddListener(CloseUpgrades);
+            buyUpgradeButton.onClick.AddListener(BuyUpgrade);
             for (int i = 0; i < orderButtons.Length; i++)
             {
                 int slot = i;
@@ -70,6 +83,7 @@ namespace ClickCook.Runtime
             }
 
             locationSelectionScreen.SetActive(true);
+            upgradeScreen.SetActive(false);
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(false);
             ClearDishResult();
@@ -104,7 +118,63 @@ namespace ClickCook.Runtime
                    finishDayButton != null && orderBoardStatusText != null &&
                    cookingPrototypeScreen != null && cookingOrderText != null &&
                    backToBoardButton != null && cookingDishButton != null && cookingDishLabel != null &&
-                   dishResultScreen != null && dishResultText != null && continueFromResultButton != null;
+                   dishResultScreen != null && dishResultText != null && continueFromResultButton != null &&
+                   upgradeCatalog != null && upgradeScreen != null && openUpgradesButton != null &&
+                   closeUpgradesButton != null && buyUpgradeButton != null &&
+                   upgradeDetailsText != null && upgradeStatusText != null;
+        }
+
+        public void OpenUpgrades()
+        {
+            if (!enabled || !locationSelectionScreen.activeSelf || session.IsDayActive) return;
+            locationSelectionScreen.SetActive(false);
+            upgradeScreen.SetActive(true);
+            upgradeStatusText.text = "Progress lasts for this game run. Saving comes in a later milestone.";
+            RefreshUpgrade();
+        }
+
+        public void CloseUpgrades()
+        {
+            if (!enabled || !upgradeScreen.activeSelf) return;
+            displayedUpgradeQuote = null;
+            refreshUpgradeNextFrame = false;
+            upgradeScreen.SetActive(false);
+            locationSelectionScreen.SetActive(true);
+            RefreshLocationSelection();
+        }
+
+        public void BuyUpgrade()
+        {
+            if (!enabled || !upgradeScreen.activeSelf || session.IsDayActive || displayedUpgradeQuote == null) return;
+            var quote = displayedUpgradeQuote;
+            displayedUpgradeQuote = null;
+            buyUpgradeButton.interactable = false;
+            upgradeStatusText.text = session.TryPurchaseUpgrade(quote)
+                ? $"Purchased Click Strength rank {session.ClickStrengthRank}."
+                : "Purchase unavailable. Check your balance and the current offer.";
+            // Consume this offer for the rest of the frame: repeated callbacks cannot buy twice.
+            refreshUpgradeNextFrame = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!refreshUpgradeNextFrame) return;
+            refreshUpgradeNextFrame = false;
+            if (upgradeScreen.activeSelf) RefreshUpgrade();
+        }
+
+        private void RefreshUpgrade()
+        {
+            var definition = upgradeCatalog.Find(UpgradeCatalog.ClickStrengthId);
+            bool hasNext = session.TryQuoteUpgrade(UpgradeCatalog.ClickStrengthId, out displayedUpgradeQuote);
+            upgradeDetailsText.text = $"Wallet: {Money(session.Rewards.Wallet)}\n" +
+                $"Click Strength: {session.ClickStrengthRank} / {definition.MaximumRank}\n" +
+                $"Current strength: {session.ClickDamage}\n" +
+                (hasNext ? $"Next strength: {UpgradeCatalog.ClickDamageAtRank(session.ClickStrengthRank + 1)}\n" +
+                    $"Price: {Money(displayedUpgradeQuote.Price)}\n" +
+                    (session.Rewards.Wallet >= displayedUpgradeQuote.Price ? "Ready to purchase" : "Not enough currency")
+                    : "Maximum rank reached");
+            buyUpgradeButton.interactable = hasNext && session.Rewards.Wallet >= displayedUpgradeQuote.Price;
         }
 
         public void ShowPreviousLocation()

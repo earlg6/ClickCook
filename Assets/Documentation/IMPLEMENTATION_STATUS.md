@@ -39,18 +39,19 @@ A read-only `LocationCatalog` ScriptableObject provides a single, ordered runtim
 
 ## Intentionally unimplemented
 
+- Current upgrade status (6A): Click Strength purchases/damage are implemented; critical/hold/auto-click and all other effects remain unimplemented. Older milestone sections below retain their historical scope.
 - Location unlocking and ownership.
 - Recipe ownership/gating.
 - Final end-of-day summary and date-based next-day progression.
-- Full economy/spending/passive income, Player/restaurant XP, save/load, persistence, upgraded cooking mechanics, timers, scoring, final UI, and final animations. Baseline rarity, Dish XP and run-local payouts/wallet are implemented in 5B.
+- Full economy/passive income, Player/restaurant XP, save/load, persistence, critical/hold/auto-click, timers, scoring, final UI, and final animations. Baseline rarity, Dish XP and run-local payouts/wallet are implemented in 5B; Click Strength purchases/damage are implemented in 6A.
 
 ## Known GDD ambiguities / TBDs retained
 
 - The GDD separately describes new recipe groups and dishes served by locations; their precise relationship and recipe purchase gating are TBD.
 - Several location descriptions use incomplete phrases such as “also serves selected ... dishes.” No extra dishes were inferred.
-- Current Dormitory LocationData has zero candidate dishes at runtime, while an earlier GDD Section 7 note says two and the dish table lists Dormitory availability. 5B preserves the existing data/empty-board behavior; final availability reconciliation remains a separate design/data decision.
+- Correction on 2026-10-12: current Dormitory LocationData has valid Sandwiches and Mug cakes references, confirmed through Unity MCP and 6A Play Mode. Earlier zero-candidate statements describe a historical verification report, not current data. No static asset was changed. Empty pools remain covered by transient test fixtures; final recipe eligibility is still TBD.
 - The Michelin restaurant says “all dishes starting from the third restaurant,” which conflicts with / is less precise than its criteria dish list. No additional earlier dishes are inferred.
-- Base hidden HP now equals ClickRequirement, with one damage per click (approved and implemented in 4B); future upgrade modifiers remain TBD.
+- Base hidden HP equals ClickRequirement, with one damage per unupgraded click (4B); 6A applies purchased Click Strength. Remaining upgrade modifiers are TBD.
 - Location ownership/unlock state, passive-income accrual/collection, recipes, Player/restaurant progression and persistent progression remain unimplemented by design. Base rarity, Dish XP and payouts use the approved 5B rules.
 
 ## Files created
@@ -316,6 +317,41 @@ Recommended next step: a read-only design decision checkpoint for rarity/payout 
 This is baseline rarity/mastery and payout, not a complete economy or persistent progression system. Spending, passive income, Player/restaurant XP, saves, final result art/audio/animations and End-of-Day summary remain unimplemented. No DishData/LocationData/catalog values or click requirements were changed. Human pacing and the engagement of this initial balance are NOT verified; high click requirements still need separately approved upgrade mechanics.
 
 Recommended next step: a scoped design checkpoint for the documented upgrade/cooking-speed dependency (GDD Sections 9 and 13), including cost, click-strength effect and purchase rules, before coding an upgrade slice. No next milestone implementation started.
+
+## Completed Milestone 6A — Click Strength Purchases (2026-10-12)
+
+The user authorized the next roadmap step and delegated routine design choices. Adopted the Click Strength subset of the existing proposal: 15 purchasable ranks, initial strength 1, damage ceil(1.75^rank), next price ceil(20 × 2.20^ownedRank), run-local ownership and purchases between days. Remaining proposal mechanics are not implicitly approved.
+
+### Implemented files
+
+- Created `Assets/Scripts/Data/UpgradeCatalog.cs` and `Assets/Data/UpgradeCatalog.asset` (+ Unity metas): one ScriptableObject with 16 serialized definitions (stable IDs/names/base prices/growth/caps). Only Click Strength is enabled for runtime purchases. Other prices remain provisional; no prerequisite/effect framework was introduced for unavailable nodes.
+- Modified `Assets/Scripts/Runtime/PrototypeOrderSession.cs`: immutable session/rank/price quote, guarded purchase, persistent-within-run rank and upgraded hidden-HP damage.
+- Modified `Assets/Scripts/Runtime/PrototypeDishRewards.cs`: internal positive-amount/exact-balance debit; reward and rarity formulas unchanged.
+- Modified `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`: between-day Upgrades/Back/Buy, wallet/rank/current-next strength/price/status, unavailable-node labels and per-frame quote consumption.
+- Modified `Assets/Scenes/SampleScene.unity`: prototype upgrade panel/bindings, navigation button and adjacent Cook position. No existing object removed; four existing serialized blocks changed (controller, two parent child lists, Cook RectTransform), plus 55 new blocks. Dormitory/camera/lights/URP unchanged.
+- Created `Assets/Tests/Editor/Milestone6AVerification.cs` (+ folder/metas): repeatable Editor-only model and Play Mode verification harness. It is invoked through MCP eval, not registered NUnit tests. Fixture wallet funding stays in Editor-only code.
+- Updated GDD, this tracker, upgrade proposal and production roadmap. Previously prepared design documents are included in this checkpoint as related context.
+
+### Executed verification
+
+- Unity 6000.3.14f1 recompiled successfully with compilationFailed=false and no C# errors.
+- `Milestone6AVerification.RunModelChecks()` passed 4,685 assertions, including fixed expected prices/damage, all 32 real dish definitions × ranks 0–15 (512 exact-completion cases), debit/insufficient cents/max rank, stale/cross-session quotes, unavailable nodes, mid-day rejection, Back reset, replacement identity, exact payout, empty pools and cross-day/new-session behavior.
+- In fresh Play Mode, `RunPlayChecks()` passed 236 assertions: all 11 locations before/after upgrades, carousel wrapping, actual button callbacks, two purchases, repeated callback protection, exact upgraded cooking, result/Continue, early Finish and a full ten-dish day. Upgrade labels fit their bounds.
+- A separate fresh Play Mode confirmed wallet/rank reset to zero. Five real UI-cooked dishes earned 31.00 in that sampled run; Buy through EventSystem raycast/pointer dispatch produced rank 1 and wallet 11.00. Repeated pointer dispatch did not buy twice. After the next frame, UI showed next price 44.00 and insufficient balance.
+- `RunInteractionChecks()` passed three Back topmost-raycast/pointer assertions. Initial raycasts failed while the background Editor remained at frame 1 and new graphics had depth -1; advancing one frame with EditorApplication.Step resolved this. Run interaction checks after a rendered/advanced frame, not immediately after changing active panels. Physical mouse input was NOT tested.
+- Inspected rendered upgrade panel and location navigation. Screen capture can lag state: exact post-purchase values were verified from live UI fields rather than claiming the screenshot depicted them.
+- No ClickCook runtime exception observed. Existing Plastic/UVCS NotConfiguredClientException recurred on domain reload; unrelated and not changed. One transient MCP transport failure during entering Play Mode recovered on the next status/eval call.
+- Existing DishData/LocationData/LocationCatalog and project settings have no diff. Scene saved; verification leaves Play Mode stopped. Current Dormitory valid two-dish pool confirmed; previous zero-pool documentation corrected as historical.
+
+### Limits and next step
+
+Only Click Strength is playable. No saves, recipe/location gates, other upgrade effects, final tree UI, passive/time-bonus policy, new rarity rules or production build are claimed. Human pacing/full economy balance remains unverified. Next roadmap slice: 7A, one in-memory player profile with stable IDs and separation from day/screen lifetime, preparing 7B save/load. Stop after the 6A Git checkpoint.
+
+### Upgrade design checkpoint — 2026-10-08, not implemented
+
+Prepared `Assets/Documentation/ClickCook_Upgrade_Design_Proposal.md`: all 16 GDD leaf nodes, provisional prices/effects/caps/prerequisites, purchase safety, subsystem gating and staged implementation recommendations. Referenced from GDD Section 13 without changing its original design requirements or marking upgrades complete.
+
+The draft uses the available FishSim screenshots and primary Kongregate/Orteil references; the remaining Figma screenshots were unavailable due to MCP quota. Executed 1,152 mathematical price checks and conditional economic simulations, NOT Unity tests or human pacing validation. Full economy balance depends on unresolved recipe/location progression. Bonus-choice windows, passive-income accrual policy and the numeric upgrade package require approval. Recommended first implementation slice after approval: 6A, run-local multilevel Click Strength and safe between-day purchases; other unsupported nodes remain unavailable. No runtime/scene/data changes, implementation commit or push performed by this design checkpoint.
 
 ## Documentation policy
 

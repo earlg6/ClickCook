@@ -6,7 +6,7 @@
 **Genre:** Restaurant/cooking clicker with collection, progression, and upgrade systems.
 
 - [DESIGNED] The player selects a location, begins a work day, selects orders, prepares dishes through close-up clicking, receives a rarity result, earns currency/XP, and progresses through upgrades and locations.
-- [IMPLEMENTED] Unity contains static location/dish data and verified Location Selection → Work Day orders → base click cooking → rarity/Dish XP/payout result → replacement/day-ending flow (5B). The tenth result ends the day on Continue. Wallet and dish mastery are run-local; final visuals, full economy, Player XP and persistent progression remain unimplemented.
+- [IMPLEMENTED] Unity contains static location/dish data and verified Location Selection → Work Day orders → click cooking → rarity/Dish XP/payout result → replacement/day-ending flow (5B), extended by between-day Click Strength purchases (6A). The tenth result ends the day on Continue. Wallet, dish mastery and upgrade rank are run-local; final visuals, full economy, Player XP and persistent progression remain unimplemented.
 - [INFERRED] The intended experience combines a persistent restaurant-management loop with focused, tactile dish-completion moments.
 - [TBD] Platform, session length, target audience, monetization, and final scope.
 
@@ -161,6 +161,7 @@ Main Menu
 
 ## 9. Cooking / Clicking Mechanics
 
+- [IMPLEMENTED — 6A] Unupgraded damage remains 1; purchased Click Strength ranks now apply Section 13.1 damage. Earlier 4B statements describe the baseline. Critical, hold and auto-click remain absent.
 - [DESIGNED] Select an order, enter close-up cooking presentation, click the dish, reduce hidden dish HP/progress, complete dish, reveal rarity.
 - [DESIGNED] The restaurant environment remains visible around the cooking presentation.
 - [DESIGNED] Relevant upgrade branches: click strength, critical hit, click hold, auto-click strength, auto-click frequency.
@@ -241,6 +242,8 @@ Canonical intended tiers from player-provided gameplay context:
 
 ## 13. Upgrade System
 
+Design reference: [Upgrade Design Proposal](ClickCook_Upgrade_Design_Proposal.md) (2026-10-08), with the Click Strength subset adopted and verified in 6A on 2026-10-12 under the user's authorization to implement the next roadmap step and resolve routine design choices. Other effects remain draft. See [Production Roadmap](ClickCook_Production_Roadmap.md) for subsequent dependencies.
+
 ### Complete tree
 
 ```text
@@ -277,8 +280,18 @@ Passives / Пассивки
 - [DESIGNED] Upgrade UI is a connected-node tree with an `Active Skills Statistics` panel and `Hide` control.
 - [TBD] Currency used, purchase rules, prerequisite semantics beyond visible links, costs, levels, caps, respec, displayed statistics, and exact effects.
 
+### 13.1 Milestone 6A — Click Strength purchases
+
+- [IMPLEMENTED — 6A, 2026-10-12] Adopt the proposed Click Strength baseline: initial rank 0 / damage 1, maximum rank 15; damage = ceil(1.75^rank). Next-rank price = ceil(20 × 2.20^ownedRank) у.е., using decimal arithmetic. First purchase costs 20 and increases strength to 2. No unlock prerequisites, discounts or refund/respec in this slice.
+- [IMPLEMENTED — 6A] Buy only between Work Days through the temporary Upgrades screen on Location Selection. Display wallet, rank/max, current/next strength, price and insufficient-funds/max states. A purchase debits the existing wallet once; a session-bound immutable quote protects against stale rank/price and repeated callbacks. All mid-day purchases are rejected.
+- [IMPLEMENTED — 6A] Rank survives day cleanup within the current run and resets on a new run with wallet/mastery. Cooking subtracts the current click strength, clamps HP at zero, and pays/completes once; excess damage never transfers to another order. Hidden HP, Back reset, approved rarity and XP rules are preserved.
+- [PARTIAL — 6A] One UpgradeCatalog ScriptableObject stores 16 uniquely identified definitions with provisional prices/caps; only click_strength has a purchasable runtime effect. Other definitions and their displayed names remain unavailable. Their prerequisites and effects are not implemented or implicitly approved by their catalog presence. The full connected tree/Active Skills Statistics presentation remains unfinished.
+- Files: Assets/Scripts/Data/UpgradeCatalog.cs, Assets/Data/UpgradeCatalog.asset, Assets/Scripts/Runtime/PrototypeOrderSession.cs, Assets/Scripts/Runtime/PrototypeDishRewards.cs, Assets/Scripts/Runtime/ClickCookPrototypeController.cs, Assets/Scenes/SampleScene.unity. Repeatable Editor-only verification: Assets/Tests/Editor/Milestone6AVerification.cs.
+- [TBD] Critical/hold/auto-click, XP/value modifiers, recipe/upgrade discounts, passive-income rules, choice bonus/time window, persistence and final tree UI. The draft 90-second income quota and 3–6-second bonus window are not implemented.
+
 ## 14. Economy
 
+- [IMPLEMENTED — 6A] The run-local wallet supports exact Click Strength debits between days (Section 13.1). Other spending and passive income remain unimplemented.
 - [DESIGNED] Currency: `у.е.`
 - [DESIGNED] Example wallet amount: `215 у.е.`
 - [DESIGNED] Dish sale values: `5` to `60,000 у.е.`
@@ -421,9 +434,9 @@ This is a design-to-technical mapping, not existing implementation.
 | Orders | Partially implemented: random instances, reservation, completion/replacement, daily cap and cleanup (4B) | PrototypeOrder / PrototypeOrderSession | Final capacities and advanced eligibility remain TBD |
 | Cooking | Partially implemented: hidden base HP and one-damage clicks on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects and upgraded click formulas remain absent |
 | Rarity | Baseline levels 1–18 implemented (5B) | PrototypeDishRewards / approved table | Future modifiers and final reveal presentation |
-| Economy | Partially implemented: exact run-local wallet/payouts (5B) | PrototypeDishRewards | Spending, passive income and persistence |
+| Economy | Partially implemented: exact run-local wallet/payouts (5B), Click Strength purchases (6A) | PrototypeDishRewards / PrototypeOrderSession | Other spending, passive income and persistence |
 | XP | Partially implemented: run-local Dish XP/mastery (5B) | PrototypeDishRewards | Player/restaurant XP, upgrades and persistence |
-| Upgrades | Not implemented | Upgrade graph/data definitions + UI | Costs/effects TBD |
+| Upgrades | Partially implemented: 16 static definitions; run-local Click Strength purchases and temporary UI (6A) | UpgradeCatalog and existing session/controller | Remaining effects, prerequisites and final tree UI unfinished |
 | Save/load | Not implemented | Persistence service | Format/slots TBD |
 | UI | Partially implemented: temporary uGUI Location Selection, Work Day, base cooking and rarity/XP/payout Dish Result screens | Existing Canvas/prototype controller | Final UI and remaining screens are unimplemented |
 | Environment | Dormitory scene/model | Scene/environment presentation layer | Reuse undecided |
@@ -438,18 +451,18 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] Product: ClickCook.
 - [IMPLEMENTED] One enabled scene: `Assets/Scenes/SampleScene.unity`.
 - [IMPLEMENTED] Scene roots: Directional Light, Dormitory, Global Volume, Camera, Directional Light (1), and `ClickCook_Prototype`.
-- [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, `ClickCookPrototypeController.cs`, `PrototypeOrder.cs`, and `PrototypeOrderSession.cs`.
+- [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, `ClickCookPrototypeController.cs`, `PrototypeOrder.cs`, `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, and `UpgradeCatalog.cs` (6A).
 - [IMPLEMENTED] Camera position approximately `(1.138, 1.184, -2.718)`, 60° perspective FOV, slight mouse-driven rotation.
 - [IMPLEMENTED] Dormitory FBX with two materials and 17 supporting texture maps.
 - [IMPLEMENTED] Global post-processing includes bloom, film grain, vignette, chromatic aberration, and color grading.
 - [IMPLEMENTED] Static data contains 32 `DishData` assets, 11 `LocationData` assets, and one ordered `LocationCatalog` asset.
 - [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → board → base click cooking → rarity/Dish XP/payout result / day end flow (5B), with Back resetting partial progress and Continue preserving replacement orders without duplicate rewards.
-- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, final result presentation, complete economy, upgrades, Player XP/progression, or complete gameplay architecture.
+- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, final result presentation, complete economy, Player XP/progression, or complete gameplay architecture. Click Strength is the first implemented upgrade (6A); other upgrade effects remain absent.
 - [TBD] Whether the Dormitory environment is retained, adapted, or replaced.
 
 ## 30. Contradictions and Design Risks
 
-- [OBSERVED — Milestone 5B verification, unresolved existing data/design discrepancy] The current Dormitory LocationData candidate pool is empty (zero documented dishes at runtime), whereas the earlier Section 7 capacity note says it uses two dishes and Section 8 lists Dormitory availability. The prototype preserves the existing assets and supports the approved empty-board state; no dishes or eligibility rules were invented to reconcile this. Decide the final location availability separately.
+- [HISTORICAL — 5B report corrected by 2026-10-12 inspection/6A verification] The earlier report described an empty Dormitory pool. Current 00_Dormitory.asset contains valid Sandwiches and Mug cakes references, confirmed through Unity MCP and the 6A Play Mode flow. No static data was changed to achieve this. Empty-pool handling remains supported and tested using transient fixtures; recipe ownership/eligibility is still TBD.
 
 1. **Rarity naming**
    - [DESIGNED] User context gives Common, Uncommon, Rare, Fantastic, Legendary.
@@ -540,7 +553,7 @@ This checklist records verified Unity implementation without changing the design
 
 ### Game flow and UI
 
-- [ ] Partially implemented — The core loop covers Location Selection → board → base click cooking → rarity/Dish XP/payout result → replacement / day end. The tenth result ends on Continue. Final summary, upgrades, persistence and date-based next-day progression remain unimplemented. — **Milestones 2B–5B**
+- [ ] Partially implemented — The core loop covers Location Selection → board → click cooking → rarity/Dish XP/payout result → replacement / day end, with between-day Click Strength purchases. The tenth result ends on Continue. Final summary, remaining upgrades, persistence and date-based next-day progression remain unimplemented. — **Milestones 2B–6A**
 - [ ] Main Menu is not implemented.
 - [ ] Partially implemented — Location Selection has a verified temporary uGUI carousel with one current location, Previous/Next wraparound across all 11 locations, name, documented level, placeholder progress, documented dish count, passive income/sec, and `Cook`. Unlock/ownership rules, real progress, dish-slot contents, and final visual design remain unimplemented. — **Milestone 2B**
 - [ ] Partially implemented — Cook starts a fresh in-memory day/board; completion, replacement, ten-dish limit, run-local payouts/XP and cleanup work. Dates and final day summary remain unimplemented. — **Milestones 2B–5B**
@@ -561,10 +574,11 @@ This checklist records verified Unity implementation without changing the design
 - [ ] Partially implemented — Location and dish design data are available at runtime, but location unlocking/ownership, passive-income accrual, recipe ownership/gating, and order eligibility rules are not implemented. — **Milestones 1 and 2A**
 - [x] Baseline rarity resolved by the approved dish-level table (1–18), before awarding Dish XP; independently tracked dish mastery, carry-over XP and level-18 cap. — **Milestone 5B**; file: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`
 - [x] Exact decimal payouts once per successful completion into a zero-starting run-local wallet; wallet/Dish XP survive day changes, not game restart. — **Milestone 5B**; files: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`
-- [ ] Partially implemented — Economy has baseline payouts/wallet only; spending, passive income and persistence remain unimplemented. — **Milestone 5B**
+- [ ] Partially implemented — Economy has payouts/wallet and Click Strength purchases; other spending, passive income and persistence remain unimplemented. — **Milestones 5B–6A**
 - [ ] Partially implemented — Dish XP/mastery works in memory; Player/restaurant XP, XP upgrade effects and persistent progression remain unimplemented. — **Milestone 5B**
 - [ ] Recipe and location unlock systems are not implemented.
-- [ ] Upgrade system is not implemented.
+- [x] Click Strength purchase/damage slice: ranks 0–15, exact decimal prices/debit, between-day UI, session-bound quote and duplicate-callback guards, cross-day retention and fresh-run reset. — **Milestone 6A**; files: `Assets/Scripts/Data/UpgradeCatalog.cs`, `Assets/Data/UpgradeCatalog.asset`, existing session/rewards/controller, `Assets/Scenes/SampleScene.unity`; checks: `Assets/Tests/Editor/Milestone6AVerification.cs`.
+- [ ] Partially implemented — 16 upgrade definitions and Click Strength work; remaining 15 effects, prerequisites, connected tree/statistics UI and persistent ownership are unfinished. — **Milestone 6A**
 - [ ] Save/load, New Game, Continue, and Reset Data behavior are not implemented.
 - [ ] Achievements are not implemented.
 - [ ] Journal is not implemented.

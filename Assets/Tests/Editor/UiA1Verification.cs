@@ -28,7 +28,13 @@ namespace ClickCook.Verification
             if(!EditorApplication.isPlaying) throw new Exception("Start Play Mode first; restore the temporary size before stopping.");
             if(gameView==null)
             {
-                gameView=Resources.FindObjectsOfTypeAll<EditorWindow>().First(w=>w.GetType().Name=="GameView");
+                var views=Resources.FindObjectsOfTypeAll<EditorWindow>().Where(w=>w.GetType().Name=="GameView").ToArray();
+                gameView=EditorWindow.focusedWindow;
+                if(gameView==null || gameView.GetType().Name!="GameView")
+                {
+                    if(views.Length!=1)throw new Exception("Multiple Game Views: focus the intended Game View before setting a verification size.");
+                    gameView=views[0];
+                }
                 var sizes=typeof(Editor).Assembly.GetType("UnityEditor.GameViewSizes");
                 var instance=sizes.GetProperty("instance",Flags).GetValue(null);
                 sizeGroup=sizes.GetProperty("currentGroup",Flags).GetValue(instance);

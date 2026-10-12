@@ -29,7 +29,7 @@ Main Menu
 
 - [DESIGNED] The order board offers dishes available at the chosen location.
 - [DESIGNED] Cooking presents the selected dish in close-up while the restaurant remains visible.
-- [DESIGNED] Each dish has hidden HP / required click progress.
+- [APPROVED — UI-A3 review] Each dish has HP / required click progress; remaining HP and required clicks are now visible during cooking (Section 9).
 - [DESIGNED] Completion produces a rarity result.
 - [DESIGNED] Daily XP formula: `Daily Earnings / 100 = XP`.
 - [TBD] Final work-day transition, timing and failure. Approved prototype lifecycle and baseline rarity calculations are specified in Sections 6–7 and 10–11.
@@ -100,7 +100,9 @@ Main Menu
 
 ## 7. Order Board
 
-- [DESIGNED] The board is on the right side of gameplay screens.
+- [HISTORICAL DESIGN — superseded by UI-A3 review] The board was on the right side of gameplay screens.
+- [APPROVED — designer UI-A3 review, 2026-10-12] Select orders using large central dish cards above the plate, following the supplied gameplay screenshot. Two cards form a centered pair; preserve the existing location-dependent 2–6 capacities and independent duplicate orders. Larger boards use a centered, non-overlapping layout. Clicking a card still immediately selects that exact order.
+- [PROTOTYPE PRESENTATION CHOICE — UI-A3] Green card bars are explicitly labeled Dish mastery and display existing Dish XP / next-level threshold (full at mastery cap), not cooking HP or expiry. Screenshot wallet/progress examples are not new balancing values; final food illustrations remain pending.
 - [DESIGNED] It displays `Количество блюд осталось - ..` / dishes remaining.
 - [DESIGNED] Current currency is shown above it; example: `215 у.е.`
 - [HISTORICAL INFERENCE] Six visible slots were interpreted as a 3×2 grid. The approved rule is a maximum of six simultaneously visible orders, not six orders at every location or a finite six-order day; final grid layout remains a presentation choice.
@@ -156,17 +158,18 @@ Main Menu
 | 32 | Imperial tasting set / `Императорский дегустационный сет` | 60,000 | 1,100,000 | 70,000 | Michelin restaurant criteria list | [F] |
 
 - [DESIGNED] The table label is `Количество кликов` / number of clicks.
-- [APPROVED — Milestone 4B] Base hidden HP equals the documented `ClickRequirement`; each discrete click subtracts one HP, and zero completes the selected dish. All documented values are preserved, including 70,000 for the final dish.
+- [APPROVED — Milestone 4B baseline; UI-A3 visibility] Base dish HP equals the documented `ClickRequirement`; each unupgraded discrete click subtracts one HP, and zero completes the selected dish. All documented values are preserved, including 70,000 for the final dish. UI-A3 displays this HP; 6A upgrades affect damage.
 - [TBD] Recipe-purchase behavior, dish unlock representation, recipe UI, dish art, and future modifiers. Base Dish XP awards are approved in Section 10.
 
 ## 9. Cooking / Clicking Mechanics
 
 - [IMPLEMENTED — 6A] Unupgraded damage remains 1; purchased Click Strength ranks now apply Section 13.1 damage. Earlier 4B statements describe the baseline. Critical, hold and auto-click remain absent.
-- [DESIGNED] Select an order, enter close-up cooking presentation, click the dish, reduce hidden dish HP/progress, complete dish, reveal rarity.
+- [DESIGNED; visibility updated in UI-A3] Select an order, enter close-up cooking presentation, click the dish, reduce visible dish HP, complete dish, reveal rarity.
 - [DESIGNED] The restaurant environment remains visible around the cooking presentation.
 - [DESIGNED] Relevant upgrade branches: click strength, critical hit, click hold, auto-click strength, auto-click frequency.
 - [DESIGNED] Screen 2 shows a central vertical feedback area with example values `67` and `23`, plus flame/impact graphics.
-- [APPROVED — Milestone 4B] Without upgrades, hidden HP = `DishData.ClickRequirement`, click damage = 1, completion occurs at zero. Do not display HP or a numerical progress counter. Back resets partial progress; reselecting the same order starts at full HP. The prototype uses a large clickable placeholder showing the dish name rather than final models or effects.
+- [HISTORICAL APPROVAL — Milestone 4B; visibility superseded by UI-A3] Without upgrades, hidden HP = `DishData.ClickRequirement`, click damage = 1, completion occurs at zero. The original instruction was not to display HP or a numerical progress counter. Back resets partial progress; reselecting the same order starts at full HP. The prototype uses a large clickable placeholder showing the dish name rather than final models or effects.
+- [APPROVED — designer UI-A3 review, 2026-10-12] Cooking now displays dish HP as remaining / documented maximum, a decreasing HP bar and remaining clicks using current Click Strength (`ceil(remaining HP / current click damage)`). This supersedes earlier hidden-HP presentation rules, including the UI-A specification. Maximum HP, damage, Back reset, completion, payout and XP rules are unchanged.
 - [TBD] Meaning of `67` and `23`; future click modifiers/feedback, critical formula, hold behavior, auto-click activation, and accessibility considerations. 5B rarity and payouts use separately approved Sections 10–11 and 14, not inferred click formulas.
 
 ## 10. Dish XP
@@ -284,7 +287,7 @@ Passives / Пассивки
 
 - [IMPLEMENTED — 6A, 2026-10-12] Adopt the proposed Click Strength baseline: initial rank 0 / damage 1, maximum rank 15; damage = ceil(1.75^rank). Next-rank price = ceil(20 × 2.20^ownedRank) у.е., using decimal arithmetic. First purchase costs 20 and increases strength to 2. No unlock prerequisites, discounts or refund/respec in this slice.
 - [IMPLEMENTED — 6A] Buy only between Work Days through the temporary Upgrades screen on Location Selection. Display wallet, rank/max, current/next strength, price and insufficient-funds/max states. A purchase debits the existing wallet once; a session-bound immutable quote protects against stale rank/price and repeated callbacks. All mid-day purchases are rejected.
-- [IMPLEMENTED — 6A] Rank survives day cleanup within the current run and resets on a new run with wallet/mastery. Cooking subtracts the current click strength, clamps HP at zero, and pays/completes once; excess damage never transfers to another order. Hidden HP, Back reset, approved rarity and XP rules are preserved.
+- [IMPLEMENTED — 6A; visibility updated in UI-A3] Rank survives day cleanup within the current run and resets on a new run with wallet/mastery. Cooking subtracts the current click strength, clamps HP at zero, and pays/completes once; excess damage never transfers to another order. UI-A3 displays HP; Back reset, approved rarity and XP rules are preserved.
 - [PARTIAL — 6A] One UpgradeCatalog ScriptableObject stores 16 uniquely identified definitions with provisional prices/caps; only click_strength has a purchasable runtime effect. Other definitions and their displayed names remain unavailable. Their prerequisites and effects are not implemented or implicitly approved by their catalog presence. The full connected tree/Active Skills Statistics presentation remains unfinished.
 - Files: Assets/Scripts/Data/UpgradeCatalog.cs, Assets/Data/UpgradeCatalog.asset, Assets/Scripts/Runtime/PrototypeOrderSession.cs, Assets/Scripts/Runtime/PrototypeDishRewards.cs, Assets/Scripts/Runtime/ClickCookPrototypeController.cs, Assets/Scenes/SampleScene.unity. Repeatable Editor-only verification: Assets/Tests/Editor/Milestone6AVerification.cs.
 - [TBD] Critical/hold/auto-click, XP/value modifiers, recipe/upgrade discounts, passive-income rules, choice bonus/time window, persistence and final tree UI. The draft 90-second income quota and 3–6-second bonus window are not implemented.
@@ -344,6 +347,9 @@ Passives / Пассивки
 
 ## 21. UI/UX
 
+- [IMPLEMENTED / VERIFIED — designer UI-A3 review, 2026-10-12] Current prototype Location Selection menu includes Exit Game. Standalone code calls `Application.Quit`; Editor code stops Play Mode without closing Unity. Native Editor Exit was verified; standalone quit/build is NOT VERIFIED. This does not implement the full Main Menu/Continue/save system.
+- [IMPLEMENTED / VERIFIED — UI-A3] Central large dish cards replace the earlier right-hand board presentation, with labeled real mastery bars; capacities/duplicates/lifecycle unchanged. Cooking now shows real remaining/max HP, decreasing bar and remaining clicks at current strength. Compilation, existing 237 regression and 240 presentation assertions, 30 new HP/card/Exit-guard assertions and 980 rendered layout/input checks passed. Native mouse verified selection, HP 5→4, Back/reselect reset and Exit stopping Play Mode. Final food art remains temporary.
+
 - [IMPLEMENTED — UI-A1, 2026-10-12] Location Selection and Click Strength purchase have a blue/pergament/orange uGUI presentation, Ukrainian display copy, scalable panel/button assets, visible focus outlines and reusable component prefabs. Authored IDs, numeric data and gameplay rules are unchanged. The venue image is an explicitly labeled stylized placeholder. See [UI/UX Specification](ClickCook_UI_UX_Specification.md).
 - [VERIFIED — UI-A1] C# compilation, 237 current-loop Play Mode assertions, glyph/contrast checks, and layout/raycast/focus at five rendered Canvas sizes passed through Unity MCP. Native mouse checks through Computer Use passed for carousel wrapping, upgrades/Back, disabled purchase, successful purchase, Cook and early Finish Day. Fixed focus loss after a consumed purchase offer; native retest confirmed focus returns to Back when the next offer is unaffordable. The user confirmed physical Enter and arrow navigation work in Game View. Computer Use synthetic keys did not trigger runtime Input System actions; that automation limitation remains recorded. Final art and the remaining production screens are unfinished.
 - [IMPLEMENTED / VERIFIED — UI-A2, 2026-10-12] Work Day has separate wallet/completed-day/order-capacity displays and up to six paper order cards on the right. Cooking has a large clickable plate sketch, selected dish/location, Back reset warning and no hidden-HP display. Dish Result shows Ukrainian rarity labels with an additional color cue, exact receipt payout/wallet/XP/levels, and a labeled bar of actual Dish XP (full at mastery cap). Tenth-result CTA uses the existing Continue action to end the day. Candidate diagnostics stay in a hidden Editor-inspectable label; no pool or order rule changed. Shared sprites/style and explicit focus navigation reuse UI-A1; all dish illustrations remain labeled temporary sketches.
@@ -401,7 +407,7 @@ Passives / Пассивки
 | Location Selection | Locations, unlocks, income, recipes | Choose restaurant | Locks/progress |
 | Work Day | Location, earnings, orders | Day active | Timer/rules |
 | Order Selection | Current orders, currency | Choose dish | Refill/timeout |
-| Cooking | Dish, hidden progress, upgrades | Click to progress | Damage math |
+| Cooking | Dish, visible HP / remaining clicks, upgrades | Click to progress | Future modifiers |
 | Dish Result | Dish, rarity, value | Reveal result | Reward application |
 | End of Day | Prepared dishes, earnings, XP, date | Review / next actions | Summary formula |
 | Upgrades | Upgrade ownership/currency | Tree browsing/purchase | Costs/effects |
@@ -436,7 +442,7 @@ This is a design-to-technical mapping, not existing implementation.
 | Locations | Partially implemented: 11 static data assets, ordered catalog, placeholder carousel | Data assets/serializable location definitions | Unlocks, ownership, progress, and income runtime remain TBD/unimplemented |
 | Dishes/recipes | Partially implemented: 32 static dish data assets; no runtime recipe system | Data assets/serializable dish and recipe definitions | Recipe ownership/purchase behavior remains TBD/unimplemented |
 | Orders | Partially implemented: random instances, reservation, completion/replacement, daily cap and cleanup (4B) | PrototypeOrder / PrototypeOrderSession | Final capacities and advanced eligibility remain TBD |
-| Cooking | Partially implemented: hidden base HP and one-damage clicks on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects and upgraded click formulas remain absent |
+| Cooking | Partially implemented: base HP, 6A Click Strength, UI-A3 visible HP/click count on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects and other click modifiers remain absent |
 | Rarity | Baseline levels 1–18 implemented (5B) | PrototypeDishRewards / approved table | Future modifiers and final reveal presentation |
 | Economy | Partially implemented: exact run-local wallet/payouts (5B), Click Strength purchases (6A) | PrototypeDishRewards / PrototypeOrderSession | Other spending, passive income and persistence |
 | XP | Partially implemented: run-local Dish XP/mastery (5B) | PrototypeDishRewards | Player/restaurant XP, upgrades and persistence |
@@ -474,7 +480,7 @@ This is a design-to-technical mapping, not existing implementation.
    - [TBD] Confirm canonical localization and whether `Обычное` equals Common.
 
 2. **Visible versus hidden cooking values**
-   - [DESIGNED] Hidden HP/click progress is intended.
+   - [HISTORICAL DESIGN — superseded by UI-A3] Hidden HP/click progress was intended. The designer now requires visible HP and remaining clicks (Section 9).
    - [F] Cooking screen visibly shows `67` and `23`.
    - [TBD] Meaning and player visibility of those values.
 
@@ -574,6 +580,7 @@ This checklist records verified Unity implementation without changing the design
 - [ ] Partially implemented — UI-A1/A2 style and responsive checks cover the five existing gameplay/purchase screens; final art, production menus/remaining screens, transitions and animations are unfinished.
 - [x] UI-A1 Location Selection/Click Strength visual and text layer is implemented and verified: automated/native mouse checks passed, including purchase focus recovery; physical Enter/arrows verified by the user. — **UI-A1 (2026-10-12)**. Files: `Assets/Scripts/UI/ClickCookUiCopy.cs`, `Assets/Scripts/UI/UiFocusOutline.cs`, `Assets/Scripts/Editor/UiA1Setup.cs`, `Assets/UI/Art/`, `Assets/UI/Prefabs/Components/`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`; verification: `Assets/Tests/Editor/UiA1Verification.cs`, `Assets/Tests/Editor/Milestone6AVerification.cs`. Remaining screens retain their prototype UI; full UI/UX remains partial.
 - [x] Work Day HUD/order cards, Cooking and Dish Result presentation with real XP bar and focus handoff; existing lifecycle retained. — **UI-A2 (2026-10-12)**. Files: `Assets/Scripts/Editor/UiA2Setup.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/UI/ClickCookUiCopy.cs`, `Assets/UI/Art/PlateCircle.png`, `Assets/UI/Prefabs/Components/OrderCard.prefab`, `Assets/Scenes/SampleScene.unity`; verification: `Assets/Tests/Editor/UiA2Verification.cs`. Temporary art and full UI/UX remain partial.
+- [x] Designer review corrections: Exit in current prototype menu (Editor tested), visible cooking HP/current-strength click count, central 2–6 dish cards with labeled real mastery. — **UI-A3 (2026-10-12)**. Files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Editor/UiA3Setup.cs`, `Assets/Scenes/SampleScene.unity`, `Assets/UI/Prefabs/Components/OrderCard.prefab`; verification: `Assets/Tests/Editor/UiA3Verification.cs`, `Assets/Tests/Editor/UiA1Verification.cs`, existing UI-A2/6A checks. Standalone quit and final art remain unverified/unfinished.
 
 ### Runtime systems
 

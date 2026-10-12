@@ -16,7 +16,7 @@ namespace ClickCook.EditorTools
         private static Color Ink => new Color(.23f,.16f,.11f);
         private static T Field<T>(ClickCookPrototypeController c,string key) =>
             (T)typeof(ClickCookPrototypeController).GetField(key,BindingFlags.NonPublic|BindingFlags.Instance).GetValue(c);
-        private static void Center(RectTransform rt,Vector2 size,Vector2 pos)
+        internal static void Center(RectTransform rt,Vector2 size,Vector2 pos)
         {
             Undo.RecordObject(rt,"UI-A2 layout");
             rt.anchorMin=rt.anchorMax=rt.pivot=new Vector2(.5f,.5f);rt.sizeDelta=size;rt.anchoredPosition=pos;
@@ -31,25 +31,25 @@ namespace ClickCook.EditorTools
             var go=new GameObject(name,typeof(RectTransform));Undo.RegisterCreatedObjectUndo(go,"UI-A2 authoring");
             go.transform.SetParent(parent,false);var rt=go.GetComponent<RectTransform>();Center(rt,size,pos);return rt;
         }
-        private static UnityEngine.UI.Image Panel(string name,Transform parent,Vector2 size,Vector2 pos,Sprite sprite)
+        internal static UnityEngine.UI.Image Panel(string name,Transform parent,Vector2 size,Vector2 pos,Sprite sprite)
         {
             var rt=Rect(name,parent,size,pos);var image=rt.gameObject.AddComponent<UnityEngine.UI.Image>();
             image.sprite=sprite;image.type=sprite==circle ? UnityEngine.UI.Image.Type.Simple : UnityEngine.UI.Image.Type.Sliced;
             image.raycastTarget=false;return image;
         }
-        private static void Text(UnityEngine.UI.Text t,Transform parent,Vector2 size,Vector2 pos,int px,bool bold=false)
+        internal static void Text(UnityEngine.UI.Text t,Transform parent,Vector2 size,Vector2 pos,int px,bool bold=false)
         {
             Undo.SetTransformParent(t.transform,parent,"UI-A2 grouping");Undo.RecordObject(t,"UI-A2 typography");
             Center(t.rectTransform,size,pos);t.font=font;t.fontSize=px;t.fontStyle=bold?FontStyle.Bold:FontStyle.Normal;
             t.color=Ink;t.alignment=TextAnchor.MiddleCenter;t.raycastTarget=false;t.resizeTextForBestFit=false;
             t.horizontalOverflow=HorizontalWrapMode.Wrap;t.verticalOverflow=VerticalWrapMode.Truncate;
         }
-        private static UnityEngine.UI.Text Label(string name,Transform parent,string copy,Vector2 size,Vector2 pos,int px,bool bold=false)
+        internal static UnityEngine.UI.Text Label(string name,Transform parent,string copy,Vector2 size,Vector2 pos,int px,bool bold=false)
         {
             var rt=Rect(name,parent,size,pos);var t=rt.gameObject.AddComponent<UnityEngine.UI.Text>();
             Text(t,parent,size,pos,px,bold);t.text=copy;return t;
         }
-        private static void Button(UnityEngine.UI.Button b,Transform parent,Vector2 size,Vector2 pos,string copy,bool accent)
+        internal static void Button(UnityEngine.UI.Button b,Transform parent,Vector2 size,Vector2 pos,string copy,bool accent)
         {
             Undo.SetTransformParent(b.transform,parent,"UI-A2 grouping");Undo.RecordObject(b,"UI-A2 button");
             Center(b.GetComponent<RectTransform>(),size,pos);var image=b.GetComponent<UnityEngine.UI.Image>();
@@ -69,6 +69,14 @@ namespace ClickCook.EditorTools
         {
             var n=a.navigation;n.mode=UnityEngine.UI.Navigation.Mode.Explicit;
             n.selectOnLeft=n.selectOnRight=n.selectOnUp=n.selectOnDown=other;a.navigation=n;
+        }
+        internal static void PrepareStyle()
+        {
+            font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            paper=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/UI/Art/PaperPanel.png");
+            primary=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/UI/Art/PrimaryButton.png");
+            circle=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/UI/Art/PlateCircle.png");
+            if(paper==null||primary==null||circle==null)throw new Exception("UI-A2 assets required.");
         }
         private static void Header(RectTransform rt,Vector2 size,float x)
         {

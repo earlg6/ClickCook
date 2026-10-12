@@ -442,6 +442,20 @@ UI-A1 is complete; full UI/UX, final art and remaining screens are still unfinis
 
 UI-A2 is complete for the defined presentation slice. Full UI, final dish/location art, End-of-Day report, saves and release polish remain unfinished. Return to roadmap 7A: one in-memory player profile with stable IDs and wallet/dish mastery/Click Strength ownership separated from day/screen lifetime; 7B save/load follows later. Do not implement 7A in this execution.
 
+## Completed UI-A3 — Designer playtest corrections (2026-10-12)
+
+The user explicitly requested Exit in the menu, visible dish HP/click progress and central dish selection cards following a new gameplay screenshot. These decisions supersede prior hidden-HP/right-board presentation constraints; original HP/damage/XP/payout/capacity formulas and authored data stay intact.
+
+- Current prototype Location Selection menu now has «Вийти з гри». Native mouse test stopped Play Mode without closing Unity. Standalone implementation uses Application.Quit; a standalone build/quit test was NOT executed. Full Main Menu/save/load remains 7B.
+- Cooking shows remaining/max HP, a decreasing orange bar and ceil(remaining/current Click Strength) remaining clicks. Native sandwich click changed 5/5 and five clicks to 4/5 and four; Back/reselect restored 5/5. Back still preserves the order identity; no new damage or reward rule.
+- Orders are large central cards above the plate: centered pairs/three-card row, or three columns × two rows for 4–6. No overlap/tilted hit areas; pool/capacity/duplicate rules unchanged. Green bars are explicitly Dish mastery, using real XP/threshold and cap; they are not cooking HP/expiry. Food art remains clearly labeled temporary sketches.
+- Modified controller/SampleScene/OrderCard.prefab; created `Assets/Scripts/Editor/UiA3Setup.cs` and `Assets/Tests/Editor/UiA3Verification.cs` (+ metas). Reused UI-A2 authoring primitives through internal helpers in `UiA2Setup.cs`; no new gameplay framework/art dependencies. Updated `UiA1Verification.cs` to target the focused Game View when multiple views exist, avoiding ambiguous resolution tests. Updated GDD, roadmap, UI/UX specification and this tracker.
+- Compilation passed. Existing 237 Play Mode regression and 240 presentation/lifecycle assertions passed. New review checks passed 15 assertions at base strength and 15 at purchased strength 2 (temporary Play Mode-only wallet funding), covering HP/fraction/click count/reset, central layout, real mastery and hidden Exit guard. 980 glyph/layout/bounds/non-overlap/topmost-raycast/focus assertions passed for two-card board, six-card board and cooking across 1280×720, 1920×1080, 2560×1440, 1920×1200, 2560×1080.
+- First resolution check was inconclusive because two Game Views selected different rendering contexts. The temporary preset was restored, helper corrected, intended Game View focused, and all target checks explicitly rerun successfully. Original preset restored afterward; temporary maximized Game View returned to original dock layout on leaving Play Mode. No production build/physical keyboard retest claimed. Existing UVCS errors remain unrelated; no ClickCook runtime exception observed.
+- SampleScene saved clean outside Play Mode; serialization comparison found zero existing blocks removed and 55 modified existing blocks, all within prototype UI/controller. Dormitory, camera and lights retained. Pre-existing unrelated changes in `Assets/Settings/PC_RPAsset.asset`, `Assets/Settings/UniversalRenderPipelineGlobalSettings.asset`, `ProjectSettings/ProjectSettings.asset`, `ProjectSettings/UnityConnectSettings.asset` were preserved and excluded from the UI checkpoint. DishData/LocationData/catalogs were not modified.
+
+Next separate roadmap step remains 7A (run-local player profile/stable IDs), unless the user chooses another UI refinement. Final dish illustrations and standalone Quit verification are explicitly pending.
+
 ## Documentation policy
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

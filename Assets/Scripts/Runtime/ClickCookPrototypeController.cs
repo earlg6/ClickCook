@@ -55,6 +55,12 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Text resultRarityText;
         [SerializeField] private UnityEngine.UI.Text resultMasteryText;
         [SerializeField] private UnityEngine.UI.Image resultMasteryFill;
+        [Header("UI-A3 — designer review")]
+        [SerializeField] private UnityEngine.UI.Button exitGameButton;
+        [SerializeField] private UnityEngine.UI.Image cookingHpFill;
+        [SerializeField] private UnityEngine.UI.Text cookingHpText;
+        [SerializeField] private UnityEngine.UI.Image[] orderMasteryFills;
+        [SerializeField] private UnityEngine.UI.Text[] orderMasteryTexts;
         private UpgradePurchaseQuote displayedUpgradeQuote;
         private bool refreshUpgradeNextFrame;
 
@@ -93,6 +99,7 @@ namespace ClickCook.Runtime
             continueFromResultButton.onClick.AddListener(ContinueFromDishResult);
             openUpgradesButton.onClick.AddListener(OpenUpgrades);
             closeUpgradesButton.onClick.AddListener(CloseUpgrades);
+            exitGameButton.onClick.AddListener(ExitGame);
             buyUpgradeButton.onClick.AddListener(BuyUpgrade);
             for (int i = 0; i < orderButtons.Length; i++)
             {
@@ -113,10 +120,11 @@ namespace ClickCook.Runtime
             if (orderButtons == null || orderLabels == null ||
                 orderButtons.Length != PrototypeOrderSession.MaximumBoardCapacity ||
                 orderLabels.Length != orderButtons.Length || prototypeCapacities == null ||
-                prototypeCapacities.Length != 11) return false;
+                prototypeCapacities.Length != 11 || orderMasteryFills == null || orderMasteryTexts == null ||
+                orderMasteryFills.Length != orderButtons.Length || orderMasteryTexts.Length != orderButtons.Length) return false;
             for (int i = 0; i < orderButtons.Length; i++)
             {
-                if (orderButtons[i] == null || orderLabels[i] == null) return false;
+                if (orderButtons[i] == null || orderLabels[i] == null || orderMasteryFills[i] == null || orderMasteryTexts[i] == null) return false;
             }
 
             return locationCatalog != null &&
@@ -141,7 +149,18 @@ namespace ClickCook.Runtime
                    closeUpgradesButton != null && buyUpgradeButton != null &&
                    upgradeDetailsText != null && upgradeStatusText != null &&
                    dayWalletText != null && dayCompletedText != null && resultRarityText != null &&
-                   resultMasteryText != null && resultMasteryFill != null;
+                   resultMasteryText != null && resultMasteryFill != null && exitGameButton != null &&
+                   cookingHpFill != null && cookingHpText != null;
+        }
+
+        public void ExitGame()
+        {
+            if (!enabled || !locationSelectionScreen.activeSelf) return;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         public void OpenUpgrades()
@@ -277,6 +296,7 @@ namespace ClickCook.Runtime
             displayedCookingOrder = order;
             cookingDishLabel.text = "Натискай на страву";
             cookingOrderText.text = $"{ClickCookUiCopy.Dish(order.Dish)}\n{ClickCookUiCopy.Location(order.Location)}";
+            RefreshCookingHp();
             RefreshOrderBoard();
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(true);
@@ -288,6 +308,7 @@ namespace ClickCook.Runtime
             if (!enabled || !cookingPrototypeScreen.activeSelf) return;
             session.ReturnToBoard();
             displayedCookingOrder = null;
+            RefreshCookingHp();
             cookingPrototypeScreen.SetActive(false);
             workDayScreen.SetActive(true);
             RefreshOrderBoard();
@@ -297,8 +318,10 @@ namespace ClickCook.Runtime
         public void ClickCookingDish()
         {
             PrototypeOrder completedOrder = displayedCookingOrder;
-            if (!enabled || !cookingPrototypeScreen.activeSelf ||
-                !session.TryCookClick(completedOrder)) return;
+            if (!enabled || !cookingPrototypeScreen.activeSelf) return;
+            bool completed = session.TryCookClick(completedOrder);
+            RefreshCookingHp();
+            if (!completed) return;
             displayedCookingOrder = null;
             cookingPrototypeScreen.SetActive(false);
             PrototypeDishResult result = session.LastResult;
@@ -374,12 +397,55 @@ namespace ClickCook.Runtime
                 bool populated = order != null;
                 orderButtons[i].gameObject.SetActive(i < session.BoardCapacity);
                 orderButtons[i].interactable = populated && session.ActiveOrder == null && order.Dish != null;
-                orderLabels[i].text = populated
-                    ? $"Замовлення {i + 1}\n\n" + (order.Dish != null
-                        ? ClickCookUiCopy.Dish(order.Dish) : "Немає даних страви")
-                    : $"Місце {i + 1}\nПорожньо";
+                orderLabels[i].text = populated ? ClickCookUiCopy.Dish(order.Dish) : "Порожньо";
+                var dish = order?.Dish;
+                int masteryLevel = dish != null ? session.Rewards.GetLevel(dish) : 1;
+                bool maximum = masteryLevel == PrototypeDishRewards.MaximumDishLevel;
+                int xp = dish != null ? session.Rewards.GetLevelXp(dish) : 0;
+                int cost = maximum ? 1 : PrototypeDishRewards.RequiredXp(masteryLevel);
+                orderMasteryFills[i].fillAmount = maximum ? 1f : (float)xp / cost;
+                orderMasteryTexts[i].text = dish == null ? "Немає страви" : maximum ? "Майстерність: максимум" :
+                    session.BoardCapacity > 3 ? $"Майстерність: {xp}/{cost} XP" : $"Майстерність: рівень {masteryLevel}\n{xp} / {cost} XP";
             }
+            LayoutOrderCards();
             ConfigureBoardNavigation();
+        }
+
+        private void RefreshCookingHp()
+        {
+            var order = displayedCookingOrder;
+            if (order?.Dish == null) { cookingHpFill.fillAmount = 0; cookingHpText.text = string.Empty; return; }
+            int maximum = order.Dish.ClickRequirement;
+            int remaining = order.RemainingClicks;
+            int clicks = (remaining + session.ClickDamage - 1) / session.ClickDamage;
+            cookingHpFill.fillAmount = maximum > 0 ? (float)remaining / maximum : 0;
+            cookingHpText.text = $"HP: {remaining} / {maximum}\nЗалишилось кліків: {clicks}";
+        }
+
+        private void LayoutOrderCards()
+        {
+            int count = session.BoardCapacity;
+            int columns = Mathf.Min(3, count);
+            bool compact = count > 3;
+            for (int i = 0; i < count; i++)
+            {
+                int row = i / columns;
+                int inRow = Mathf.Min(columns, count - row * columns);
+                var rt = orderButtons[i].GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(360, compact ? 300 : 540);
+                rt.anchoredPosition = new Vector2(((i % columns) - (inRow - 1) * .5f) * 420, compact ? 150 - row * 330 : -15);
+                orderLabels[i].rectTransform.sizeDelta = new Vector2(330, compact ? 80 : 135);
+                orderLabels[i].rectTransform.anchoredPosition = new Vector2(0, compact ? 105 : 175);
+                orderLabels[i].fontSize = compact ? 28 : 34;
+                var plate = orderButtons[i].transform.Find("UIA2_Plate") as RectTransform;
+                plate.sizeDelta = new Vector2(compact ? 150 : 260, compact ? 105 : 200);
+                plate.anchoredPosition = new Vector2(0, compact ? 0 : 10);
+                // Stretch nested illustration layers to the resized plate.
+                orderMasteryTexts[i].rectTransform.sizeDelta = new Vector2(330, compact ? 45 : 65);
+                orderMasteryTexts[i].rectTransform.anchoredPosition = new Vector2(0, compact ? -78 : -135);
+                var track = orderMasteryFills[i].transform.parent as RectTransform;
+                track.anchoredPosition = new Vector2(0, compact ? -125 : -210);
+            }
         }
 
         private void FocusBoard()

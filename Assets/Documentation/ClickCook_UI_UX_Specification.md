@@ -2,6 +2,7 @@
 
 Дата: 2026-10-12. База: завершений Milestone 6A, commit 1fa32ff.
 Статус: UI-A1 і UI-A2 виконано та перевірено в межах існуючого циклу. Решта екранів — дизайн-план за п'ятьма наданими референсами.
+Оновлення UI-A3 після тесту користувача: Exit у поточному меню локацій, видимий HP/click count під час готування та великі центральні картки за новим референсом. Це явна зміна попередніх hidden-HP/right-board вимог; gameplay формули збережено. Mastery смуги карток підписані й використовують фактичний Dish XP, final art — майбутній крок.
 Оновлення UI-A1: Location Selection і Click Strength оформлені в Unity; component assets, copy та automated layout/input checks готові. Computer Use native mouse checks пройдено; виправлено втрату фокусу після покупки. Користувач підтвердив роботу фізичних Enter і стрілок у Game View. Синтетичні клавіші Computer Use не викликали runtime Input System дій — це обмеження автоматизації.
 Оновлення UI-A2: оформлено Order Board/HUD, Cooking та Dish Result; українські назви/рідкість/receipt, окремі daily/orders counters, real mastery bar, state focus. П’ять розмірів Canvas/raycast/focus, regression і нативний цикл мишею перевірено; новий фізичний keyboard pass і build не виконано. Страви мають явно позначені тимчасові ескізи. Деталі виконаних перевірок — IMPLEMENTATION_STATUS.md. Подальші розділи описують весь план, а не готовність усіх екранів.
 Джерела: ClickCook_GDD.md (§3–7, 9–11, 13, 16–25), IMPLEMENTATION_STATUS.md та актуальний production roadmap.
@@ -109,11 +110,11 @@ Header: Wallet зліва; міжденні вкладки/Upgrades по цен�
 
 Картки як у референсі 5: пергамент, велика food illustration, назва, чітка рамка наведення. Кожна card — одна велика кнопка. Візуальний нахил дозволений для art layer; hit area передбачувана і картки не перекривають одна одну.
 
-Узгодження з GDD §7: замовлення в зоні праворуч від центральної тарілки. Для 2–3 — один компактний ряд, для 4–6 — до трьох колонок × два рядки в правій зоні. На мінімальній роздільності перевірити food focus і назви; не вимагати шість карток у кожній локації.
+Оновлене GDD §7 / UI-A3: великі картки по центру над тарілкою. Для двох — симетрична пара, для трьох — центральний ряд, для 4–6 — до трьох колонок × два рядки. Усі картки — окремі великі кнопки з неперекритими hit areas. На мінімальній роздільності перевірити food focus і назви; не вимагати шість карток у кожній локації.
 
 Повторна страва — окрема картка/slot; не зливати дублікати. При виборі картки — одразу Cooking. Немає кнопки підтвердження чи заміни при selection.
 
-Зелені смуги під замовленнями з референсу не включати до UI-A. Якщо їх майбутня функція Dish mastery, додати явний підпис і джерело Dish XP; hidden HP не показувати.
+UI-A3 включає зелені смуги з явним підписом «Майстерність» і джерелом фактичного Dish XP / next-level threshold. Це presentation choice для вже реалізованих даних, не нова механіка. На cooking окремо показувати HP помаранчевою шкалою.
 
 Діагностичні GUID, IDs, provisional capacities і candidate lists прибрати з основного player HUD; залишити в Editor/debug view при потребі. Це зміна presentation, не eligibility.
 
@@ -125,7 +126,7 @@ Header: Wallet зліва; міжденні вкладки/Upgrades по цен�
 
 Back: «До замовлень»; tooltip/підказка «Прогрес приготування цієї страви буде скинуто». Зберігати чинну identity/Back логіку. Finish не показувати як активну кнопку всередині Cooking.
 
-HP/progress і невідомі 67/23 не виводити. Короткий visual press/tint можна додати як presentation; sparks/flames, screen shake, damage numbers і нові механіки — окремий узгоджений art/effects підкрок. Не додавати fake crit feedback до звичайного кліку.
+UI-A3 supersedes hidden-HP rule: показувати «HP: remaining / max», спадну шкалу та «Залишилось кліків: ceil(remaining HP / current damage)». Back/reselect відновлює повне HP. Значення 67/23 з ранніх референсів залишаються непоясненими. Короткий visual press/tint допустимий; sparks/flames, screen shake, damage numbers та нові механіки — окремий art/effects підкрок. Не додавати fake crit feedback.
 
 ### Dish Result — UI-A
 
@@ -250,7 +251,7 @@ UI-A можна поділити:
 - Основний текст читабельний на 1280×720, довгі назви/валюта/cap не обрізаються; contrast перевірений із textures.
 - Carousel переглядає всі 11, дані беруться з runtime; level0/income0 Dormitory не змінені через референс.
 - Orders 2–6 вписуються, дублікати незалежні; daily count показано окремо.
-- Немає hidden HP, непідписаних fake bars, чужих balance values або працюючих кнопок неготових систем.
+- HP та mastery мають окремі явні підписи й фактичні дані; немає непідписаних fake bars, чужих balance values або працюючих кнопок неготових систем.
 - Click Strength purchase, exact completion, Back, rarity/XP/payout, tenth Continue і early Finish проходять існуючу regression suite.
 - Перевірені topmost raycast, реальна mouse взаємодія, focus order та принаймні gameplay build на цільовій платформі, якщо його включено в конкретний UI підкрок.
 - Captures зроблені після оновлення кадру, для всіх змінених станів на різних resolutions. Screenshot lag у MCP не вважається доказом відображення поточного значення.

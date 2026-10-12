@@ -11,6 +11,8 @@
 
 ## 1. Висновок
 
+UI-A3 — виконані правки після тесту користувача (2026-10-12): Exit у поточному prototype menu, видимий HP/залишок кліків, великі центральні картки за новим референсом і підписаний Dish mastery. Hidden-HP/right-board presentation superseded; числові правила не змінено. Standalone quit перевірити разом із наступним build checkpoint; повний Main Menu залишається 7B, final dish art — UI-C/11A.
+
 ClickCook має реалізований прототип основного циклу до готування, рідкості, Dish XP, виплати та завершення дня. Наступна продуктова мета — повний повторюваний цикл «заробив → покращив → зберіг → повернувся → відкрив новий контент».
 
 Рекомендована послідовність після виконаного 6A: UI-A1/A2 для чинного циклу → постійний профіль/save → підсумок дня → рецепти/рівні/локації → решта погоджених апгрейдів → повний контент і фінальний UX → beta → release candidate → публікація. R0-рішення закриваються перед відповідними залежними етапами.
@@ -76,6 +78,7 @@ Gate R0: один погоджений release brief; окремий списо�
 | 6A — виконано | Заробити → купити ранг Click Strength → готувати швидше; тимчасовий екран покупки | 9, 13–14 | Піднабір формул прийнято за дорученням користувача | Unity compilation, 4,685 model / 236 Play Mode assertions, EventSystem перевірки пройдено |
 | UI-A1 — виконано | Дизайн-система, читабельна типографіка, scalable компоненти, Location Selection і Click Strength purchase у стилі референсу 4 | 5, 13, 21–22 | 6A; чесно позначена venue illustration placeholder | Compilation, 237 regression assertions, 5 layouts/raycast/focus і native mouse PASS; фізичні Enter/стрілки підтверджено користувачем |
 | UI-A2 — виконано | OrderCard/HUD, Cooking і Dish Result поверх середовища у стилі референсу 5; тимчасові ескізи | 7, 9–11, 21–23 | UI-A1 | 237 regression + 240 presentation + 10 edge + 795 layouts/raycast/focus checks PASS; нативний цикл мишею PASS; daily count окремо від capacity, XP bar із реальних даних |
+| UI-A3 — виконано | Exit у поточному меню; HP/click count; центральні великі 2–6 картки з підписаною майстерністю | 7, 9, 21 | Погоджені правки користувача після тесту UI-A2 | Compilation, 237 regression + 240 presentation + 30 review + 980 layout/input checks PASS; native HP/Back/Exit Editor PASS; standalone quit ще перевірити |
 | 7A | Єдиний профіль гравця й відокремлення даних дня від довготривалого прогресу | 20, 26–27 | 6A; політика відновлення | Wallet, Dish XP і ранги мають стабільні ID та snapshot; один власник стану |
 | 7B | Save/load, Main Menu, Continue/New Game/Reset та мінімальний Pause, використовуючи UI-A компоненти | 3–4, 18–20 | 7A; погоджені save/pause правила | Перезапуск відновлює прогрес; збої запису не знищують останній валідний save; UI states відповідають save status |
 | 8A | Підсумок дня: страви, отримані гроші/XP, Next Day, Upgrades | 6, 14, 21 | 7B; earnings/date рішення | Звіт дорівнює сумі receipts, без повторної виплати; завершення і save узгоджені |

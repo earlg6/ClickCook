@@ -1,5 +1,17 @@
 # ClickCook Implementation Status
 
+## Designer-source synchronization — 2026-10-15 (documentation only)
+
+- The designer explicitly prioritizes ClickCook Figma/FigJam over previous GDD interpretations. GDD Section 0 now records source precedence and reconciled conflicts; FishSim is a mechanics/progression reference as well as a UI reference.
+- Restored designer story/inner thoughts/culinary diary direction, detailed Pause/Settings contents, existing recipe Journal content and the 25 source achievement rows/reward notation. Achievement units, exact triggers and stacking remain unresolved; no rewards were granted.
+- Expanded upgrade design: 27 planned effect families (existing 16 plus 11 extensions), connected/tiered progression, manual/critical/hold/extra-strike/automation/economy/XP/quality paths. Only Click Strength remains implemented and verified. The original 16-family draft is not a final content cap; its unimplemented numbers are still proposed balance.
+- User approved: double strike is a chance of one extra hit on the same dish, without another portion/reward; critics remain part of the design but activation and career penalties/reset scope require separate approval. No reset behavior was authorized.
+- Spatial presentation target: actual right-hand noticeboard sheets and cooking on the existing tray/plate, superseding UI-A3's floating central-card layout as the final target. UI-A3 verification below remains historical evidence, not verification of the new presentation.
+- UI-A4 has pre-existing local script/scene/art/test work. Full verification/documentation/Git checkpoint is not complete; no new [x] or Unity pass is claimed here. Existing unrelated settings changes and all unfinished UI-A4 changes were preserved.
+- Documentation changed: ClickCook_GDD.md, ClickCook_Upgrade_Design_Proposal.md, ClickCook_UI_UX_Specification.md, ClickCook_Production_Roadmap.md, IMPLEMENTATION_STATUS.md. No gameplay code, data, scene, Figma or settings were changed by this synchronization task.
+- Next implementation checkpoint: finish and verify UI-A4 only; then follow the profile/save and expanded-tree dependency plan. Do not automatically implement U0–U6 or mark the whole tree complete.
+- Documentation verification: scoped `git diff --check` passed; original location/dish/rarity tables in GDD Sections 5/8/11 compare unchanged against HEAD; expanded tree contains 27 unique family IDs; achievement table contains 25 entries; Markdown fences/local document links passed checks. No Unity compilation/Play Mode test was run for this documentation-only task. Existing scene-diff whitespace warnings were not edited.
+
 ## Completed milestones
 
 ### Milestone 1 — ClickCook Data Foundation

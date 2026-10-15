@@ -1,5 +1,41 @@
 # ClickCook — Game Design Document
 
+## 0. Source authority and designer synchronization — 2026-10-15
+
+This GDD is the maintained implementation specification, not a replacement for the designer's source. The designer explicitly gave Figma/FigJam higher priority than earlier GDD interpretations on 2026-10-15.
+
+Source: [ClickCook designer board](https://www.figma.com/board/FfbBcNEBFZz9LSIpDAK9mI/Untitled). Reviewed through Chrome Computer Use: ClickCook descriptions, UI wireframes, counter concepts, location/dish examples, upgrade tree, achievements, Journal/recipe content, and FishSim upgrade references. This is a design review, not a new Unity verification or a claim that every reference number has been transcribed.
+
+Resolve sources in this order:
+
+1. Latest explicit designer decisions in this conversation, including approved corrections to historical Figma content.
+2. ClickCook-specific Figma descriptions, structured data tables and tree; use developed visual examples for visual direction and wireframes for screen contents/flow.
+3. FishSim screenshots as the intended breadth and mechanics/economic-progression reference, adapted to ClickCook rather than dismissed as styling only. Fishing-specific content and literal prices are not automatically ClickCook rules.
+4. Earlier GDD interpretations, prototype limitations and developer recommendations. Existing code is evidence of implementation, not design authority.
+
+When a presentation image conflicts with a ClickCook data table, use the structured table for numbers and the image for composition. Thus Dormitory remains documented level 0 / income 0, not the illustrative level 1 / income 5. Previously approved rarity corrections and visible cooking HP remain in force. Do not silently change static assets or verified runtime rules during documentation synchronization.
+
+Status vocabulary: **DESIGN SOURCE** = present in designer Figma; **APPROVED** = explicit designer decision; **ADOPTED DESIGN** = a documented implementation decision under the user's delegation; **PROPOSED BALANCE** = unverified tuning; **IMPLEMENTED/VERIFIED** = separately evidenced Unity behavior. None of the first four implies implementation. Historical milestone paragraphs describe their checkpoint and are superseded by later rules where explicitly stated.
+
+### 0.1 Reconciled conflicts
+
+| Topic | Current specification / decision | Implementation consequence |
+|---|---|---|
+| Background and order placement | Latest designer instruction plus counter concepts: take paper orders from the actual right-hand 3D board; cook the selected dish on the actual tray/plate. Central floating UI-A3 cards are a previous presentation checkpoint. | UI-A4 is in progress, NOT accepted as complete by this documentation change. |
+| Broad upgrades | FishSim is also a mechanics/progression reference. The current 16 definitions are not a final content cap. See Section 13.2. | Expand in independently verified slices; no sale of effects that do not work. |
+| Double click | APPROVED 2026-10-15: chance of an extra strike on the same dish, not a physical double-click requirement or a second dish/reward. | New future combat effect; existing completed-day and payout identity stay intact. |
+| Other choices disappear | ADOPTED DESIGN: hide/disable the other sheets during close-up cooking, without deleting their order instances. This reconciles the original Figma wording with the later approved reservation/Back contract. | No reroll/discard on selection or Back. |
+| Limited selection time / timely bonus | DESIGN SOURCE: timed choice and a timely-choice bonus exist in the concept. ADOPTED DESIGN: implement as a bonus window, not order expiry or a hard day timeout; slow selection still works. Exact seconds/reward remain proposed balance. | Add in a separate timing/economy slice; no timer is implemented by this sync. |
+| Dish level increases value | DESIGN SOURCE: stronger dish mastery leads to more valuable dishes. Current approved implementation achieves this via level-dependent rarity and payout multipliers. | Do not add a second direct level-price multiplier until the economy specification explicitly defines it. |
+| Critics and career reset | DESIGN SOURCE: critics may reset a career if the chosen dish is below level 8; appear after restaurant level 3. APPROVED 2026-10-15: retain the concept, defer exact penalty and activation for separate approval. | No destructive reset is authorized. Exact restaurant-level meaning, encounter rate and retained/lost progress are unresolved. |
+| Achievements / Journal | Figma already contains achievement rows/rewards and recipe text; these are not wholly unspecified. See Sections 16–17. | Preserve source content; distinguish missing runtime rules from missing content. |
+
+### 0.2 Synchronization boundaries
+
+- This checkpoint changes documentation only. It does not implement upgrades, critics, timing, recipes, achievements, story or persistence, and does not certify unfinished UI-A4 work.
+- Keep approved 5B rarity/XP/payout math and 6A Click Strength behavior until a separately reviewed gameplay milestone changes them.
+- FishSim's progression business model means earn → choose an investment → feel its benefit → reach harder content → unlock another branch. This does not approve real-money purchases, advertising, premium currencies or a store monetization model.
+
 ## 1. Game Overview
 
 **Game:** ClickCook  
@@ -9,6 +45,12 @@
 - [IMPLEMENTED] Unity contains static location/dish data and verified Location Selection → Work Day orders → click cooking → rarity/Dish XP/payout result → replacement/day-ending flow (5B), extended by between-day Click Strength purchases (6A). The tenth result ends the day on Continue. Wallet, dish mastery and upgrade rank are run-local; final visuals, full economy, Player XP and persistent progression remain unimplemented.
 - [INFERRED] The intended experience combines a persistent restaurant-management loop with focused, tactile dish-completion moments.
 - [TBD] Platform, session length, target audience, monetization, and final scope.
+
+### 1.1 Designer story and experience
+
+- [DESIGN SOURCE — FigJam] A young student cook starts with simple food in the Dormitory, improves culinary skills, buys recipes, works in progressively better venues and aims for a Michelin restaurant/star. The intended journey is novice → chef, not merely a sequence of abstract damage upgrades.
+- [DESIGN SOURCE] Single-player presentation includes the protagonist's inner thoughts/voice and a culinary diary/book. Background social interactions, thought icons and narrative events are part of the design direction. Their exact scripts, triggers, characters, voice production and localization remain to be specified; do not fabricate completed story content.
+- [DESIGN SOURCE] Critics and the possibility of starting a career again belong to the source concept. Section 0.1 records the approved deferral of penalty/reset details; they are not part of current runtime or an implicit prestige mechanic.
 
 ## 2. Core Gameplay Loop
 
@@ -41,14 +83,14 @@ Main Menu
 | Main Menu | Launch / return from play | Continue, New Game, Settings, Exit, Discord | Choose action | [DESIGNED] Menu items exist |
 | Location Selection | New/continued session | Browse locations, inspect dishes/progress, Cook | Press Cook | [DESIGNED] Carousel/card UI exists |
 | Work Day / Order Board | Start work day | Select an order, Finish Day | Select dish / finish day | [DESIGNED] Currency, remaining dishes, location-dependent capacity up to six visible orders |
-| Cooking | Select order | Click dish; potentially use click-related upgrades | Dish completion | [DESIGNED] Close-up dish, hidden progress |
+| Cooking | Select order | Click dish; potentially use click-related upgrades | Dish completion | [APPROVED] Dish on the real plate, visible HP; close-up with restaurant visible |
 | Dish Result | Dish reaches completion | Continue | Return to orders | [DESIGNED] Dish, rarity, value shown |
 | End of Day | Finish Day | View prepared dishes/results, Upgrades, Next Day | Upgrade screen / next day | [DESIGNED] Summary wireframe |
 | Upgrades | End-of-day action/navigation | Inspect/purchase upgrades | Return | [DESIGNED] Upgrade tree exists |
 | Achievements | Navigation | Inspect achievement list | Return | [DESIGNED] Screen exists |
 | Journal | Navigation | Browse collection | Return | [DESIGNED] Grid/list screen exists |
 | Settings | Main menu/pause | Change settings/reset data | Return | [DESIGNED] Settings categories exist |
-| Pause | During gameplay | TBD | Resume/exit TBD | [DESIGNED] Screen exists |
+| Pause | During gameplay | Resume, Settings, return to Main Menu | Chosen action | [DESIGN SOURCE] Buttons are specified; simulation/save policy remains separate |
 
 - [TBD] Transition restrictions, animation timing, pause behavior, saving points, and state restoration.
 
@@ -100,8 +142,8 @@ Main Menu
 
 ## 7. Order Board
 
-- [HISTORICAL DESIGN — superseded by UI-A3 review] The board was on the right side of gameplay screens.
-- [APPROVED — designer UI-A3 review, 2026-10-12] Select orders using large central dish cards above the plate, following the supplied gameplay screenshot. Two cards form a centered pair; preserve the existing location-dependent 2–6 capacities and independent duplicate orders. Larger boards use a centered, non-overlapping layout. Clicking a card still immediately selects that exact order.
+- [APPROVED DESIGN — latest counter instruction; synchronized 2026-10-15] The Order Board is the physical noticeboard to the player's right in the existing Dormitory environment. Paper sheets are clickable order cards anchored to this scene surface, not a disconnected screen-space grid. The selected dish appears on the existing plate/tray in front of the player. Preserve environment geometry/lighting and the approved order identity/lifecycle. Final sheets need readable art/text, hover/focus feedback and non-overlapping hit areas for 2–6 orders; camera framing/readability must be verified before acceptance.
+- [HISTORICAL DESIGN] Early wireframes used a right-side HUD grid; UI-A3 (2026-10-12) implemented large central cards above the plate, a centered pair/row or up to 3×2 cards. These remain historical presentation checkpoints, not the final spatial specification. The independent duplicate orders, location-dependent capacity and immediate selection rules remain current.
 - [PROTOTYPE PRESENTATION CHOICE — UI-A3] Green card bars are explicitly labeled Dish mastery and display existing Dish XP / next-level threshold (full at mastery cap), not cooking HP or expiry. Screenshot wallet/progress examples are not new balancing values; final food illustrations remain pending.
 - [DESIGNED] It displays `Количество блюд осталось - ..` / dishes remaining.
 - [DESIGNED] Current currency is shown above it; example: `215 у.е.`
@@ -111,6 +153,7 @@ Main Menu
 - [APPROVED — Milestone 4 design] Capacity depends on location: early locations approximately 2–3 simultaneous orders, later locations up to six. Exact per-location capacities are not approved.
 - [APPROVED PROTOTYPE RULE] Generate orders uniformly at random from the selected `LocationData.DocumentedAvailableDishes`. Duplicates are allowed as independent runtime instances. No recipe ownership, progression, economy, rarity, or weighted filtering. Empty pools generate no orders; missing references must be handled safely without invented dishes.
 - [APPROVED — selection] Clicking a populated card immediately enters cooking, without confirmation. Only one order may be active. Preserve its runtime identity, dish, slot, and location; selection is not completion and other orders cannot be selected while it is reserved.
+- [ADOPTED DESIGN — Figma reconciliation, 2026-10-15] Other choice cards hide or become visibly unavailable during close-up cooking; their runtime orders are retained. Back restores the same board and exact orders. The original Figma phrase about other options disappearing is not interpreted as deleting/regenerating all unselected orders. The source's timely-choice bonus is planned as a separate optional bonus window; no forced selection/expiry is added to the existing prototype.
 - [APPROVED PROTOTYPE CHOICE — 4A] Use a screen labeled `Cooking Prototype — Not Implemented`, showing the selected order identity, dish ID/name, and location. Back releases the active reservation and returns to the unchanged board without completion, regeneration, or counter changes. Final close-up art and clicking remain deferred.
 - [APPROVED — Milestone 4B, supersedes the 4A cooking placeholder] A large clickable dish placeholder implements basic cooking, while final art remains unimplemented. Back resets cooking progress to its starting state but preserves the exact order and all other board entries. Successful cooking returns directly to the board with a replacement order, unless it reaches the daily limit. No intermediate result screen, rarity, or rewards in this milestone.
 - [APPROVED — Milestone 5A, supersedes direct board return for dishes 1–9] After a dish completes below the daily limit, show a temporary Dish Result screen with its name, documented base `SaleValue` explicitly labeled reference-only, `Rarity: not implemented`, and Continue. Continue returns to the existing board/replacement without another completion, increment, or regeneration. No currency/XP is awarded. The tenth completed dish bypasses this screen and immediately ends the day as approved in Section 6. Other board/cooking actions are unavailable during the result screen.
@@ -167,6 +210,7 @@ Main Menu
 - [DESIGNED; visibility updated in UI-A3] Select an order, enter close-up cooking presentation, click the dish, reduce visible dish HP, complete dish, reveal rarity.
 - [DESIGNED] The restaurant environment remains visible around the cooking presentation.
 - [DESIGNED] Relevant upgrade branches: click strength, critical hit, click hold, auto-click strength, auto-click frequency.
+- [APPROVED — 2026-10-15] The expanded tree includes a probabilistic extra strike on the current dish. A successful proc is another hit, not another order, completed dish, XP grant or payout. It must not chain recursively or carry unused damage into a replacement. It is not an OS/mouse double-click gesture. Section 13.2 specifies the future design scope; implementation is pending.
 - [DESIGNED] Screen 2 shows a central vertical feedback area with example values `67` and `23`, plus flame/impact graphics.
 - [HISTORICAL APPROVAL — Milestone 4B; visibility superseded by UI-A3] Without upgrades, hidden HP = `DishData.ClickRequirement`, click damage = 1, completion occurs at zero. The original instruction was not to display HP or a numerical progress counter. Back resets partial progress; reselecting the same order starts at full HP. The prototype uses a large clickable placeholder showing the dish name rather than final models or effects.
 - [APPROVED — designer UI-A3 review, 2026-10-12] Cooking now displays dish HP as remaining / documented maximum, a decreasing HP bar and remaining clicks using current Click Strength (`ceil(remaining HP / current click damage)`). This supersedes earlier hidden-HP presentation rules, including the UI-A specification. Maximum HP, damage, Back reset, completion, payout and XP rules are unchanged.
@@ -245,9 +289,9 @@ Canonical intended tiers from player-provided gameplay context:
 
 ## 13. Upgrade System
 
-Design reference: [Upgrade Design Proposal](ClickCook_Upgrade_Design_Proposal.md) (2026-10-08), with the Click Strength subset adopted and verified in 6A on 2026-10-12 under the user's authorization to implement the next roadmap step and resolve routine design choices. Other effects remain draft. See [Production Roadmap](ClickCook_Production_Roadmap.md) for subsequent dependencies.
+Authority: designer ClickCook tree and FishSim reference screenshots under Section 0. The user explicitly requires a similarly broad progression/mechanics system, not only similar UI. [Upgrade Design Proposal](ClickCook_Upgrade_Design_Proposal.md) Section 12 records the expanded adaptation. Its older 16-family balance is a retained draft, except Click Strength adopted/verified in 6A. See [Production Roadmap](ClickCook_Production_Roadmap.md) for dependencies.
 
-### Complete tree
+### Original designer tree — retained foundation, not a final size limit
 
 ```text
 Culinary / Кулинария
@@ -281,7 +325,8 @@ Passives / Пассивки
 ```
 
 - [DESIGNED] Upgrade UI is a connected-node tree with an `Active Skills Statistics` panel and `Hide` control.
-- [TBD] Currency used, purchase rules, prerequisite semantics beyond visible links, costs, levels, caps, respec, displayed statistics, and exact effects.
+- [ADOPTED DESIGN — 2026-10-15] Use the existing earned currency for the upgrade economy; between-day purchases extend the verified 6A flow. No second/premium currency, paid respec or monetization is inferred. Tree groups are navigation, not paid empty effects.
+- [TBD / PROPOSED BALANCE] Final node-specific prices/ranks/caps, exact prerequisite graph beyond the source links, modifier stacking/rounding and respec. The 6A Click Strength subset remains the only implemented effect; other draft prices are not source-approved balance.
 
 ### 13.1 Milestone 6A — Click Strength purchases
 
@@ -291,6 +336,27 @@ Passives / Пассивки
 - [PARTIAL — 6A] One UpgradeCatalog ScriptableObject stores 16 uniquely identified definitions with provisional prices/caps; only click_strength has a purchasable runtime effect. Other definitions and their displayed names remain unavailable. Their prerequisites and effects are not implemented or implicitly approved by their catalog presence. The full connected tree/Active Skills Statistics presentation remains unfinished.
 - Files: Assets/Scripts/Data/UpgradeCatalog.cs, Assets/Data/UpgradeCatalog.asset, Assets/Scripts/Runtime/PrototypeOrderSession.cs, Assets/Scripts/Runtime/PrototypeDishRewards.cs, Assets/Scripts/Runtime/ClickCookPrototypeController.cs, Assets/Scenes/SampleScene.unity. Repeatable Editor-only verification: Assets/Tests/Editor/Milestone6AVerification.cs.
 - [TBD] Critical/hold/auto-click, XP/value modifiers, recipe/upgrade discounts, passive-income rules, choice bonus/time window, persistence and final tree UI. The draft 90-second income quota and 3–6-second bonus window are not implemented.
+
+### 13.2 Broad FishSim-style progression — approved direction, future implementation
+
+- [APPROVED DIRECTION — 2026-10-15] Build a wide, connected tree with meaningful branches, multi-rank investments, later extensions, critical hits, double strikes and automation. The 16 serialized 6A definitions are a checkpoint, not a cap on the final design. Do not mark extra branches implemented because their names exist in data or a mockup.
+- [ADOPTED DESIGN] Preserve all 16 existing effect-family IDs. The expanded planning model has 27 effect families below: 16 existing plus 11 extensions. Multiple visually separate tier nodes may contribute ranks to one effect family. These counts do not require 27 assets or a generalized framework and do not authorize changing the runtime catalog in this documentation task.
+
+| Branch | Existing families to retain | Planned extensions / purpose |
+|---|---|---|
+| Manual cooking | `click_strength`, `critical_chance`, `critical_multiplier`, `click_hold` | `click_multiplier` (multiplies base strength), `double_strike_chance`, `double_strike_power`, `hold_frequency` |
+| Automation | `auto_strength`, `auto_frequency` | `auto_strength_multiplier`; separate strength and speed investments, operating only on the selected dish |
+| Mastery / XP | `dish_xp`, `restaurant_xp`, `character_xp` | `dish_xp_flat`, `restaurant_xp_flat`, `character_xp_flat`; distinguish flat bonuses from multipliers and the three XP owners |
+| Value / economy | `dish_value`, `recipe_discount`, `upgrade_discount`, `passive_unlock`, `passive_value` | `passive_flat`; source-inspired base income and multiplier paths, not only one scalar |
+| Choice / rhythm | `selection_bonus`, `selection_window` | Timely-choice reward and a separate increase to its window; not a hard day timer |
+| Quality / collection | None in the 6A catalog | `rarity_chance`, `rarity_multiplier`; adapt FishSim's flat/multiplicative rarity progression to the five ClickCook tiers, without copying its single rare-fish percentage |
+
+- [ADOPTED DESIGN] Early purchases must have a working effect immediately. Do not sell an automation opener with zero effective frequency, an XP modifier before that XP system exists, or a passive-income node before accrual works. Keep available / prerequisite-locked / unaffordable / maximum / not-yet-implemented states distinct.
+- [ADOPTED DESIGN] Offer parallel manual, automation and value/mastery investments instead of forcing all upgrades into one purchase sequence. Later tiers use explicit prerequisites from data; no invisible level gates. Existing Click Strength rank/cost/damage remain unchanged until a dedicated balance migration milestone.
+- [ADOPTED DESIGN] Display selected node name, rank/max, concise description, current → next effect, exact price, explicit prerequisites and unavailable reason. The active-statistics panel summarizes actual combined effects. Hover, focus and selected states must not rely only on line color. Tree zoom/pan is presentation, not a new gameplay system.
+- [ADOPTED DESIGN] A manual or hold trigger may produce one extra strike according to its purchased chance. Resolve only against the same still-active dish; if the first hit completes it, suppress the extra hit. Extra hits do not trigger further extra hits. Each applied manual/hold hit may independently crit; automation does not crit or trigger double strikes in the base adaptation. One order still produces at most one completion/reward transaction. Physical rapid clicks remain ordinary independent inputs.
+- [PROPOSED BALANCE, not implemented] Reuse the original proposal's critical/hold/auto values as initial candidates, not proven final tuning. Choose new family prices, ranks, caps and extra-strike power only in the relevant implementation/balance slice. Additional rarity modifiers require a separately specified probability transform preserving a 100% distribution; do not mutate the approved baseline table or invent extra tiers.
+- [IMPLEMENTATION BOUNDARY] Extended definition/graph validation, tree UI, critical/hold, double strike, auto-click, XP/value, timing/passives and quality modifiers are separate testable slices. See the proposal Section 12 and roadmap U0–U6. No new effect is implemented by this section.
 
 ## 14. Economy
 
@@ -317,26 +383,61 @@ Passives / Пассивки
 - [DESIGNED] An achievements screen exists with five visible rows.
 - [DESIGNED] Each row has icon, title/main text, and right-side reward/value area.
 - [DESIGNED] It shares the Active Skills Statistics panel.
-- [TBD] Achievement names, requirements, rewards, progress, notification behavior, and persistence.
+- [DESIGN SOURCE — FigJam, synchronized 2026-10-15] The designer supplied a table of milestone labels and effect rewards. Preserve the rows below; do not treat all achievement content as absent. Not implemented. Names/notation below retain source terminology; `+0.5` is not silently converted into percentage points, and `quality` is not silently mapped to a particular rarity.
+
+| Source milestone label | Source reward notation |
+|---|---|
+| Общежитие | Сила клика +1 |
+| Кафе | Умнож. ценность блюда ×1.05 |
+| Закусочная | Повыш. опыт за блюдо +3 |
+| Фудкорт | Повыш. шанс крита +0.5 |
+| Шашлычная | Повыш. автоподсечки +1 |
+| Домашний ресторан | Повыш. шанс качества +0.02 |
+| Итальянский ресторан | Умнож. множитель клика ×1.1 |
+| Кондитерская | Умнож. ценность блюда ×1.1 |
+| Японский ресторан | Сила клика +1.2 |
+| Фешн ресторан | Повыш. опыт за блюдо +5 |
+| Мишленовский ресторан | Повыш. шанс качества +0.5 |
+| Количество блюд 10 | Сила клика +1 |
+| Количество блюд 50 | Сила клика +2 |
+| Количество блюд 250 | Умнож. множитель клика ×1.1 |
+| Количество блюд 700 | Умнож. множитель клика ×1.5 |
+| Превосходное качество 10 | Повыш. шанс качества +0.2 |
+| Превосходное качество 50 | Умнож. ценность блюда ×1.05 |
+| Превосходное качество 150 | Умнож. множитель качества ×1.15 |
+| Заработано денег 1000 | Сила клика +1 |
+| Заработано денег 100000 | Умнож. чаевых ×1.1 |
+| Заработано денег 10000000 | Умнож. чаевых ×1.5 |
+| Заработано денег 1000000000 | Умнож. ценность блюда ×1.7 |
+| Получено опыта 100 | Повыш. опыт за блюдо +3 |
+| Получено опыта 700 | Умнож. опыт за блюдо ×1.05 |
+| Получено опыта 4200 | Умнож. опыт за блюдо ×1.2 |
+
+- [ADOPTED DESIGN] Treat the table as achievement content, not store purchases. Show permanent earned bonuses separately from purchased ranks; granting a bonus must be idempotent. The fishing word `автоподсечки` needs a ClickCook effect mapping, not a new fishing subsystem.
+- [TBD BEFORE IMPLEMENTATION] Exact trigger for venue-named milestones (unlock, first shift or mastery); whether prepared/earnings/XP counters are career totals; canonical meaning of Превосходное качество/quality/tips; units and stacking of chance bonuses; fractional strength rounding; automatic versus claimed rewards; notifications and persistent recovery. Source values remain intact until these semantics are resolved.
 
 ## 17. Journal
 
 - [DESIGNED] Journal screen exists as a collection grid/list.
 - [DESIGNED] It shares top navigation with Locations, Upgrades, and Achievements.
-- [TBD] Entry types, dish/recipe relationship, unlock rules, text/image content, sorting/filtering, and persistence.
+- [DESIGN SOURCE — FigJam] The detail panel has dish illustration/name, dish level and progress, prepared count, price, five colored indicators and recipe content. The board includes a dish-index table plus authored ingredient/method texts. Recipe writing therefore has an existing source; it is not wholly TBD. Preserve source wording/content when importing it in a later content milestone; this sync does not claim a word-for-word import or culinary validation of every recipe.
+- [ADOPTED DESIGN] Distinguish recipe purchase price from sale value, dish mastery from cooking HP, and authored recipe instructions from interactive cooking actions. Real-world ingredient/preparation steps do not automatically become runtime minigames.
+- [TBD] Entry visibility/ownership rules, meaning/data of the five indicators, canonical display price, missing/source image assets, sorting/filtering, collection counters and persistence.
 
 ## 18. Settings
 
 - [DESIGNED] Language selection.
 - [DESIGNED] Display/window controls.
 - [DESIGNED] Volume controls.
+- [DESIGN SOURCE — wireframe] Display controls include resolution, fullscreen/window mode and FPS. Separate sliders are music, environment and effects volume. Examples 1920×1080 / 60 are mockup values, not a mandatory hardware/default policy.
 - [DESIGNED] Reset data action.
-- [TBD] Exact labels, defaults, languages, supported display modes, audio categories, reset confirmation, and storage behavior.
+- [TBD] Release languages, defaults/supported display choices, FPS options, audio routing, reset confirmation and storage behavior. The source audio categories above are known; implementation is not complete.
 
 ## 19. Pause
 
 - [DESIGNED] A pause screen exists.
-- [TBD] Pause menu content, whether passive income/cooking stops, navigation, save behavior, and quitting behavior.
+- [DESIGN SOURCE — wireframe] Actions: Resume, Settings, return to Main Menu; retain the version/Discord footer where appropriate. Do not leave the menu's actual button list unspecified.
+- [TBD] Whether passive income/cooking stops, save/unfinished-day policy, confirmations and standalone transition behavior. The source specifies the menu contents but not these simulation policies.
 
 ## 20. Save / Load / New Game / Continue
 
@@ -346,6 +447,8 @@ Passives / Пассивки
 - [TBD] Save slots, autosave points, serialization scope, cloud support, New Game overwrite behavior, Continue fallback behavior, reset scope, and version migration.
 
 ## 21. UI/UX
+
+- [APPROVED DESIGN PRIORITY — 2026-10-15] Follow the designer's developed Figma visuals and ClickCook descriptions before earlier GDD/developer presentation assumptions. Blue food-pattern/paper/orange styling applies to meta screens; the real 3D counter is the gameplay surface. Use a handwritten accent for short dish titles, readable body/numeric text, and genuine scene-bound sheets/dish targets. Current runtime labels/placeholders are not final art. See Section 0 for conflicts and [UI/UX Specification](ClickCook_UI_UX_Specification.md).
 
 - [IMPLEMENTED / VERIFIED — designer UI-A3 review, 2026-10-12] Current prototype Location Selection menu includes Exit Game. Standalone code calls `Application.Quit`; Editor code stops Play Mode without closing Unity. Native Editor Exit was verified; standalone quit/build is NOT VERIFIED. This does not implement the full Main Menu/Continue/save system.
 - [IMPLEMENTED / VERIFIED — UI-A3] Central large dish cards replace the earlier right-hand board presentation, with labeled real mastery bars; capacities/duplicates/lifecycle unchanged. Cooking now shows real remaining/max HP, decreasing bar and remaining clicks at current strength. Compilation, existing 237 regression and 240 presentation assertions, 30 new HP/card/Exit-guard assertions and 980 rendered layout/input checks passed. Native mouse verified selection, HP 5→4, Back/reselect reset and Exit stopping Play Mode. Final food art remains temporary.
@@ -383,6 +486,7 @@ Passives / Пассивки
 
 - [DESIGNED] FigJam includes areas for Locations, Dishes, Characters, and `3D модели и анимации`.
 - [DESIGNED] Food/reference imagery and external visual references exist.
+- [APPROVED DESIGN — latest counter instruction, synchronized 2026-10-15] Retain and interact with the existing Dormitory: right-hand noticeboard for order sheets, actual tray/plate for cooking. The background must not remain a purely decorative image behind floating gameplay panels. Existing counter concepts support this spatial relationship. Final food models, transitions and other venues remain separate content work.
 - [IMPLEMENTED] Unity contains one imported `Dormitory.fbx` interior model, materials, 17 texture maps, embedded lights/cameras, and one added capsule collider.
 - [IMPLEMENTED] The scene is an early visual prototype, not a confirmed final restaurant.
 - [TBD] Final environment list, individual dish models, characters, rigs, animation list, ownership/licensing, production status, and asset pipeline.
@@ -449,7 +553,7 @@ This is a design-to-technical mapping, not existing implementation.
 | Upgrades | Partially implemented: 16 static definitions; run-local Click Strength purchases and temporary UI (6A) | UpgradeCatalog and existing session/controller | Remaining effects, prerequisites and final tree UI unfinished |
 | Save/load | Not implemented | Persistence service | Format/slots TBD |
 | UI | Partially implemented: temporary uGUI Location Selection, Work Day, base cooking and rarity/XP/payout Dish Result screens | Existing Canvas/prototype controller | Final UI and remaining screens are unimplemented |
-| Environment | Dormitory scene/model | Scene/environment presentation layer | Reuse undecided |
+| Environment | Dormitory scene/model retained; spatial UI-A4 in progress | Scene-bound board and tray/plate presentation | Other venues/final assets and full UI-A4 acceptance pending |
 | Camera | One camera with cursor-follow script | Gameplay presentation camera | Existing script may be reusable |
 | Input | Input System asset, direct mouse read | Central input bindings | Current asset unwired |
 | Visual effects | URP/Global Volume | Presentation/post-processing profile | Must be validated against Figma |
@@ -468,7 +572,7 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] Static data contains 32 `DishData` assets, 11 `LocationData` assets, and one ordered `LocationCatalog` asset.
 - [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → board → base click cooking → rarity/Dish XP/payout result / day end flow (5B), with Back resetting partial progress and Continue preserving replacement orders without duplicate rewards.
 - [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, final result presentation, complete economy, Player XP/progression, or complete gameplay architecture. Click Strength is the first implemented upgrade (6A); other upgrade effects remain absent.
-- [TBD] Whether the Dormitory environment is retained, adapted, or replaced.
+- [APPROVED DESIGN] Retain the current Dormitory environment and adapt the gameplay presentation to its board/tray/plate; do not replace it. Additional location environments remain a separate content scope.
 
 ## 30. Contradictions and Design Risks
 
@@ -495,7 +599,7 @@ This is a design-to-technical mapping, not existing implementation.
 5. **Dormitory prototype versus restaurant design**
    - [IMPLEMENTED] Current scene/model is Dormitory-based.
    - [DESIGNED] Final locations are restaurant/food-service venues.
-   - [TBD] Prototype reuse decision.
+   - [APPROVED DESIGN — 2026-10-15 synchronization] Retain Dormitory and make its board/plate interactive; other environments and production art remain unimplemented.
 
 6. **Click requirement semantics**
    - [F] Dish data exposes “number of clicks.”
@@ -507,21 +611,21 @@ This is a design-to-technical mapping, not existing implementation.
 ### Critical
 
 - Work-day duration/timer, failure, order timeout, final capacity mapping, and future daily-limit progression. Baseline limit, early finish/discard, generation, selection, completion replacement, and automatic end transition are approved in Sections 6–7 but design approval alone does not establish implementation.
-- Future upgraded click-damage calculations. Base hidden HP and damage are approved in Sections 8–9.
+- Future modifiers beyond implemented 6A Click Strength and the adopted extra-strike contract. Base HP/damage and visible progress are specified in Sections 8–9.
 - Critical, click-hold, and auto-click formulas.
 - Baseline rarity probabilities, dish-XP relationship and payout multipliers are approved/implemented in 5B; future modifiers, persistent progression and localized terminology remain open.
 - Recipe purchase/unlock rules and location unlock rules.
-- Upgrade costs, effects, levels, prerequisites, and caps.
+- Exact prices/ranks/caps/prerequisite graph beyond implemented 6A, plus probability/rounding contracts for the expanded Section 13.2 tree. The source-backed branch scope is no longer wholly TBD.
 - Save/load, New Game, Continue, reset-data behavior.
 - Future economic modifiers/order and spending rules; base payout timing is approved/implemented in 5B.
-- Final environmental/3D content scope and Dormitory prototype decision.
+- Additional environmental/3D content scope; Dormitory retention and spatial board/plate use are decided.
 
 ### Important
 
 - Character, restaurant, and dish XP gain/thresholds/rewards.
 - Player-level interpretation and benefits.
-- Achievement definitions/rewards.
-- Journal content and unlock rules.
+- Achievement trigger/reward semantics and persistence; source rows/numeric reward notation exist in Section 16.
+- Journal unlock/indicator rules and asset completeness; source recipe texts/detail-panel contents exist in Section 17.
 - UI navigation, feedback, transitions, and responsive behavior.
 - Input/device support and accessibility.
 - Audio direction and controls.
@@ -538,7 +642,7 @@ This is a design-to-technical mapping, not existing implementation.
 1. Confirm critical TBD decisions and retain this GDD as the data source.
 2. Define project architecture, state flow, and persistence boundaries.
 3. Establish the conceptual data model for player, locations, dishes, recipes, upgrades, and progression.
-4. Decide the scene/environment foundation and evaluate the Dormitory prototype against final location needs.
+4. Complete the retained Dormitory's spatial board/plate presentation and verify it before extrapolating to other locations.
 5. Build UI navigation foundations: Main Menu, Location Selection, Settings, Pause.
 6. Encode location, dish, recipe, and player-XP data exactly as documented.
 7. Implement work-day and order lifecycle once its unresolved rules are decided.
@@ -552,6 +656,13 @@ This is a design-to-technical mapping, not existing implementation.
 ## 33. Implementation Progress
 
 This checklist records verified Unity implementation without changing the design requirements above. Milestone labels identify the checkpoint that delivered each implemented or partial step.
+
+### Designer synchronization checkpoint — 2026-10-15
+
+- Documentation only: Section 0 establishes Figma-first authority and resolves source conflicts; Sections 1, 7, 9, 13, 16–19 and 21–23 restore designer scope. User decisions: probabilistic extra strike; defer critics' penalty/reset policy. No new Unity verification is claimed.
+- [ ] UI-A4 — scene-bound order sheets, cooking on the actual plate and readable camera/input presentation. Local work exists but the complete acceptance/regression pass is pending; do not mark finished.
+- [ ] Expanded upgrade tree — 27 planned effect families and tiered progression are specified in Section 13.2/proposal Section 12. Only the existing Click Strength slice is implemented/verified.
+- [ ] Critical/hold, extra-strike, automation, additional economy/XP/quality modifiers, achievements, recipe Journal and narrative/critic systems remain unimplemented. Design-source completeness is not implementation completion.
 
 ### Verified foundations
 
@@ -571,7 +682,7 @@ This checklist records verified Unity implementation without changing the design
 - [x] Manual Finish Day clears unfinished orders and temporary day state, returns to Location Selection, and displays a day-finished message; since 5B, ten completions trigger cleanup on result Continue. Earned run-local wallet/Dish XP survive day cleanup. No Finish Day action during cooking/results. — **Milestones 4B/5B**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scenes/SampleScene.unity`
 - [x] Initial Order Board population: location-configured capacity capped at six, uniform random documented candidates, independent duplicate order identities, empty-state handling and separate available/capacity/completed counters. 5B replaces the original unimplemented currency label with a real run-local wallet. — **Milestones 4A/5B**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
 - [x] Single-order reservation and selected-order/dish/location handoff; Back preserves the board without completion/regeneration and resets partial cooking progress. — **Milestones 4A–4B**, same files as initial board population.
-- [x] Base cooking: hidden HP equals `ClickRequirement`, one damage per discrete dish-button click, exact-instance completion at zero, replacement in the same slot before the ten-dish cap, and no replacement at the cap. — **Milestone 4B**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
+- [x] Base cooking: HP equals `ClickRequirement`, one damage per unupgraded discrete dish-button click, exact-instance completion at zero, replacement in the same slot before the ten-dish cap, and no replacement at the cap. HP was hidden at 4B and became visible at UI-A3; 6A applies purchased strength. — **Milestones 4B/6A/UI-A3**; files: `Assets/Scripts/Runtime/PrototypeOrder.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
 - [ ] Partially implemented — Order Board/basic day lifecycle works; final balancing, eligibility, economy, expiry rules and presentation remain unfinished. — **Milestones 4A–4B**
 - [ ] Partially implemented — Basic click cooking works on a large temporary dish placeholder; final close-up dish art, effects, critical/hold/auto-click upgrades and final input support remain unfinished. — **Milestone 4B**
 - [x] Dish Result foundation (5A) is extended in 5B: exact dish identity/name, resolved rarity, earned payout/wallet, Dish XP gain and old/new level/progress; Continue preserves the replacement board without repeat rewards. All ten dishes show results; tenth Continue ends the day. Stale text clears on Continue/end/new day. — **Milestones 5A–5B**; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`, `Assets/Scenes/SampleScene.unity`

@@ -21,7 +21,7 @@ Status vocabulary: **DESIGN SOURCE** = present in designer Figma; **APPROVED** =
 
 | Topic | Current specification / decision | Implementation consequence |
 |---|---|---|
-| Background and order placement | Latest designer instruction plus counter concepts: take paper orders from the actual right-hand 3D board; cook the selected dish on the actual tray/plate. Central floating UI-A3 cards are a previous presentation checkpoint. | UI-A4 is in progress, NOT accepted as complete by this documentation change. |
+| Background and order placement | Latest designer instruction plus counter concepts: take paper orders from the actual right-hand 3D board; cook the selected dish on the actual tray/plate. Central floating UI-A3 cards are a previous presentation checkpoint. | UI-A4 was pending at design synchronization; subsequently implemented/verified below in Sections 21/33. Final food art remains unfinished. |
 | Broad upgrades | FishSim is also a mechanics/progression reference. The current 16 definitions are not a final content cap. See Section 13.2. | Expand in independently verified slices; no sale of effects that do not work. |
 | Double click | APPROVED 2026-10-15: chance of an extra strike on the same dish, not a physical double-click requirement or a second dish/reward. | New future combat effect; existing completed-day and payout identity stay intact. |
 | Other choices disappear | ADOPTED DESIGN: hide/disable the other sheets during close-up cooking, without deleting their order instances. This reconciles the original Figma wording with the later approved reservation/Back contract. | No reroll/discard on selection or Back. |
@@ -32,7 +32,7 @@ Status vocabulary: **DESIGN SOURCE** = present in designer Figma; **APPROVED** =
 
 ### 0.2 Synchronization boundaries
 
-- This checkpoint changes documentation only. It does not implement upgrades, critics, timing, recipes, achievements, story or persistence, and does not certify unfinished UI-A4 work.
+- The source-synchronization checkpoint changed documentation only; it did not implement upgrades, critics, timing, recipes, achievements, story or persistence or certify the then-unfinished UI-A4. Later implementation/verification is recorded separately in Sections 21/33.
 - Keep approved 5B rarity/XP/payout math and 6A Click Strength behavior until a separately reviewed gameplay milestone changes them.
 - FishSim's progression business model means earn → choose an investment → feel its benefit → reach harder content → unlock another branch. This does not approve real-money purchases, advertising, premium currencies or a store monetization model.
 
@@ -448,6 +448,11 @@ Passives / Пассивки
 
 ## 21. UI/UX
 
+- [IMPLEMENTED / VERIFIED — UI-A4, 2026-10-15] Reused the six order buttons as world-space sheets on the actual Dormitory noticeboard. Selection shows a collider-clickable 3D sketch on the existing plate/tray, with visible HP and scene-camera close-up. Other sheets hide during cooking/result; Back restores the same board and resets partial HP through the existing controller. Camera FOV/parallax mode restores on return; pointer-follow is bounded outside the window. No order/reward/balance formula changed.
+- [IMPLEMENTED / VERIFIED — UI-A4 input] The dish target also accepts EventSystem Submit and explicit arrow navigation to/from Back, with a visible input/temporary-art hint. Physical mouse verified carousel wrapping, Cook, sheet selection, HP 8→7, Back/reselect 8/8, eight-click completion, one 8.00 payout/+10 XP, Continue/same replacement, early Finish, fresh identities on a new day, and slot 6 selection. Physical keyboard and standalone build were NOT retested; Submit/move checks are EventSystem callbacks, not physical-key claims.
+- [VERIFIED — UI-A4] Compilation passed with no C# errors; 4,685 existing model, 237 Play Mode, 240 presentation and 10 edge assertions passed. Rendered-frame checks across all 11 locations at 1280×720, 1920×1080, 2560×1440, 1920×1200 and 2560×1080 passed 880 lifecycle/input and 69,391 spatial/text/glyph/raycast assertions. Temporary resolution preset restored. Existing scene blocks removed: zero; Camera only gained a PhysicsRaycaster, authored camera pose/environment/lighting and static dish/location/catalog assets retained. Only pre-existing UVCS configuration errors remained.
+- [PARTIAL PRESENTATION — UI-A4] Sandwich and mug-cake sketches use simple primitives; other dishes use a clearly labeled neutral 3D sketch. World sheets retain temporary illustrations. This is the scene-interaction prototype, not 32 final dish models, final typography/art, other location environments, animation or production UX certification. Files: `Assets/Scripts/UI/CounterScenePresentation.cs`, `Assets/Scripts/UI/CounterDishPointer.cs`, `Assets/Scripts/Editor/UiA4Setup.cs`, `Assets/Tests/Editor/CounterSceneVerification.cs`, `Assets/Scripts/Camera_Move.cs`, existing controller, `Assets/Scenes/SampleScene.unity`, `Assets/Art/Prototype/Materials/`.
+
 - [APPROVED DESIGN PRIORITY — 2026-10-15] Follow the designer's developed Figma visuals and ClickCook descriptions before earlier GDD/developer presentation assumptions. Blue food-pattern/paper/orange styling applies to meta screens; the real 3D counter is the gameplay surface. Use a handwritten accent for short dish titles, readable body/numeric text, and genuine scene-bound sheets/dish targets. Current runtime labels/placeholders are not final art. See Section 0 for conflicts and [UI/UX Specification](ClickCook_UI_UX_Specification.md).
 
 - [IMPLEMENTED / VERIFIED — designer UI-A3 review, 2026-10-12] Current prototype Location Selection menu includes Exit Game. Standalone code calls `Application.Quit`; Editor code stops Play Mode without closing Unity. Native Editor Exit was verified; standalone quit/build is NOT VERIFIED. This does not implement the full Main Menu/Continue/save system.
@@ -546,14 +551,14 @@ This is a design-to-technical mapping, not existing implementation.
 | Locations | Partially implemented: 11 static data assets, ordered catalog, placeholder carousel | Data assets/serializable location definitions | Unlocks, ownership, progress, and income runtime remain TBD/unimplemented |
 | Dishes/recipes | Partially implemented: 32 static dish data assets; no runtime recipe system | Data assets/serializable dish and recipe definitions | Recipe ownership/purchase behavior remains TBD/unimplemented |
 | Orders | Partially implemented: random instances, reservation, completion/replacement, daily cap and cleanup (4B) | PrototypeOrder / PrototypeOrderSession | Final capacities and advanced eligibility remain TBD |
-| Cooking | Partially implemented: base HP, 6A Click Strength, UI-A3 visible HP/click count on a large temporary uGUI dish | Existing prototype controller/session | Final art, effects and other click modifiers remain absent |
+| Cooking | Partially implemented: base HP, 6A Click Strength, visible HP and UI-A4 collider-clickable 3D sketch on the existing plate | Existing controller/session and scene-only CounterScenePresentation/CounterDishPointer | Final art, effects and other click modifiers remain absent |
 | Rarity | Baseline levels 1–18 implemented (5B) | PrototypeDishRewards / approved table | Future modifiers and final reveal presentation |
 | Economy | Partially implemented: exact run-local wallet/payouts (5B), Click Strength purchases (6A) | PrototypeDishRewards / PrototypeOrderSession | Other spending, passive income and persistence |
 | XP | Partially implemented: run-local Dish XP/mastery (5B) | PrototypeDishRewards | Player/restaurant XP, upgrades and persistence |
 | Upgrades | Partially implemented: 16 static definitions; run-local Click Strength purchases and temporary UI (6A) | UpgradeCatalog and existing session/controller | Remaining effects, prerequisites and final tree UI unfinished |
 | Save/load | Not implemented | Persistence service | Format/slots TBD |
 | UI | Partially implemented: temporary uGUI Location Selection, Work Day, base cooking and rarity/XP/payout Dish Result screens | Existing Canvas/prototype controller | Final UI and remaining screens are unimplemented |
-| Environment | Dormitory scene/model retained; spatial UI-A4 in progress | Scene-bound board and tray/plate presentation | Other venues/final assets and full UI-A4 acceptance pending |
+| Environment | Dormitory retained; spatial UI-A4 verified | Scene-bound board and tray/plate presentation | Other venues/final assets remain unfinished |
 | Camera | One camera with cursor-follow script | Gameplay presentation camera | Existing script may be reusable |
 | Input | Input System asset, direct mouse read | Central input bindings | Current asset unwired |
 | Visual effects | URP/Global Volume | Presentation/post-processing profile | Must be validated against Figma |
@@ -565,7 +570,7 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] Product: ClickCook.
 - [IMPLEMENTED] One enabled scene: `Assets/Scenes/SampleScene.unity`.
 - [IMPLEMENTED] Scene roots: Directional Light, Dormitory, Global Volume, Camera, Directional Light (1), and `ClickCook_Prototype`.
-- [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, `ClickCookPrototypeController.cs`, `PrototypeOrder.cs`, `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, and `UpgradeCatalog.cs` (6A).
+- [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, `ClickCookPrototypeController.cs`, `PrototypeOrder.cs`, `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, `UpgradeCatalog.cs` (6A), and scene-only `CounterScenePresentation.cs` / `CounterDishPointer.cs` (UI-A4).
 - [IMPLEMENTED] Camera position approximately `(1.138, 1.184, -2.718)`, 60° perspective FOV, slight mouse-driven rotation.
 - [IMPLEMENTED] Dormitory FBX with two materials and 17 supporting texture maps.
 - [IMPLEMENTED] Global post-processing includes bloom, film grain, vignette, chromatic aberration, and color grading.
@@ -660,7 +665,7 @@ This checklist records verified Unity implementation without changing the design
 ### Designer synchronization checkpoint — 2026-10-15
 
 - Documentation only: Section 0 establishes Figma-first authority and resolves source conflicts; Sections 1, 7, 9, 13, 16–19 and 21–23 restore designer scope. User decisions: probabilistic extra strike; defer critics' penalty/reset policy. No new Unity verification is claimed.
-- [ ] UI-A4 — scene-bound order sheets, cooking on the actual plate and readable camera/input presentation. Local work exists but the complete acceptance/regression pass is pending; do not mark finished.
+- [x] UI-A4 — world-space order sheets on the real board, collider/Submit dish target on the existing plate, visible HP, camera return and same-order Back. Completed and verified after source synchronization on 2026-10-15; evidence/files/remaining art and physical-keyboard/build limitations are recorded in Section 21. No new upgrade effects were added.
 - [ ] Expanded upgrade tree — 27 planned effect families and tiered progression are specified in Section 13.2/proposal Section 12. Only the existing Click Strength slice is implemented/verified.
 - [ ] Critical/hold, extra-strike, automation, additional economy/XP/quality modifiers, achievements, recipe Journal and narrative/critic systems remain unimplemented. Design-source completeness is not implementation completion.
 

@@ -8,7 +8,7 @@
 
 Статус: частково прийнято й реалізовано в 6A (2026-10-12): лише Click Strength, його ціни/ранги/сила та міжденна купівля. Користувач доручив виконати наступний крок і самостійно обрати робочі рішення. Інші ефекти, передумови та нові механіки нижче залишаються DRAFT.
 
-6A використовує один UpgradeCatalog.asset із 16 серіалізованими визначеннями; окремі UpgradeData assets і generalized progress/effects framework не знадобились. Купується тільки click_strength. Перевірки/файли: IMPLEMENTATION_STATUS.md, розділ 6A. Актуальний порядок — завершити незакритий UI-A4, потім окремі profile/save та expanded-tree slices за production roadmap. Нижче збережено початкову дизайн-пропозицію; її майбутні кроки не є звітом про реалізацію.
+6A використовує один UpgradeCatalog.asset із 16 серіалізованими визначеннями; окремі UpgradeData assets і generalized progress/effects framework не знадобились. Купується тільки click_strength. Перевірки/файли: IMPLEMENTATION_STATUS.md, розділ 6A. UI-A4 завершено й перевірено 2026-10-15, без нових upgrade effects. Далі окремі 7A/7B profile/save та expanded-tree slices за roadmap. Нижче збережено початкову дизайн-пропозицію; її майбутні кроки не є звітом про реалізацію.
 Дата: 2026-10-08. База: Milestone 5B, Git 8be8222.
 Авторитетний документ: [ClickCook_GDD.md](ClickCook_GDD.md), §9, §10, §13, §14.
 Цей документ не змінює затверджені правила GDD. Усі нові числа, передумови й формули нижче — власна балансувальна пропозиція, а не правила FishSim чи доведений оптимальний баланс.
@@ -279,4 +279,4 @@ Imperial — лише умовний економічний приклад: йо
 6. U5: XP/value/discount/passive/bonus families по готовності їхніх базових систем; окремі receipts/save та idempotent achievement grants.
 7. U6: quality modifiers після точного probability-контракту; нормалізація/межі й узгодження source achievement units.
 
-Спочатку закрити UI-A4; profile/save не пропускати перед production-прогресією. U0–U6 — планування, не виконані milestones. Широке дерево залишається вимогою продукту, навіть якщо його runtime впроваджується маленькими частинами.
+UI-A4 закрито окремим перевіреним presentation milestone 2026-10-15; profile/save не пропускати перед production-прогресією. U0–U6 — планування, не виконані milestones. Широке дерево залишається вимогою продукту, навіть якщо його runtime впроваджується маленькими частинами.

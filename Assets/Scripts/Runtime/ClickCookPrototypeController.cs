@@ -300,7 +300,7 @@ namespace ClickCook.Runtime
             RefreshOrderBoard();
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(true);
-            FocusUi(cookingDishButton);
+            FocusUi(cookingDishButton.gameObject.activeInHierarchy ? cookingDishButton : backToBoardButton);
         }
 
         public void BackToBoard()
@@ -389,7 +389,8 @@ namespace ClickCook.Runtime
         {
             dayWalletText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
             dayCompletedText.text = $"Приготовано: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}";
-            orderBoardStatusText.text = $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
+            bool physicalBoard = orderButtons[0].GetComponentInParent<Canvas>(true)?.renderMode == RenderMode.WorldSpace;
+            orderBoardStatusText.text = (physicalBoard ? "Дошка праворуч · " : string.Empty) + $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
                 (session.Orders.Count == 0 ? "\nНемає доступних замовлень" : string.Empty);
             for (int i = 0; i < orderButtons.Length; i++)
             {
@@ -424,6 +425,8 @@ namespace ClickCook.Runtime
 
         private void LayoutOrderCards()
         {
+            var canvas = orderButtons[0].GetComponentInParent<Canvas>(true);
+            if (canvas != null && canvas.renderMode == RenderMode.WorldSpace) return;
             int count = session.BoardCapacity;
             int columns = Mathf.Min(3, count);
             bool compact = count > 3;

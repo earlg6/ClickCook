@@ -7,9 +7,9 @@
 - Expanded upgrade design: 27 planned effect families (existing 16 plus 11 extensions), connected/tiered progression, manual/critical/hold/extra-strike/automation/economy/XP/quality paths. Only Click Strength remains implemented and verified. The original 16-family draft is not a final content cap; its unimplemented numbers are still proposed balance.
 - User approved: double strike is a chance of one extra hit on the same dish, without another portion/reward; critics remain part of the design but activation and career penalties/reset scope require separate approval. No reset behavior was authorized.
 - Spatial presentation target: actual right-hand noticeboard sheets and cooking on the existing tray/plate, superseding UI-A3's floating central-card layout as the final target. UI-A3 verification below remains historical evidence, not verification of the new presentation.
-- UI-A4 has pre-existing local script/scene/art/test work. Full verification/documentation/Git checkpoint is not complete; no new [x] or Unity pass is claimed here. Existing unrelated settings changes and all unfinished UI-A4 changes were preserved.
+- At source synchronization UI-A4 had pre-existing local script/scene/art/test work, not a complete acceptance pass. It was subsequently completed/verified in the separate UI-A4 report below; the documentation-only synchronization itself did not certify it. Existing unrelated settings changes were preserved.
 - Documentation changed: ClickCook_GDD.md, ClickCook_Upgrade_Design_Proposal.md, ClickCook_UI_UX_Specification.md, ClickCook_Production_Roadmap.md, IMPLEMENTATION_STATUS.md. No gameplay code, data, scene, Figma or settings were changed by this synchronization task.
-- Next implementation checkpoint: finish and verify UI-A4 only; then follow the profile/save and expanded-tree dependency plan. Do not automatically implement U0–U6 or mark the whole tree complete.
+- The next checkpoint at synchronization was UI-A4; after its completion below, the next separate implementation is 7A profile/stable IDs. Do not automatically implement U0–U6 or mark the whole tree complete.
 - Documentation verification: scoped `git diff --check` passed; original location/dish/rarity tables in GDD Sections 5/8/11 compare unchanged against HEAD; expanded tree contains 27 unique family IDs; achievement table contains 25 entries; Markdown fences/local document links passed checks. No Unity compilation/Play Mode test was run for this documentation-only task. Existing scene-diff whitespace warnings were not edited.
 
 ## Completed milestones
@@ -468,6 +468,41 @@ The user explicitly requested Exit in the menu, visible dish HP/click progress a
 
 Next separate roadmap step remains 7A (run-local player profile/stable IDs), unless the user chooses another UI refinement. Final dish illustrations and standalone Quit verification are explicitly pending.
 
-## Documentation policy
+## UI-A4 — Scene-bound board and plate interaction (2026-10-15)
+
+Completed the existing local work rather than rebuilding the prototype. Six existing order buttons now belong to a world-space Canvas anchored to the actual Dormitory noticeboard. Board capacity/pool/duplicate rules are unchanged. Selecting a sheet displays the exact selected dish on the existing plate/tray; sheets hide during close-up/result and return unchanged on Back. The old floating plate/cooking button remains inactive, with serialized bindings preserved.
+
+- `CounterScenePresentation` handles only scene presentation: environment anchors, 2–6 sheet layout, temporary dish variant, camera look-at/FOV and parallax suspension/restoration. Board framing uses a 12-degree presentation yaw, leaving the authored camera pose unchanged. Mouse-follow normalization clamps outside-window coordinates to keep the counter bounded.
+- `CounterDishPointer` routes native collider pointer clicks and EventSystem Submit through the existing cooking guard. Explicit arrow navigation connects the dish target with Back; the hint distinguishes temporary 3D art and shows keyboard input while focused. No new damage/reward/order architecture or upgrade effect.
+- Simple sandwich and mug-cake sketches reuse six new URP materials; other dishes use a labeled neutral sketch. Final food models/card illustrations and other location environments remain unimplemented.
+
+### Files
+
+- Created `Assets/Scripts/UI/CounterScenePresentation.cs`, `Assets/Scripts/UI/CounterDishPointer.cs`, `Assets/Scripts/Editor/UiA4Setup.cs`, `Assets/Tests/Editor/CounterSceneVerification.cs` and their `.meta` files. Authoring helpers are explicit stopped-Editor operations; tests are MCP-invoked Editor checks, not registered NUnit tests.
+- Created six materials and `.meta` files under `Assets/Art/Prototype/Materials/`, plus folder metadata for Art/Prototype/Materials.
+- Modified `Assets/Scripts/Runtime/ClickCookPrototypeController.cs` (world-space layout bypass, board hint, safe initial focus), `Assets/Scripts/Camera_Move.cs` (read-only cursor rotation and normalized input bounds), and `Assets/Scenes/SampleScene.unity`.
+- Updated GDD, this tracker, roadmap, UI/UX specification and the upgrade proposal's next-step notes. No changes to DishData, LocationData, catalogs, environment meshes/materials, Packages or project settings in this milestone. Pre-existing settings diffs remain excluded.
+
+### Verification executed
+
+- Unity 6000.3.14f1 compilation PASS, no C# failures. Existing regression: 4,685 model assertions (32 dishes × 16 strength ranks), 237 Play Mode, 240 presentation/lifecycle and 10 empty/mastery edge assertions PASS.
+- Frame-settled world-space verification ran all 11 locations at every rendered/input size below. It tests paper corners, topmost rays, text/glyphs, HUD bounds, exact selected instance, one active order, Submit/arrow event routing, Back/no regeneration/reset HP, Finish cleanup, transient empty/independent-duplicate fixtures, ten results/replacements and stale callbacks. These are automated events, NOT physical input claims.
+
+| Actual render size | Lifecycle/input assertions | Spatial/text/glyph/raycast assertions | Result |
+|---|---:|---:|---|
+| 1280×720 | 176 | 13,812 | PASS |
+| 1920×1080 | 176 | 13,851 | PASS |
+| 2560×1440 | 176 | 13,918 | PASS |
+| 1920×1200 | 176 | 13,905 | PASS |
+| 2560×1080 | 176 | 13,905 | PASS |
+
+- Native Computer Use mouse PASS: carousel 0→10→0, Cook, physical sheet → correct mug-cake order, actual 3D dish HP 8→7, Back preserving both IDs and completed=0, reselect HP=8, eight physical clicks → Common result/8.00 wallet/+10 XP/one completion, Continue retaining the replacement IDs without payment, Finish clearing orders and retaining earned wallet, and a fresh day with fresh IDs/completed=0. A six-card location was prepared through MCP, then native mouse selected slot 6/Imperial (70,000 HP), returned with Back and finished; no physical late-dish completion is claimed.
+- Initial diagnostics found an offscreen third-sheet edge at fixed 720p; adjusted the board-only camera yaw and reran the complete five-size matrix successfully. Two simultaneous Game Views initially produced conflicting camera/input aspect contexts; final tests targeted the intended maximized Game View and checked actual render/input dimensions. Original resolution preset was restored before stopping Play Mode.
+- Existing scene blocks removed: zero; 23 existing blocks changed, all prototype presentation except the Camera GameObject gaining a PhysicsRaycaster. Original Dormitory objects, camera Transform, lights and URP volume retained. No static gameplay asset diff. Scene saved outside Play Mode; Play Mode stopped.
+- Console contains only the known Plastic/UVCS client configuration error; no new ClickCook runtime exception observed. No standalone build/quit or physical-keyboard retest was executed. Runtime Submit/move was tested through EventSystem, not synthetic keys presented as real hardware. Full production typography/art/performance acceptance remains later work.
+
+Next separate milestone: 7A — in-memory player profile/stable IDs, followed by 7B persistence. Expanded tree U0–U6 remains planned, not implemented.
+
+## Documentation policy (ongoing)
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

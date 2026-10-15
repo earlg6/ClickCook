@@ -1,5 +1,7 @@
 # ClickCook — roadmap до production
 
+**Останній checkpoint — 7A, 2026-10-15: виконано й перевірено.** Єдиний run-local PlayerProfile володіє wallet/Dish XP/рангами; день/екрани відокремлені; стабільні наявні ID, незалежний read-only snapshot. Прогрес переживає перезавантаження SampleScene, але не перезапуск гри. Деталі перевірок/файли — IMPLEMENTATION_STATUS.md. Наступний окремий крок — 7B save/load; recovery/New Game/reset/pause правила закрити перед реалізацією. Нижчі згадки «наступний 7A» описують попередні checkpoints.
+
 ## Поточний пріоритет — синхронізація Figma/GDD, 2026-10-15
 
 Figma/FigJam дизайнера має вищий пріоритет за ранні трактування GDD; останні явні рішення користувача уточнюють Figma. Див. GDD §0, §13.2 та upgrade proposal §12. FishSim визначає і ширину/механіки прогресії, не лише стиль. Нижче початкові факти аудиту 2026-10-12 залишені історичними; ця синхронізація не є новою Unity compilation/Play Mode перевіркою.
@@ -90,7 +92,7 @@ Gate R0: один погоджений release brief; окремий списо�
 | UI-A2 — виконано | OrderCard/HUD, Cooking і Dish Result поверх середовища у стилі референсу 5; тимчасові ескізи | 7, 9–11, 21–23 | UI-A1 | 237 regression + 240 presentation + 10 edge + 795 layouts/raycast/focus checks PASS; нативний цикл мишею PASS; daily count окремо від capacity, XP bar із реальних даних |
 | UI-A3 — виконано | Exit у поточному меню; HP/click count; центральні великі 2–6 картки з підписаною майстерністю | 7, 9, 21 | Погоджені правки користувача після тесту UI-A2 | Compilation, 237 regression + 240 presentation + 30 review + 980 layout/input checks PASS; native HP/Back/Exit Editor PASS; standalone quit ще перевірити |
 | UI-A4 — виконано | Аркуші на справжній дошці праворуч; 3D-ескіз на реальній тарілці; camera/pointer/Submit/HP | 0, 7, 9, 21–23 | Завершено існуючу локальну роботу; без зміни gameplay math | Compilation, 4685 model + 237 Play + 240 presentation + 10 edge PASS; 11 locations × 5 sizes, 880 lifecycle + 69391 spatial/text checks PASS; native mouse board/cook/Back/result/Finish і slot 6 PASS; physical keyboard/build не перевіряли |
-| 7A | Єдиний профіль гравця й відокремлення даних дня від довготривалого прогресу | 20, 26–27 | 6A; політика відновлення | Wallet, Dish XP і ранги мають стабільні ID та snapshot; один власник стану |
+| 7A — виконано | Єдиний in-memory профіль гравця й відокремлення даних дня від прогресу | 20, 26–27 | 6A; disk recovery лишається 7B | Wallet, Dish XP і ранги мають стабільні ID та незалежний snapshot; один run-власник; scene reload/fresh run перевірено |
 | 7B | Save/load, Main Menu, Continue/New Game/Reset та мінімальний Pause, використовуючи UI-A компоненти | 3–4, 18–20 | 7A; погоджені save/pause правила | Перезапуск відновлює прогрес; збої запису не знищують останній валідний save; UI states відповідають save status |
 | U0 | Точний graph/баланс першої нової гілки, stable IDs усіх планових сімейств, розділення rank і achievement source | 0, 13.2, 16 | Upgrade proposal §12; без runtime продажу неготових ефектів | Визначені ціна/ефект/rounding/передумови майбутнього slice; немає циклів або несумісного перейменування 6A |
 | U1 | Широке дерево, node detail, active statistics, zoom/pan; робочий Click Strength і чесно недоступні інші ефекти | 13, 21 | U0, чинна purchase логіка; 7B для production retention | Mouse/keyboard навігація; Buy/locked/unaffordable/max/unimplemented розрізняються; жодних фіктивних продажів |
@@ -148,7 +150,7 @@ UI-A4 завершено окремою реалізацією після док
 
 ## 6. Persistence — рання обов'язкова залежність
 
-Нинішній controller створює PrototypeOrderSession, а session володіє Rewards. Рекомендація: вводити власника PlayerProfile під час 7A, залишаючи окремий WorkDaySession. Не будувати загальний framework і не переписувати весь прототип одним кроком.
+7A виконано: PlayerProfileRuntime володіє PlayerProfile, який містить єдиний Rewards та ранги; controller створює PrototypeOrderSession із цим профілем. Session зберігає тільки тимчасовий день/замовлення/result. Незалежний snapshot містить wallet/Dish XP/ранги за чинними ID. Scene reload перевірено без втрати прогресу чи перенесення незавершених замовлень; новий запуск починається з нуля. Це не disk persistence або рішення interrupted-save recovery. Не будувати загальний framework і не переписувати весь прототип одним кроком.
 
 Зберігати:
 - версію схеми, wallet, XP/прогрес за стабільними dish/location/upgrade ID;
@@ -256,4 +258,4 @@ Performance оцінювати на цільовому обладнанні у b
 
 Початковий огляд створив лише цей roadmap. Пізніше UI-A1 додав пов'язану UI/UX специфікацію, Unity UI assets/код, оновлення SampleScene та перевірки; gameplay data, середовище, project settings і Figma не змінено.
 
-Після завершеного UI-A4 найближчий рекомендований implementation checkpoint — 7A profile/stable IDs. Потім 7B та U0–U6 за залежностями. Основний результат після 7B — заробіток, покупка й повернення до збереженого прогресу в окремій збірці; широкий upgrade UX не відкладається до готовності всіх останніх ефектів. Не починати наступний крок автоматично.
+Після завершеного 7A найближчий рекомендований implementation checkpoint — 7B save/load і відповідні menu/recovery правила. Потім U0–U6 за залежностями. Основний результат після 7B — заробіток, покупка й повернення до збереженого прогресу в окремій збірці; широкий upgrade UX не відкладається до готовності всіх останніх ефектів. Не починати наступний крок автоматично.

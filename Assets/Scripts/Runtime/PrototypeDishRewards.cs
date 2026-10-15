@@ -28,7 +28,7 @@ namespace ClickCook.Runtime
         }
     }
 
-    /// <summary>Run-local wallet and per-dish mastery. No persistence or player XP.</summary>
+    /// <summary>Profile-owned run-local wallet and per-dish mastery. No persistence or player XP.</summary>
     public sealed class PrototypeDishRewards
     {
         public const int MaximumDishLevel = 18;
@@ -45,6 +45,8 @@ namespace ClickCook.Runtime
         private readonly Dictionary<int, int> dishXp = new();
 
         public decimal Wallet { get; private set; }
+
+        internal Dictionary<int, int> CopyDishXp() => new(dishXp);
 
         internal bool TrySpend(decimal amount)
         {

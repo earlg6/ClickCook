@@ -503,6 +503,36 @@ Completed the existing local work rather than rebuilding the prototype. Six exis
 
 Next separate milestone: 7A — in-memory player profile/stable IDs, followed by 7B persistence. Expanded tree U0–U6 remains planned, not implemented.
 
+## Milestone 7A — run-owned player profile and stable IDs — completed 2026-10-15
+
+### Implemented scope and files
+
+- New `Assets/Scripts/Runtime/PlayerProfile.cs`: owns one existing `PrototypeDishRewards` component (wallet/Dish XP) and ranks keyed by stable upgrade ID. A profile-wide active-day guard prevents concurrent days and purchases through another session while a day is active.
+- New `Assets/Scripts/Runtime/PlayerProfileRuntime.cs`: run-lifetime owner, not a screen/controller owner. SubsystemRegistration resets it for a new run; no disk I/O or persistent Unity object is required.
+- New `Assets/Scripts/Runtime/PlayerProfileSnapshot.cs`: detached read-only copies of exact decimal wallet, numeric dish-ID→XP and upgrade-ID→rank. No Unity asset references, active orders, results or location ownership. This is an in-memory boundary, not a save/restore format.
+- Modified `Assets/Scripts/Runtime/PrototypeOrderSession.cs`: injected profile, existing UI/rewards facade retained, Click Strength rank delegated to profile; day cleanup releases only its own active-day ownership. Default constructor still creates an isolated fresh profile for fixtures.
+- Modified `Assets/Scripts/Runtime/PrototypeDishRewards.cs`: internal XP-copy helper only; probabilities, rewards and XP formulas unchanged.
+- Modified `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`: binds the run profile in Awake; OnDestroy clears its temporary day without deleting earned progress.
+- New `Assets/Tests/Editor/PlayerProfileVerification.cs`; Unity generated `.meta` for each of the four new scripts. Documentation updated: GDD, this tracker and Production Roadmap.
+- Identity policy reuses existing authored DishId, upgrade string IDs and catalog level keys 0–10; no assets renumbered. Location level remains a lookup key, not an inferred player-level gate. Future location/recipe/achievement progress is not invented or stored now.
+
+### Executed Unity verification
+
+- Unity MCP compilation: succeeded, no C# failures.
+- New isolated profile tests: **58 PASS** — all 32 dish IDs, 11 unique ordered location keys, unique upgrade definitions, fresh profile, same-profile sessions, concurrent-day/purchase guards, foreign/stale quotes, single receipt, exact debit, day replacement, snapshot isolation/mutation rejection, null profile/location, discarded-order callbacks.
+- Existing model regression: **4,685 PASS**, all 32 dishes × 16 strength ranks (512 exact cooking cases).
+- Fresh Play Mode regression: **237 PASS** — all 11 locations before/after purchases, ten-dish day, carousel wrap, Cook/Back/Continue/Finish and repeat callback guards. Existing Back raycast/pointer test: **3 PASS**.
+- Actual SampleScene reload in Play Mode: **14 PASS** — new controller/session retained the same funded profile and purchased ranks/XP; old unfinished order invalidated; a fresh day started and finished without additional rewards. No scene asset write occurred.
+- Existing UI presentation **240 PASS**, empty-pool/mastery-cap fixtures **10 PASS**.
+- Existing rendered-frame scene runner: **176 lifecycle/input + 14,036 spatial/text/glyph/raycast assertions PASS**, all 11 locations, physical board/plate targets, same-order Back, exact completion/replacement, ten receipts and cleanup at the current Game View size. This was not a repeat of the five-resolution UI-A4 matrix. The runner was initially stalled by Unity's normal unfocused Game View behavior; `Application.runInBackground` was temporarily enabled at runtime and restored to false before stopping. No project setting was edited.
+- A second fresh Play Mode entry explicitly verified zero wallet, empty XP/rank snapshots, no active day and the controller bound to the run owner. Play Mode then stopped; SampleScene clean. The domain-reload-disabled configuration itself was not toggled/tested; the SubsystemRegistration reset hook is present.
+- No new ClickCook runtime exceptions observed. Only the pre-existing Plastic/UVCS missing client configuration exception remains. These tests used Unity MCP, model calls and EventSystem/button callbacks; no new physical keyboard/mouse or standalone build test is claimed.
+- `SampleScene`, static data, environment, packages and UI assets unchanged. Four pre-existing settings edits remain preserved and excluded from the checkpoint: PC_RPAsset, UniversalRenderPipelineGlobalSettings, ProjectSettings and UnityConnectSettings.
+
+### Intentionally unfinished / next step
+
+7A is complete only for run-local progress ownership. No save file, restore, autosave, New Game/reset UI, Player/Restaurant XP, new upgrade effects or balance changes. Expanded tree and other systems remain pending. Next separate milestone: **7B — local save/load and associated menu/recovery behavior**, after explicitly documenting the interrupted-day/New Game/reset/pause policies. Do not start 7B automatically.
+
 ## Documentation policy (ongoing)
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

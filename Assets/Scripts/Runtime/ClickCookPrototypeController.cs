@@ -64,7 +64,7 @@ namespace ClickCook.Runtime
         private UpgradePurchaseQuote displayedUpgradeQuote;
         private bool refreshUpgradeNextFrame;
 
-        private readonly PrototypeOrderSession session = new();
+        private PrototypeOrderSession session;
         private PrototypeOrder displayedCookingOrder;
         private int currentLocationIndex;
 
@@ -83,6 +83,7 @@ namespace ClickCook.Runtime
 
         private void Awake()
         {
+            session = new PrototypeOrderSession(PlayerProfileRuntime.Current);
             if (!HasRequiredReferences() || !session.ConfigureUpgrades(upgradeCatalog))
             {
                 Debug.LogError("ClickCook prototype is missing required scene references.", this);
@@ -113,6 +114,12 @@ namespace ClickCook.Runtime
             cookingPrototypeScreen.SetActive(false);
             ClearDishResult();
             RefreshLocationSelection();
+        }
+
+        private void OnDestroy()
+        {
+            // A view/scene can disappear without deleting the run's earned profile progress.
+            session?.EndDay();
         }
 
         private bool HasRequiredReferences()

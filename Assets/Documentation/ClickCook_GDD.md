@@ -443,7 +443,9 @@ Passives / Пассивки
 
 - [DESIGNED] Main menu contains Continue and New Game.
 - [DESIGNED] Settings contains Reset Data.
-- [IMPLEMENTED] No save/load code, PlayerPrefs usage, data model, or save UI exists in Unity.
+- [IMPLEMENTED / VERIFIED — 7A, 2026-10-15] One in-memory `PlayerProfile` owns the existing rewards wallet/Dish XP and upgrade ranks. `PlayerProfileRuntime` owns it for the run, independently of screen/scene instances. `PrototypeOrderSession` owns only temporary day/orders/results and references that profile. Ending a day or reloading SampleScene clears unfinished orders, not earned profile progress. Only one day per profile can be active; existing purchase/receipt guards remain intact.
+- [IMPLEMENTED / VERIFIED — 7A] `PlayerProfileSnapshot` captures detached read-only decimal wallet, XP by existing numeric `DishData.DishId`, and ranks by existing `UpgradeDefinition.Id`. No Unity object/order/session references are included. The existing unique documented location levels 0–10 remain catalog lookup keys, not player-level unlock rules; there is no location progress to snapshot yet. Keep authored IDs stable; renaming display labels must not renumber identity. No static assets were changed.
+- [NOT IMPLEMENTED] Disk save/load, PlayerPrefs, serialization/restore/migrations and save UI. A fresh application/Play run starts with zero wallet/XP/ranks. The in-memory snapshot is not an approved file schema. Interrupted-day loading, New Game and reset policies remain 7B decisions; scene-lifetime cleanup in 7A does not decide recovery from a disk save.
 - [TBD] Save slots, autosave points, serialization scope, cloud support, New Game overwrite behavior, Continue fallback behavior, reset scope, and version migration.
 
 ## 21. UI/UX
@@ -540,6 +542,8 @@ Passives / Пассивки
 | Upgrade | Tree node/name/dependencies | Ownership/level/effect | Costs/caps/prerequisites |
 | Achievement | UI row/reward slot | Progress/unlocked state | Names/rules/rewards |
 | Journal Entry | Collection presence | Linked content/unlock state | Types/content |
+
+7A implementation subset: `PlayerProfile`/`PlayerProfileRuntime`/`PlayerProfileSnapshot` under `Assets/Scripts/Runtime/`. Only wallet, Dish XP and the already playable Click Strength rank exist; the other conceptual Player fields above are still unimplemented. The existing reward implementation remains the profile-owned subcomponent, not a second wallet or second XP store.
 
 ## 28. Unity Implementation Mapping
 
@@ -709,6 +713,7 @@ This checklist records verified Unity implementation without changing the design
 - [x] Click Strength purchase/damage slice: ranks 0–15, exact decimal prices/debit, between-day UI, session-bound quote and duplicate-callback guards, cross-day retention and fresh-run reset. — **Milestone 6A**; files: `Assets/Scripts/Data/UpgradeCatalog.cs`, `Assets/Data/UpgradeCatalog.asset`, existing session/rewards/controller, `Assets/Scenes/SampleScene.unity`; checks: `Assets/Tests/Editor/Milestone6AVerification.cs`.
 - [ ] Partially implemented — 16 upgrade definitions and Click Strength work; remaining 15 effects, prerequisites, connected tree/statistics UI and persistent ownership are unfinished. — **Milestone 6A**
 - [ ] Save/load, New Game, Continue, and Reset Data behavior are not implemented.
+- [x] Run-owned in-memory player profile, stable authored IDs and detached read-only snapshot; wallet/Dish XP/Click Strength ownership survive day and SampleScene/controller replacement, while temporary orders do not. Cross-session active-day and stale-purchase guards verified; fresh Play starts empty. — **Milestone 7A (2026-10-15)**. Files: `Assets/Scripts/Runtime/PlayerProfile.cs`, `PlayerProfileRuntime.cs`, `PlayerProfileSnapshot.cs`, existing `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, `ClickCookPrototypeController.cs`; checks: `Assets/Tests/Editor/PlayerProfileVerification.cs`, existing 6A/UI-A2/CounterScene verification. Disk persistence and the rest of Player progression remain unfinished.
 - [ ] Achievements are not implemented.
 - [ ] Journal is not implemented.
 - [ ] Settings are not implemented.

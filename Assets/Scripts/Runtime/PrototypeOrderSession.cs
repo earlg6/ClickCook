@@ -33,10 +33,11 @@ namespace ClickCook.Runtime
         public bool IsDayActive { get; private set; }
         public IReadOnlyList<PrototypeOrder> Orders => readOnlyOrders;
         public PrototypeOrder ActiveOrder { get; private set; }
-        public PrototypeDishRewards Rewards { get; } = new();
+        public PlayerProfile Profile { get; }
+        public PrototypeDishRewards Rewards => Profile.Rewards;
         public PrototypeDishResult LastResult { get; private set; }
         private UpgradeCatalog upgradeCatalog;
-        public int ClickStrengthRank { get; private set; }
+        public int ClickStrengthRank => Profile.GetUpgradeRank(UpgradeCatalog.ClickStrengthId);
         public int ClickDamage => UpgradeCatalog.ClickDamageAtRank(ClickStrengthRank);
 
         public bool ConfigureUpgrades(UpgradeCatalog catalog)
@@ -50,7 +51,7 @@ namespace ClickCook.Runtime
         {
             quote = null;
             // Other catalog entries remain unavailable until their effects are implemented.
-            if (IsDayActive || id != UpgradeCatalog.ClickStrengthId || upgradeCatalog == null || !upgradeCatalog.IsValid) return false;
+            if (Profile.HasActiveDay || id != UpgradeCatalog.ClickStrengthId || upgradeCatalog == null || !upgradeCatalog.IsValid) return false;
             var definition = upgradeCatalog.Find(id);
             if (ClickStrengthRank >= definition.MaximumRank) return false;
             quote = new UpgradePurchaseQuote(this, ClickStrengthRank, definition.PriceForNextRank(ClickStrengthRank));
@@ -61,22 +62,24 @@ namespace ClickCook.Runtime
         {
             if (quote == null || quote.Owner != this || quote.OwnedRank != ClickStrengthRank ||
                 !TryQuoteUpgrade(UpgradeCatalog.ClickStrengthId, out var current) ||
-                quote.Price != current.Price || !Rewards.TrySpend(current.Price)) return false;
-            ClickStrengthRank++;
-            return true;
+                quote.Price != current.Price) return false;
+            return Profile.TryPurchaseClickStrength(quote.OwnedRank, current.Price);
         }
 
-        public PrototypeOrderSession()
+        public PrototypeOrderSession() : this(new PlayerProfile()) { }
+
+        public PrototypeOrderSession(PlayerProfile profile)
         {
+            Profile = profile ?? throw new System.ArgumentNullException(nameof(profile));
             readOnlyOrders = orders.AsReadOnly();
         }
 
         public void StartDay(LocationData location, int capacity)
         {
             EndDay();
+            if (location == null || !Profile.TryBeginDay(this)) return;
             SelectedLocation = location;
             BoardCapacity = Mathf.Clamp(capacity, 0, MaximumBoardCapacity);
-            if (location == null) return;
             IsDayActive = true;
 
             var candidates = GetValidCandidates();
@@ -154,6 +157,7 @@ namespace ClickCook.Runtime
             CompletedDishes = 0;
             IsDayActive = false;
             LastResult = null;
+            Profile.ReleaseDay(this);
         }
 
         private List<DishData> GetValidCandidates()

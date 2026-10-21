@@ -533,6 +533,33 @@ Next separate milestone: 7A — in-memory player profile/stable IDs, followed by
 
 7A is complete only for run-local progress ownership. No save file, restore, autosave, New Game/reset UI, Player/Restaurant XP, new upgrade effects or balance changes. Expanded tree and other systems remain pending. Next separate milestone: **7B — local save/load and associated menu/recovery behavior**, after explicitly documenting the interrupted-day/New Game/reset/pause policies. Do not start 7B automatically.
 
+## Scoped burger presentation and updated Dormitory recovery — completed 2026-10-21
+
+### Preserved scene / repair
+
+- The user manually replaced `Assets/Models/Snene_Dormitory/Dormitory.fbx`, its GUID/import mappings and materials, created a variant prefab, and moved the scene camera/environment. The old GUID left the board's two paper renderers and Plate unbound, causing CounterScenePresentation's required-reference guard to disable scene interaction.
+- Before editing, copied the exact saved SampleScene/metadata and entire current environment folder to local `ArtSource/Recovery/Dormitory_BeforeRepair_2026-10-21/`; README records the snapshot. This recovery copy is outside Assets and excluded from the Git checkpoint. The new FBX is retained byte-for-byte: SHA-256 `C9C44279EC2325D619DBAD0C95B2C0CE58805334B3077616F55E6DAFC82F3149` matches the backup.
+- Rebound `boardPaperLeft`, `boardPaperRight` and `plate` to the replacement model's Sticker_1, Sticker_2 and Plate. CounterScenePresentation derives board orientation from the paper mesh's thinnest axis, facing the existing camera; the new FBX uses different local axes. Real world-space sheets and plate-based dish positioning work again.
+- Unity's RemoveUnusedOverrides removed 152 unresolved modifications targeting the deleted import, retaining 17 live overrides. All 39 environment transforms were compared unchanged. New model/prefab/materials, camera position `(0.95, 3.96, -3.22)` and authored rotation, lighting/volume and existing UI hierarchy preserved. Saved SampleScene reopened with valid bindings, zero missing scripts; all 38 environment renderers have valid meshes/materials/supported shaders.
+
+### Previously interrupted burger request completed
+
+- Preserved the existing Blender-authored FBX and color atlas. New `Assets/Models/Food/Burger/BurgerAssembly.prefab` groups 15 meshes / 1,306 triangles into six stages, with all nine sesame meshes traveling with the top bun. `Burger_URP.mat` uses the shared 512×512 atlas.
+- New `Assets/Scripts/UI/BurgerAssemblyPresentation.cs`: bottom bun initially present; subsequent layers descend from above as accepted HP damage advances. Short settle/squash feedback is presentation only. Back resets the visual, result completes it, stronger damage skips visual thresholds correctly; no extra reward/cooking action is generated.
+- Modified `CounterScenePresentation.cs` and `CounterDishPointer.cs`: Dish ID 6 uses the burger; other dishes retain their current sketches. A compact left-side burger name panel and slightly adjusted burger look-at clear the ingredient area. The original large title initially obscured the falling top bun; the targeted presentation adjustment resolved it.
+- New explicit authoring helper `Assets/Scripts/Editor/BurgerAssemblySetup.cs`, new `Assets/Tests/Editor/BurgerAssemblyVerification.cs` and script metadata. Existing `CounterSceneVerification.cs` now includes the burger as the fourth visual variant; its former three-sketch-only assertion was obsolete and updated.
+- Static DishData/LocationData/catalogs, HP/damage, rarity, payout, XP and profile formulas unchanged. This is an out-of-roadmap presentation/repair checkpoint; 7B remains unstarted.
+
+### Verification executed
+
+- Unity compilation PASS; no C# failures. Existing model **4,685 PASS**, profile/IDs **58 PASS**, fresh Play Mode loop **237 PASS**, UI presentation **240 PASS**, empty/mastery edge **10 PASS**.
+- New burger checks **48 PASS** in the updated environment: six stages/sesame grouping, accepted pointer click, HP-driven motion, Back/reset/same identity, one completion/payment, stale Submit guard, cleanup/fallback collider and max-strength one-hit assembly. Max-strength coverage used a disposable Editor-only wallet/purchase fixture; no asset/player save was edited.
+- All 11 locations passed frame-settled CounterScene checks at actual input/render sizes: 1280×720 (**176 + 14,140**), 1920×1080 (**176 + 14,133**), 2560×1440 (**176 + 14,123**), 1920×1200 (**176 + 14,107**) and 2560×1080 (**176 + 14,188**). Total **880 lifecycle/input + 70,691 spatial/text/glyph/raycast assertions**. The first 720p run reported a one-off sheet raycast failure; subsequent inspection found all sheet rays valid and a complete repeated 720p run passed. No assertion was removed or relaxed for it. Temporary size preset restored before stopping; runtime-only runInBackground restored to false.
+- Native Computer Use mouse PASS in the new scene: a location-2 board prepared through MCP; native burger sheet selection, HP 42→41/descending patty, Back with all three IDs unchanged and no payment, native reselect resetting HP/assembly, final native click after 41 MCP cooking callbacks, Common burger result/40.00 wallet/+10 XP/one completion, native Continue preserving replacement/other IDs and wallet, native Finish clearing the day and retaining earned wallet. This was mixed MCP/native verification, not 42 physical clicks. The new counter, ingredient poses, unobscured name layout and result were visually inspected. Physical keyboard and standalone build were not retested.
+- Only the known pre-existing Plastic/UVCS client configuration exceptions remain; no new ClickCook runtime exception observed. Play Mode stopped, scene saved clean. Existing four settings edits, other-chat art sources/reference documents and the local recovery snapshot remain separate from the runtime checkpoint.
+
+Documentation synchronized: GDD, this tracker, Production Roadmap and UI/UX Specification. Next numbered milestone stays **7B**; do not start automatically.
+
 ## Documentation policy (ongoing)
 
 After every completed and Unity-verified milestone, update both `ClickCook_GDD.md` and this file. Do not mark an entire gameplay system complete when only static data or placeholder UI exists.

@@ -206,6 +206,8 @@ Main Menu
 
 ## 9. Cooking / Clicking Mechanics
 
+- [APPROVED USER REQUEST — 2026-10-20; IMPLEMENTED / VERIFIED — 2026-10-21] Burgers (Dish ID 6) assemble from the authored Blender ingredient meshes on the actual plate. The bottom bun is initially visible; patty, cheddar, lettuce, tomato and top bun descend in order as accepted cooking damage progresses. Sesame moves with the top bun. Presentation reads `1 − remaining HP / maximum HP`; stronger clicks can cross several visual stages. A short squash/settle gives click feedback. These are visual timings, not extra clicks, ingredients to purchase or a recipe minigame. Completion/rewards use the existing runtime rules; Back resets assembly together with existing HP reset, and Result shows the assembled burger.
+
 - [IMPLEMENTED — 6A] Unupgraded damage remains 1; purchased Click Strength ranks now apply Section 13.1 damage. Earlier 4B statements describe the baseline. Critical, hold and auto-click remain absent.
 - [DESIGNED; visibility updated in UI-A3] Select an order, enter close-up cooking presentation, click the dish, reduce visible dish HP, complete dish, reveal rarity.
 - [DESIGNED] The restaurant environment remains visible around the cooking presentation.
@@ -491,10 +493,13 @@ Passives / Пассивки
 
 ## 23. 3D / Environment / Characters / Animations
 
+- [IMPLEMENTED / VERIFIED — environment recovery, 2026-10-21] Retained the user's updated Dormitory FBX, prefab, materials and authored placement/camera. Rebound the two imported board-paper renderers and Plate after GUID replacement; board alignment now derives from the paper mesh plane rather than assuming FBX axes. Removed 152 unresolved old-import overrides while preserving all 39 environment transforms and 17 live overrides. The saved scene was reopened successfully. A pre-repair scene/environment copy is retained locally under `ArtSource/Recovery/Dormitory_BeforeRepair_2026-10-21/`.
+- [IMPLEMENTED / VERIFIED — burger presentation] `Assets/Models/Food/Burger/BurgerAssembly.prefab` reuses the existing 15-mesh, 1,306-triangle FBX and 512×512 color atlas through a URP material; six ingredient groups include sesame in the top group. `BurgerAssemblyPresentation.cs` drives assembly from real HP progress. Counter presentation and input keep the existing order/session/profile behavior. The burger name panel is compact and left-aligned during its close-up to clear the ingredients. Other dishes retain their current sketches; this does not complete all dish art or animations.
+
 - [DESIGNED] FigJam includes areas for Locations, Dishes, Characters, and `3D модели и анимации`.
 - [DESIGNED] Food/reference imagery and external visual references exist.
 - [APPROVED DESIGN — latest counter instruction, synchronized 2026-10-15] Retain and interact with the existing Dormitory: right-hand noticeboard for order sheets, actual tray/plate for cooking. The background must not remain a purely decorative image behind floating gameplay panels. Existing counter concepts support this spatial relationship. Final food models, transitions and other venues remain separate content work.
-- [IMPLEMENTED] Unity contains one imported `Dormitory.fbx` interior model, materials, 17 texture maps, embedded lights/cameras, and one added capsule collider.
+- [IMPLEMENTED — updated environment retained 2026-10-21] Unity contains the user's replacement `Dormitory.fbx`/variant prefab with 38 renderers and four mapped URP materials. The physical board, tray, plate and environment props remain in the scene. There are no colliders on this updated environment; the cooking target retains its own BoxCollider/PhysicsRaycaster input.
 - [IMPLEMENTED] The scene is an early visual prototype, not a confirmed final restaurant.
 - [TBD] Final environment list, individual dish models, characters, rigs, animation list, ownership/licensing, production status, and asset pipeline.
 
@@ -576,11 +581,11 @@ This is a design-to-technical mapping, not existing implementation.
 - [IMPLEMENTED] Scene roots: Directional Light, Dormitory, Global Volume, Camera, Directional Light (1), and `ClickCook_Prototype`.
 - [IMPLEMENTED] Authored runtime scripts: `Camera_Move.cs`, `DishData.cs`, `LocationData.cs`, `LocationCatalog.cs`, `ClickCookPrototypeController.cs`, `PrototypeOrder.cs`, `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, `UpgradeCatalog.cs` (6A), and scene-only `CounterScenePresentation.cs` / `CounterDishPointer.cs` (UI-A4).
 - [IMPLEMENTED] Camera position approximately `(1.138, 1.184, -2.718)`, 60° perspective FOV, slight mouse-driven rotation.
-- [IMPLEMENTED] Dormitory FBX with two materials and 17 supporting texture maps.
+- [IMPLEMENTED] Updated Dormitory FBX/variant prefab with four mapped URP materials; geometry, textures, authored placement and camera retained during the 2026-10-21 counter repair.
 - [IMPLEMENTED] Global post-processing includes bloom, film grain, vignette, chromatic aberration, and color grading.
 - [IMPLEMENTED] Static data contains 32 `DishData` assets, 11 `LocationData` assets, and one ordered `LocationCatalog` asset.
 - [IMPLEMENTED] `SampleScene` contains a temporary uGUI Canvas/EventSystem and verified Location Selection → board → base click cooking → rarity/Dish XP/payout result / day end flow (5B), with Back resetting partial progress and Continue preserving replacement orders without duplicate rewards.
-- [IMPLEMENTED] No gameplay prefabs, audio, animation, save/load, final result presentation, complete economy, Player XP/progression, or complete gameplay architecture. Click Strength is the first implemented upgrade (6A); other upgrade effects remain absent.
+- [PARTIALLY IMPLEMENTED] Burger now has an assembly presentation prefab/animation; other dish art, audio, save/load, final result presentation, complete economy and Player XP/progression remain unfinished. Click Strength is the first implemented upgrade (6A); other upgrade effects remain absent.
 - [APPROVED DESIGN] Retain the current Dormitory environment and adapt the gameplay presentation to its board/tray/plate; do not replace it. Additional location environments remain a separate content scope.
 
 ## 30. Contradictions and Design Risks
@@ -703,6 +708,8 @@ This checklist records verified Unity implementation without changing the design
 - [x] Designer review corrections: Exit in current prototype menu (Editor tested), visible cooking HP/current-strength click count, central 2–6 dish cards with labeled real mastery. — **UI-A3 (2026-10-12)**. Files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scripts/Editor/UiA3Setup.cs`, `Assets/Scenes/SampleScene.unity`, `Assets/UI/Prefabs/Components/OrderCard.prefab`; verification: `Assets/Tests/Editor/UiA3Verification.cs`, `Assets/Tests/Editor/UiA1Verification.cs`, existing UI-A2/6A checks. Standalone quit and final art remain unverified/unfinished.
 
 ### Runtime systems
+
+- [x] Burger model/HP-driven ingredient assembly, click squash, same-order Back reset and assembled Result; repaired counter bindings/orientation in the user's updated Dormitory. — **Scoped presentation fix, 2026-10-21**, outside the numbered roadmap. Files: `Assets/Scripts/UI/BurgerAssemblyPresentation.cs`, existing `CounterScenePresentation.cs` / `CounterDishPointer.cs`, `Assets/Scripts/Editor/BurgerAssemblySetup.cs`, `Assets/Models/Food/Burger/`, updated Dormitory assets and `Assets/Scenes/SampleScene.unity`. Verification: `Assets/Tests/Editor/BurgerAssemblyVerification.cs`, existing CounterScene/6A/profile/UI-A2 helpers. Remaining dish models, broad animation/audio work and 7B persistence stay pending.
 
 - [ ] Partially implemented — Location and dish design data are available at runtime, but location unlocking/ownership, passive-income accrual, recipe ownership/gating, and order eligibility rules are not implemented. — **Milestones 1 and 2A**
 - [x] Baseline rarity resolved by the approved dish-level table (1–18), before awarding Dish XP; independently tracked dish mastery, carry-over XP and level-18 cap. — **Milestone 5B**; file: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`

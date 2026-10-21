@@ -226,7 +226,12 @@ namespace ClickCook.Verification
                 Check(!camera.GetComponent<CameraCursorFollow>().enabled&&camera.fieldOfView==40,"focused camera, parallax suspended");
                 Check(collider.enabled==(stage=="cooking"),"click collider only while cooking");
                 Check(!canvas.gameObject.activeInHierarchy,"other order sheets hidden during close-up/result");
-                Check(new[]{"SandwichSketch","MugCakeSketch","GenericDishSketch"}.Count(n=>dish.transform.Find(n).gameObject.activeSelf)==1,"one appropriate visual");
+                var burger=Field<BurgerAssemblyPresentation>(view,"burger");
+                int activeVisuals=new[]{"SandwichSketch","MugCakeSketch","GenericDishSketch"}.Count(n=>dish.transform.Find(n).gameObject.activeSelf);
+                if(burger!=null&&burger.gameObject.activeSelf)activeVisuals++;
+                Check(activeVisuals==1,"one appropriate visual");
+                int dishId=stage=="cooking"?c.OrderSession.ActiveOrder.Dish.DishId:c.OrderSession.LastResult.Dish.DishId;
+                if(burger!=null)Check(burger.gameObject.activeSelf==(dishId==6),"burger model only for documented burger ID");
                 if(stage=="cooking")
                 {
                     var hits=new System.Collections.Generic.List<RaycastResult>();EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current){position=camera.WorldToScreenPoint(collider.bounds.center)},hits);

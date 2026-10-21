@@ -13,12 +13,19 @@ namespace ClickCook.UI
         [SerializeField] private RectTransform boardCanvas;
         [SerializeField] private Renderer boardPaperLeft, boardPaperRight, plate;
         [SerializeField] private GameObject dishRoot, sandwich, mugCake, genericDish;
+        [SerializeField] private BurgerAssemblyPresentation burger;
+        [SerializeField] private RectTransform cookingNamePanel;
         [SerializeField] private Collider dishCollider;
         [SerializeField] private UnityEngine.UI.Button[] sheets;
         [SerializeField] private float boardYawBias = 12f;
         private Quaternion returnRotation;
         private float returnFov;
         private bool followWasEnabled, leftWasEnabled, rightWasEnabled, focused, initialized, wasBoard, wasCooking;
+        private PrototypeOrder presentedOrder;
+        private Vector3 defaultColliderSize, defaultColliderCenter;
+        private UnityEngine.UI.Text cookingNameLabel;
+        private Vector2 defaultNamePosition, defaultNameSize, defaultNameTextSize;
+        private Vector3 boardSurfaceNormal;
 
         private void Start()
         {
@@ -31,6 +38,25 @@ namespace ClickCook.UI
                 if (!HasSheetBindings(sheet))
                 { Debug.LogError("Counter presentation has an incomplete order sheet.", this); enabled = false; return; }
             leftWasEnabled=boardPaperLeft.enabled;rightWasEnabled=boardPaperRight.enabled;initialized=true;
+            // FBX re-exports can change mesh axes without changing the physical paper plane.
+            var paperMesh=boardPaperLeft.GetComponent<MeshFilter>();
+            if(paperMesh!=null&&paperMesh.sharedMesh!=null)
+            {
+                Vector3 size=paperMesh.sharedMesh.bounds.size;
+                Vector3 axis=size.x<=size.y&&size.x<=size.z?Vector3.right:size.y<=size.z?Vector3.up:Vector3.forward;
+                boardSurfaceNormal=boardPaperLeft.transform.TransformDirection(axis).normalized;
+            }
+            else boardSurfaceNormal=-boardPaperLeft.transform.forward;
+            if(Vector3.Dot(boardSurfaceNormal,sceneCamera.transform.position-boardPaperLeft.bounds.center)<0)
+                boardSurfaceNormal=-boardSurfaceNormal;
+            if (dishCollider is BoxCollider box)
+            { defaultColliderSize=box.size; defaultColliderCenter=box.center; }
+            if(cookingNamePanel!=null)
+            {
+                cookingNameLabel=cookingNamePanel.GetComponentInChildren<UnityEngine.UI.Text>(true);
+                defaultNamePosition=cookingNamePanel.anchoredPosition;defaultNameSize=cookingNamePanel.sizeDelta;
+                if(cookingNameLabel!=null)defaultNameTextSize=cookingNameLabel.rectTransform.sizeDelta;
+            }
         }
 
         private void LateUpdate()
@@ -51,7 +77,7 @@ namespace ClickCook.UI
             boardPaperLeft.enabled=showSheets?false:leftWasEnabled;
             boardPaperRight.enabled=showSheets?false:rightWasEnabled;
             // Anchors follow the actual environment, not a viewport coordinate.
-            boardCanvas.rotation=boardPaperLeft.transform.rotation*Quaternion.Euler(0,180,0);
+            boardCanvas.rotation=Quaternion.LookRotation(-boardSurfaceNormal,Vector3.up);
             boardCanvas.position=(boardPaperLeft.bounds.center+boardPaperRight.bounds.center)*.5f + Vector3.up*.04f-boardCanvas.forward*.055f;
             int count=controller.OrderSession.BoardCapacity;
             int columns=Mathf.Min(3,count);
@@ -89,7 +115,27 @@ namespace ClickCook.UI
             dishRoot.transform.position=new Vector3(center.x,plate.bounds.max.y+.008f,center.z);
             sandwich.SetActive(dish!=null&&dish.DishId==1);
             mugCake.SetActive(dish!=null&&dish.DishId==2);
-            genericDish.SetActive(dish!=null&&dish.DishId!=1&&dish.DishId!=2);
+            bool showBurger=dish!=null&&dish.DishId==6&&burger!=null;
+            SetBurgerNameLayout(showBurger);
+            genericDish.SetActive(dish!=null&&dish.DishId!=1&&dish.DishId!=2&&!showBurger);
+            if (cooking) presentedOrder=controller.OrderSession.ActiveOrder;
+            if (burger!=null)
+            {
+                burger.gameObject.SetActive(showBurger);
+                if(showBurger)
+                {
+                    object identity=presentedOrder!=null&&presentedOrder.Dish==dish
+                        ? presentedOrder : (object)controller.OrderSession.LastResult;
+                    float progress=result?1f:1f-(float)controller.OrderSession.ActiveOrder.RemainingClicks/dish.ClickRequirement;
+                    burger.Present(identity,progress);
+                }
+            }
+            if (dishCollider is BoxCollider currentBox)
+            {
+                currentBox.size=showBurger?new Vector3(.44f,.40f,.36f):defaultColliderSize;
+                currentBox.center=showBurger?new Vector3(0,.20f,0):defaultColliderCenter;
+            }
+            if(!cooking&&!result) presentedOrder=null;
             bool focus=cooking||result;
             if(focus&&!focused)
             {
@@ -99,7 +145,7 @@ namespace ClickCook.UI
             }
             if(focus)
             {
-                sceneCamera.transform.LookAt(dishRoot.transform.position+new Vector3(result ? .32f : 0f,.10f,0));
+                sceneCamera.transform.LookAt(dishRoot.transform.position+new Vector3(result ? .32f : 0f,showBurger&&cooking?.08f:.10f,0));
                 sceneCamera.fieldOfView=40f;
             }
             else if(focused)RestoreCamera();
@@ -117,6 +163,13 @@ namespace ClickCook.UI
                 mastery.GetComponent<UnityEngine.UI.Text>() != null && track is RectTransform &&
                 track.Find("Fill") is RectTransform;
         }
+        private void SetBurgerNameLayout(bool assembling)
+        {
+            if(cookingNamePanel==null)return;
+            cookingNamePanel.anchoredPosition=assembling?defaultNamePosition+new Vector2(-650,0):defaultNamePosition;
+            cookingNamePanel.sizeDelta=assembling?new Vector2(440,150):defaultNameSize;
+            if(cookingNameLabel!=null)cookingNameLabel.rectTransform.sizeDelta=assembling?new Vector2(390,130):defaultNameTextSize;
+        }
         private void RestoreCamera()
         {
             if(sceneCamera!=null){sceneCamera.transform.rotation=returnRotation;sceneCamera.fieldOfView=returnFov;}
@@ -130,6 +183,7 @@ namespace ClickCook.UI
             if(boardPaperRight!=null)boardPaperRight.enabled=rightWasEnabled;
             if(boardCanvas!=null)boardCanvas.gameObject.SetActive(false);
             if(dishRoot!=null)dishRoot.SetActive(false);
+            SetBurgerNameLayout(false);
         }
     }
 }

@@ -25,13 +25,19 @@ namespace ClickCook.UI
         public override void OnSelect(BaseEventData data)
         {
             base.OnSelect(data);
-            if (inputHint != null) inputHint.text = "3D-ескіз · клік або Enter · ↓ до замовлень";
+            if (inputHint != null) inputHint.text = IsBurger
+                ? "Збирай бургер · клік або Enter · ↓ до замовлень"
+                : "3D-ескіз · клік або Enter · ↓ до замовлень";
         }
 
         public override void OnDeselect(BaseEventData data)
         {
             base.OnDeselect(data);
-            if (inputHint != null) inputHint.text = "Тимчасовий 3D-ескіз · натискай на страву";
+            if (inputHint != null) inputHint.text = IsBurger
+                ? "Натискай, щоб зібрати бургер"
+                : "Тимчасовий 3D-ескіз · натискай на страву";
         }
+
+        private bool IsBurger => controller != null && controller.OrderSession?.ActiveOrder?.Dish?.DishId == 6;
     }
 }

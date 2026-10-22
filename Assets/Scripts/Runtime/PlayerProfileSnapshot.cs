@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace ClickCook.Runtime
 {
-    /// <summary>Detached read-only values for a future save boundary; not a save format or restore API.</summary>
+    /// <summary>Detached read-only profile values. PlayerProfileStore owns the versioned disk format.</summary>
     public sealed class PlayerProfileSnapshot
     {
         public decimal Wallet { get; }

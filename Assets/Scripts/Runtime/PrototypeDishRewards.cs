@@ -48,6 +48,13 @@ namespace ClickCook.Runtime
 
         internal Dictionary<int, int> CopyDishXp() => new(dishXp);
 
+        internal void Restore(decimal wallet, Dictionary<int, int> xp)
+        {
+            Wallet = wallet;
+            dishXp.Clear();
+            foreach (var pair in xp) dishXp.Add(pair.Key, pair.Value);
+        }
+
         internal bool TrySpend(decimal amount)
         {
             if (amount <= 0m || Wallet < amount) return false;

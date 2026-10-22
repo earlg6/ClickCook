@@ -120,7 +120,9 @@ namespace ClickCook.EditorTools
             var view = c.GetComponent<CounterScenePresentation>();
             Undo.RecordObject(view,"UI-A4 board framing");
             var viewSo = new SerializedObject(view);
-            viewSo.FindProperty("boardYawBias").floatValue = 12f;
+            // Historical world-board scenes may still contain this field; front selection has no forced yaw.
+            var legacyYaw=viewSo.FindProperty("boardYawBias");
+            if(legacyYaw!=null)legacyYaw.floatValue=12f;
             viewSo.ApplyModifiedProperties();
             var cooking = Field<GameObject>(c,"cookingPrototypeScreen");
             var hint = cooking.transform.Find("UIA4_DishClickHint/DishClickHint").GetComponent<UnityEngine.UI.Text>();

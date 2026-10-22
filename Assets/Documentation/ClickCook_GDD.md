@@ -1,5 +1,7 @@
 # ClickCook — Game Design Document
 
+**Current implementation checkpoint — 2026-10-22:** 7B local persistence, Main Menu/Continue/New Game and minimal Pause implemented. Owner approved one local profile + backup; immediate save of earned wallet/Dish XP/purchases; interrupted days discarded without extra rewards; confirmed New Game resets wallet/XP/ranks and backup; pause blocks gameplay. Editor verification passed; Windows build verification is recorded in IMPLEMENTATION_STATUS.md. Historical milestone reports below retain their original scope. Next numbered work is U0, then U1; recipes/unlocks, the other upgrade effects, full Settings and summary remain planned.
+
 ## 0. Source authority and designer synchronization — 2026-10-15
 
 This GDD is the maintained implementation specification, not a replacement for the designer's source. The designer explicitly gave Figma/FigJam higher priority than earlier GDD interpretations on 2026-10-15.
@@ -439,7 +441,7 @@ Passives / Пассивки
 
 - [DESIGNED] A pause screen exists.
 - [DESIGN SOURCE — wireframe] Actions: Resume, Settings, return to Main Menu; retain the version/Discord footer where appropriate. Do not leave the menu's actual button list unspecified.
-- [TBD] Whether passive income/cooking stops, save/unfinished-day policy, confirmations and standalone transition behavior. The source specifies the menu contents but not these simulation policies.
+- [APPROVED / IMPLEMENTED — 7B, 2026-10-22] Minimal Pause: Resume, return to Main Menu, Save and Exit; Esc or Pause button opens it, losing focus also pauses. Time scale becomes zero and controller/session guards block cooking, selection, Back, purchases and result transitions. Resume restores the previous time scale and focus. Main Menu discards unfinished orders but retains already issued rewards. Full Settings/version/Discord footer remain planned; no passive-income or automation semantics are invented.
 
 ## 20. Save / Load / New Game / Continue
 
@@ -447,8 +449,9 @@ Passives / Пассивки
 - [DESIGNED] Settings contains Reset Data.
 - [IMPLEMENTED / VERIFIED — 7A, 2026-10-15] One in-memory `PlayerProfile` owns the existing rewards wallet/Dish XP and upgrade ranks. `PlayerProfileRuntime` owns it for the run, independently of screen/scene instances. `PrototypeOrderSession` owns only temporary day/orders/results and references that profile. Ending a day or reloading SampleScene clears unfinished orders, not earned profile progress. Only one day per profile can be active; existing purchase/receipt guards remain intact.
 - [IMPLEMENTED / VERIFIED — 7A] `PlayerProfileSnapshot` captures detached read-only decimal wallet, XP by existing numeric `DishData.DishId`, and ranks by existing `UpgradeDefinition.Id`. No Unity object/order/session references are included. The existing unique documented location levels 0–10 remain catalog lookup keys, not player-level unlock rules; there is no location progress to snapshot yet. Keep authored IDs stable; renaming display labels must not renumber identity. No static assets were changed.
-- [NOT IMPLEMENTED] Disk save/load, PlayerPrefs, serialization/restore/migrations and save UI. A fresh application/Play run starts with zero wallet/XP/ranks. The in-memory snapshot is not an approved file schema. Interrupted-day loading, New Game and reset policies remain 7B decisions; scene-lifetime cleanup in 7A does not decide recovery from a disk save.
-- [TBD] Save slots, autosave points, serialization scope, cloud support, New Game overwrite behavior, Continue fallback behavior, reset scope, and version migration.
+- [APPROVED / IMPLEMENTED — 7B, 2026-10-22] One local profile: exact decimal wallet (invariant string), XP by current dish IDs 1–32 and implemented Click Strength rank 0–15. Save immediately after one completed receipt or purchase, retry/flush on menu/focus/quit. Orders, partial HP, reservations and pending result UI are excluded. Restart loads progress into the 7A owner and opens Main Menu; Continue never reissues a receipt or resumes an unfinished day.
+- [IMPLEMENTED — 7B] Version-1 JSON envelope, SHA-256 integrity checksum, validated payload/IDs/ranges, flushed temporary file and atomic primary replacement with previous valid backup. Corrupt/missing primary can recover backup with a visible notice. Both copies invalid/unreadable or a newer schema disable Continue and preserve files; New Game requires explicit confirmation. Failed writes retain in-memory progress, show a retry notice and block menu Save and Exit until saving succeeds. New Game resets both primary and backup; it does not reset unimplemented progression systems.
+- [STORAGE — 7B] Player: `Application.persistentDataPath/profile.json`, `.bak` backup; Editor: Git-ignored project `UserSettings/ClickCookProfile/profile.json` (survives Editor restarts, isolated from Player saves). Verification uses separate GUID folders in `Temp/ClickCookSaveTests`. Local only; no PlayerPrefs/cloud/multiple slots. Newer schemas are protected, not silently migrated; add a migration when a new schema actually exists. Full Settings Reset Data control remains planned; confirmed New Game currently provides the implemented reset action.
 
 ## 21. UI/UX
 
@@ -688,8 +691,8 @@ This checklist records verified Unity implementation without changing the design
 
 ### Game flow and UI
 
-- [ ] Partially implemented — The core loop covers Location Selection → board → click cooking → rarity/Dish XP/payout result → replacement / day end, with between-day Click Strength purchases. The tenth result ends on Continue. Final summary, remaining upgrades, persistence and date-based next-day progression remain unimplemented. — **Milestones 2B–6A**
-- [ ] Main Menu is not implemented.
+- [ ] Partially implemented — The core loop covers Main Menu/Continue → Location Selection → board → click cooking → rarity/Dish XP/payout → day end, between-day Click Strength purchases and local persistence. Final summary, remaining upgrade effects and date-based next-day progression remain unfinished. — **Milestones 2B–7B**
+- [x] Minimal functional Main Menu: valid-profile Continue, confirmed New Game and Exit; backup recovery/error states. Full Settings/version/Discord presentation remains planned. — **7B, 2026-10-22**
 - [ ] Partially implemented — Location Selection has a verified temporary uGUI carousel with one current location, Previous/Next wraparound across all 11 locations, name, documented level, placeholder progress, documented dish count, passive income/sec, and `Cook`. Unlock/ownership rules, real progress, dish-slot contents, and final visual design remain unimplemented. — **Milestone 2B**
 - [ ] Partially implemented — Cook starts a fresh in-memory day/board; completion, replacement, ten-dish limit, run-local payouts/XP and cleanup work. Dates and final day summary remain unimplemented. — **Milestones 2B–5B**
 - [x] Work Day displays the selected location's complete `DocumentedAvailableDishes` list as read-only documented candidates, with count, dish IDs, and English names in stored order. This is not an order board or an eligibility rule. — **Milestone 3**, supporting Sections 2, 5, and 8; files: `Assets/Scripts/Runtime/ClickCookPrototypeController.cs`, `Assets/Scenes/SampleScene.unity`
@@ -709,22 +712,22 @@ This checklist records verified Unity implementation without changing the design
 
 ### Runtime systems
 
-- [x] Burger model/HP-driven ingredient assembly, click squash, same-order Back reset and assembled Result; repaired counter bindings/orientation in the user's updated Dormitory. — **Scoped presentation fix, 2026-10-21**, outside the numbered roadmap. Files: `Assets/Scripts/UI/BurgerAssemblyPresentation.cs`, existing `CounterScenePresentation.cs` / `CounterDishPointer.cs`, `Assets/Scripts/Editor/BurgerAssemblySetup.cs`, `Assets/Models/Food/Burger/`, updated Dormitory assets and `Assets/Scenes/SampleScene.unity`. Verification: `Assets/Tests/Editor/BurgerAssemblyVerification.cs`, existing CounterScene/6A/profile/UI-A2 helpers. Remaining dish models, broad animation/audio work and 7B persistence stay pending.
+- [x] Burger model/HP-driven ingredient assembly, click squash, same-order Back reset and assembled Result; repaired counter bindings/orientation in the user's updated Dormitory. — **Scoped presentation fix, 2026-10-21**, outside the numbered roadmap. Files: `Assets/Scripts/UI/BurgerAssemblyPresentation.cs`, existing `CounterScenePresentation.cs` / `CounterDishPointer.cs`, `Assets/Scripts/Editor/BurgerAssemblySetup.cs`, `Assets/Models/Food/Burger/`, updated Dormitory assets and `Assets/Scenes/SampleScene.unity`. Verification: `Assets/Tests/Editor/BurgerAssemblyVerification.cs`, existing CounterScene/6A/profile/UI-A2 helpers. Remaining dish models and broad animation/audio work stay pending; 7B persistence is completed separately.
 
 - [ ] Partially implemented — Location and dish design data are available at runtime, but location unlocking/ownership, passive-income accrual, recipe ownership/gating, and order eligibility rules are not implemented. — **Milestones 1 and 2A**
 - [x] Baseline rarity resolved by the approved dish-level table (1–18), before awarding Dish XP; independently tracked dish mastery, carry-over XP and level-18 cap. — **Milestone 5B**; file: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`
 - [x] Exact decimal payouts once per successful completion into a zero-starting run-local wallet; wallet/Dish XP survive day changes, not game restart. — **Milestone 5B**; files: `Assets/Scripts/Runtime/PrototypeDishRewards.cs`, `Assets/Scripts/Runtime/PrototypeOrderSession.cs`
-- [ ] Partially implemented — Economy has payouts/wallet and Click Strength purchases; other spending, passive income and persistence remain unimplemented. — **Milestones 5B–6A**
+- [ ] Partially implemented — Economy has persisted payouts/wallet and Click Strength purchases; other spending and passive income remain unfinished. — **Milestones 5B–7B**
 - [ ] Partially implemented — Dish XP/mastery works in memory; Player/restaurant XP, XP upgrade effects and persistent progression remain unimplemented. — **Milestone 5B**
 - [ ] Recipe and location unlock systems are not implemented.
 - [x] Click Strength purchase/damage slice: ranks 0–15, exact decimal prices/debit, between-day UI, session-bound quote and duplicate-callback guards, cross-day retention and fresh-run reset. — **Milestone 6A**; files: `Assets/Scripts/Data/UpgradeCatalog.cs`, `Assets/Data/UpgradeCatalog.asset`, existing session/rewards/controller, `Assets/Scenes/SampleScene.unity`; checks: `Assets/Tests/Editor/Milestone6AVerification.cs`.
 - [ ] Partially implemented — 16 upgrade definitions and Click Strength work; remaining 15 effects, prerequisites, connected tree/statistics UI and persistent ownership are unfinished. — **Milestone 6A**
-- [ ] Save/load, New Game, Continue, and Reset Data behavior are not implemented.
-- [x] Run-owned in-memory player profile, stable authored IDs and detached read-only snapshot; wallet/Dish XP/Click Strength ownership survive day and SampleScene/controller replacement, while temporary orders do not. Cross-session active-day and stale-purchase guards verified; fresh Play starts empty. — **Milestone 7A (2026-10-15)**. Files: `Assets/Scripts/Runtime/PlayerProfile.cs`, `PlayerProfileRuntime.cs`, `PlayerProfileSnapshot.cs`, existing `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, `ClickCookPrototypeController.cs`; checks: `Assets/Tests/Editor/PlayerProfileVerification.cs`, existing 6A/UI-A2/CounterScene verification. Disk persistence and the rest of Player progression remain unfinished.
+- [x] Local save/load, Continue and confirmed New Game/reset of wallet/Dish XP/ranks plus backup. Atomic writes, corruption recovery, newer-version protection and failure/retry verified in Editor; native Windows earn→purchase→quit→restart→Continue passed. Full Settings Reset Data control remains planned. — **7B, 2026-10-22**
+- [x] Run-owned in-memory player profile, stable authored IDs and detached read-only snapshot; wallet/Dish XP/Click Strength ownership survive day and SampleScene/controller replacement, while temporary orders do not. Cross-session active-day and stale-purchase guards verified; at the historical 7A checkpoint a fresh Play started empty. — **Milestone 7A (2026-10-15)**. Files: `Assets/Scripts/Runtime/PlayerProfile.cs`, `PlayerProfileRuntime.cs`, `PlayerProfileSnapshot.cs`, existing `PrototypeOrderSession.cs`, `PrototypeDishRewards.cs`, `ClickCookPrototypeController.cs`; checks: `Assets/Tests/Editor/PlayerProfileVerification.cs`, existing 6A/UI-A2/CounterScene verification. 7B adds disk persistence; the rest of Player progression remains unfinished.
 - [ ] Achievements are not implemented.
 - [ ] Journal is not implemented.
 - [ ] Settings are not implemented.
-- [ ] Pause behavior is not implemented.
+- [x] Minimal Pause/Resume, menu return and Save and Exit; gameplay guards, previous time scale/focus restoration and focus-loss pause. Full Settings integration and hardware-keyboard acceptance remain pending. — **7B, 2026-10-22**
 - [ ] Audio content and runtime audio behavior are not implemented.
 
 Going forward, every completed and Unity-verified milestone must update this checklist and `Assets/Documentation/IMPLEMENTATION_STATUS.md`.

@@ -13,19 +13,25 @@ namespace ClickCook.UI
         [SerializeField] private RectTransform boardCanvas;
         [SerializeField] private Renderer boardPaperLeft, boardPaperRight, plate;
         [SerializeField] private GameObject dishRoot, sandwich, mugCake, genericDish;
+        [SerializeField] private SandwichAssemblyPresentation sandwichAssembly;
         [SerializeField] private BurgerAssemblyPresentation burger;
         [SerializeField] private RectTransform cookingNamePanel;
         [SerializeField] private Collider dishCollider;
         [SerializeField] private UnityEngine.UI.Button[] sheets;
-        [SerializeField] private float boardYawBias = 12f;
+        [SerializeField, Min(.01f)] private float cardEntranceSeconds = .28f;
+        [SerializeField, Min(0f)] private float cardStaggerSeconds = .025f;
         private Quaternion returnRotation;
         private float returnFov;
-        private bool followWasEnabled, leftWasEnabled, rightWasEnabled, focused, initialized, wasBoard, wasCooking;
+        private bool followWasEnabled, focused, initialized, wasBoard, wasCooking;
         private PrototypeOrder presentedOrder;
         private Vector3 defaultColliderSize, defaultColliderCenter;
         private UnityEngine.UI.Text cookingNameLabel;
         private Vector2 defaultNamePosition, defaultNameSize, defaultNameTextSize;
-        private Vector3 boardSurfaceNormal;
+        private CanvasGroup cardGroup;
+        private float entranceTime;
+
+        public bool OwnsOrderCardLayout => boardCanvas != null;
+        public bool OrderCardsReady { get; private set; }
 
         private void Start()
         {
@@ -37,18 +43,10 @@ namespace ClickCook.UI
             foreach (var sheet in sheets)
                 if (!HasSheetBindings(sheet))
                 { Debug.LogError("Counter presentation has an incomplete order sheet.", this); enabled = false; return; }
-            leftWasEnabled=boardPaperLeft.enabled;rightWasEnabled=boardPaperRight.enabled;initialized=true;
-            // FBX re-exports can change mesh axes without changing the physical paper plane.
-            var paperMesh=boardPaperLeft.GetComponent<MeshFilter>();
-            if(paperMesh!=null&&paperMesh.sharedMesh!=null)
-            {
-                Vector3 size=paperMesh.sharedMesh.bounds.size;
-                Vector3 axis=size.x<=size.y&&size.x<=size.z?Vector3.right:size.y<=size.z?Vector3.up:Vector3.forward;
-                boardSurfaceNormal=boardPaperLeft.transform.TransformDirection(axis).normalized;
-            }
-            else boardSurfaceNormal=-boardPaperLeft.transform.forward;
-            if(Vector3.Dot(boardSurfaceNormal,sceneCamera.transform.position-boardPaperLeft.bounds.center)<0)
-                boardSurfaceNormal=-boardSurfaceNormal;
+            cardGroup=boardCanvas.GetComponent<CanvasGroup>();
+            if(cardGroup==null||boardCanvas.GetComponent<Canvas>().renderMode==RenderMode.WorldSpace)
+            { Debug.LogError("Front order selection requires its configured overlay CanvasGroup.",this); enabled=false; return; }
+            initialized=true;
             if (dishCollider is BoxCollider box)
             { defaultColliderSize=box.size; defaultColliderCenter=box.center; }
             if(cookingNamePanel!=null)
@@ -61,40 +59,49 @@ namespace ClickCook.UI
 
         private void LateUpdate()
         {
-            if(!initialized)return;
+            // A script-domain reload during Play Mode can run this component one frame before
+            // the controller recreates its transient session.
+            if(!initialized||controller==null||controller.OrderSession==null)return;
+            if(controller.OrderSession.IsPaused)return;
             bool cooking=cookingScreen.activeInHierarchy;
             bool result=resultScreen.activeInHierarchy;
             bool board=workDayScreen.activeInHierarchy;
-            bool showSheets=board;
+            bool showSheets=board&&controller.OrderSession.Orders.Count>0;
             boardCanvas.gameObject.SetActive(showSheets);
-            if(board&&!wasBoard)
+            if(showSheets&&!wasBoard)
             {
+                entranceTime=0f;
                 foreach(var sheet in sheets)
                     if(sheet.gameObject.activeInHierarchy&&sheet.interactable)
                     { var events=UnityEngine.EventSystems.EventSystem.current;if(events!=null)events.SetSelectedGameObject(sheet.gameObject);break; }
             }
-            wasBoard=board;
-            boardPaperLeft.enabled=showSheets?false:leftWasEnabled;
-            boardPaperRight.enabled=showSheets?false:rightWasEnabled;
-            // Anchors follow the actual environment, not a viewport coordinate.
-            boardCanvas.rotation=Quaternion.LookRotation(-boardSurfaceNormal,Vector3.up);
-            boardCanvas.position=(boardPaperLeft.bounds.center+boardPaperRight.bounds.center)*.5f + Vector3.up*.04f-boardCanvas.forward*.055f;
+            else if(showSheets)entranceTime+=Time.unscaledDeltaTime;
+            wasBoard=showSheets;
             int count=controller.OrderSession.BoardCapacity;
             int columns=Mathf.Min(3,count);
+            OrderCardsReady=!showSheets||entranceTime>=cardEntranceSeconds+Mathf.Max(0,count-1)*cardStaggerSeconds;
+            // Mouse hits wait until the moving cards settle. Keyboard Submit remains immediately available.
+            cardGroup.blocksRaycasts=showSheets&&OrderCardsReady;
             for(int i=0;i<count;i++)
             {
                 bool compact=count>3;int row=i/columns;int rowCount=Mathf.Min(columns,count-row*columns);
                 var rt=sheets[i].GetComponent<RectTransform>();
-                rt.sizeDelta=new Vector2(compact?285:350,compact?315:490);
-                rt.anchoredPosition3D=new Vector3(((i%columns)-(rowCount-1)*.5f)*(compact?310:385),compact?175-row*350:0,0);
+                float width=compact?360:count==2?420:360;
+                rt.sizeDelta=new Vector2(width,compact?300:540);
+                var target=new Vector2(((i%columns)-(rowCount-1)*.5f)*(count==2?500:420),compact?150-row*330:-15);
+                float t=Mathf.Clamp01((entranceTime-i*cardStaggerSeconds)/Mathf.Max(.01f,cardEntranceSeconds));
+                float eased=1f-Mathf.Pow(1f-t,3f);
+                rt.anchoredPosition3D=Vector2.Lerp(new Vector2(boardCanvas.rect.width*.5f+width+i*65,target.y-45),target,eased);
+                rt.localScale=Vector3.one*Mathf.Lerp(.2f,1f,eased);
+                rt.localRotation=Quaternion.identity;
                 var name=sheets[i].transform.GetChild(0).GetComponent<UnityEngine.UI.Text>();
-                if(name!=null){name.rectTransform.sizeDelta=new Vector2(compact?265:330,compact?120:135);name.rectTransform.anchoredPosition=new Vector2(0,compact?95:155);name.fontSize=compact?32:38;}
+                if(name!=null){name.rectTransform.sizeDelta=new Vector2(width-30,compact?80:135);name.rectTransform.anchoredPosition=new Vector2(0,compact?105:175);name.fontSize=compact?28:34;}
                 var illustration=sheets[i].transform.Find("UIA2_Plate") as RectTransform;
-                illustration.sizeDelta=new Vector2(compact?120:230,compact?90:180);illustration.anchoredPosition=Vector2.zero;
+                illustration.sizeDelta=new Vector2(compact?150:260,compact?105:200);illustration.anchoredPosition=new Vector2(0,compact?0:10);
                 var mastery=sheets[i].transform.Find("UIA3_CardMasteryText").GetComponent<UnityEngine.UI.Text>();
-                mastery.rectTransform.sizeDelta=new Vector2(compact?265:330,65);mastery.rectTransform.anchoredPosition=new Vector2(0,compact?-80:-135);
+                mastery.rectTransform.sizeDelta=new Vector2(width-30,compact?45:65);mastery.rectTransform.anchoredPosition=new Vector2(0,compact?-78:-135);
                 var track=sheets[i].transform.Find("UIA3_CardMastery") as RectTransform;
-                track.sizeDelta=new Vector2(compact?255:310,22);track.anchoredPosition=new Vector2(0,compact?-132:-205);
+                track.sizeDelta=new Vector2(width-50,22);track.anchoredPosition=new Vector2(0,compact?-125:-210);
                 var fill=track.Find("Fill") as RectTransform;fill.sizeDelta=track.sizeDelta-new Vector2(8,8);
             }
             var dish=cooking?controller.OrderSession.ActiveOrder?.Dish:result?controller.OrderSession.LastResult?.Dish:null;
@@ -113,7 +120,8 @@ namespace ClickCook.UI
             wasCooking = cooking;
             var center=plate.bounds.center;
             dishRoot.transform.position=new Vector3(center.x,plate.bounds.max.y+.008f,center.z);
-            sandwich.SetActive(dish!=null&&dish.DishId==1);
+            bool showSandwich=dish!=null&&dish.DishId==1&&sandwichAssembly!=null;
+            sandwich.SetActive(dish!=null&&dish.DishId==1&&!showSandwich);
             mugCake.SetActive(dish!=null&&dish.DishId==2);
             bool showBurger=dish!=null&&dish.DishId==6&&burger!=null;
             SetBurgerNameLayout(showBurger);
@@ -128,6 +136,17 @@ namespace ClickCook.UI
                         ? presentedOrder : (object)controller.OrderSession.LastResult;
                     float progress=result?1f:1f-(float)controller.OrderSession.ActiveOrder.RemainingClicks/dish.ClickRequirement;
                     burger.Present(identity,progress);
+                }
+            }
+            if (sandwichAssembly!=null)
+            {
+                sandwichAssembly.gameObject.SetActive(showSandwich);
+                if(showSandwich)
+                {
+                    object identity=presentedOrder!=null&&presentedOrder.Dish==dish
+                        ? presentedOrder : (object)controller.OrderSession.LastResult;
+                    float progress=result?1f:1f-(float)controller.OrderSession.ActiveOrder.RemainingClicks/dish.ClickRequirement;
+                    sandwichAssembly.Present(identity,progress);
                 }
             }
             if (dishCollider is BoxCollider currentBox)
@@ -149,8 +168,6 @@ namespace ClickCook.UI
                 sceneCamera.fieldOfView=40f;
             }
             else if(focused)RestoreCamera();
-            if(board&&cursorFollow!=null&&cursorFollow.enabled)
-                sceneCamera.transform.localRotation=cursorFollow.CursorRotation*Quaternion.Euler(0,boardYawBias,0);
             focused=focus;
         }
         private static bool HasSheetBindings(UnityEngine.UI.Button sheet)
@@ -179,9 +196,8 @@ namespace ClickCook.UI
         {
             if(!initialized)return;
             if(focused)RestoreCamera();focused=false;
-            if(boardPaperLeft!=null)boardPaperLeft.enabled=leftWasEnabled;
-            if(boardPaperRight!=null)boardPaperRight.enabled=rightWasEnabled;
             if(boardCanvas!=null)boardCanvas.gameObject.SetActive(false);
+            wasBoard=false;OrderCardsReady=false;
             if(dishRoot!=null)dishRoot.SetActive(false);
             SetBurgerNameLayout(false);
         }

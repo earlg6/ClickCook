@@ -31,6 +31,7 @@ namespace ClickCook.Runtime
         public int BoardCapacity { get; private set; }
         public int CompletedDishes { get; private set; }
         public bool IsDayActive { get; private set; }
+        public bool IsPaused { get; set; }
         public IReadOnlyList<PrototypeOrder> Orders => readOnlyOrders;
         public PrototypeOrder ActiveOrder { get; private set; }
         public PlayerProfile Profile { get; }
@@ -51,7 +52,7 @@ namespace ClickCook.Runtime
         {
             quote = null;
             // Other catalog entries remain unavailable until their effects are implemented.
-            if (Profile.HasActiveDay || id != UpgradeCatalog.ClickStrengthId || upgradeCatalog == null || !upgradeCatalog.IsValid) return false;
+            if (IsPaused || Profile.HasActiveDay || id != UpgradeCatalog.ClickStrengthId || upgradeCatalog == null || !upgradeCatalog.IsValid) return false;
             var definition = upgradeCatalog.Find(id);
             if (ClickStrengthRank >= definition.MaximumRank) return false;
             quote = new UpgradePurchaseQuote(this, ClickStrengthRank, definition.PriceForNextRank(ClickStrengthRank));
@@ -76,6 +77,7 @@ namespace ClickCook.Runtime
 
         public void StartDay(LocationData location, int capacity)
         {
+            if (IsPaused) return;
             EndDay();
             if (location == null || !Profile.TryBeginDay(this)) return;
             SelectedLocation = location;
@@ -94,7 +96,7 @@ namespace ClickCook.Runtime
 
         public bool TrySelect(int slotIndex)
         {
-            if (!IsDayActive || CompletedDishes >= MAX_COMPLETED_DISHES_PER_DAY || ActiveOrder != null) return false;
+            if (IsPaused || !IsDayActive || CompletedDishes >= MAX_COMPLETED_DISHES_PER_DAY || ActiveOrder != null) return false;
             PrototypeOrder order = GetOrderAtSlot(slotIndex);
             if (order == null || order.Dish == null || order.Location == null || order.IsReserved ||
                 order.IsCompleted || order.Dish.ClickRequirement <= 0) return false;
@@ -112,7 +114,7 @@ namespace ClickCook.Runtime
         /// <summary>Returns true only when this click completes the exact active order.</summary>
         public bool TryCookClick(PrototypeOrder expectedOrder)
         {
-            if (!IsDayActive || expectedOrder == null || ActiveOrder != expectedOrder ||
+            if (IsPaused || !IsDayActive || expectedOrder == null || ActiveOrder != expectedOrder ||
                 expectedOrder.IsCompleted || expectedOrder.Dish == null || expectedOrder.RemainingClicks <= 0 ||
                 CompletedDishes >= MAX_COMPLETED_DISHES_PER_DAY) return false;
 
@@ -126,6 +128,7 @@ namespace ClickCook.Runtime
             orders.RemoveAt(index);
             CompletedDishes++;
             LastResult = Rewards.Complete(expectedOrder.Dish);
+            Profile.NotifyChanged();
             if (CompletedDishes < MAX_COMPLETED_DISHES_PER_DAY)
             {
                 var candidates = GetValidCandidates();
@@ -140,6 +143,7 @@ namespace ClickCook.Runtime
 
         public void ReturnToBoard()
         {
+            if (IsPaused) return;
             if (ActiveOrder != null)
             {
                 ActiveOrder.IsReserved = false;
@@ -150,6 +154,7 @@ namespace ClickCook.Runtime
 
         public void EndDay()
         {
+            IsPaused = false;
             ReturnToBoard();
             orders.Clear();
             SelectedLocation = null;

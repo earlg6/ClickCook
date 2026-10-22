@@ -69,6 +69,8 @@ namespace ClickCook.Runtime
         private int currentLocationIndex;
 
         public PrototypeOrderSession OrderSession => session;
+        private ProfileMenu profileMenu;
+        public bool GameplayBlocked => profileMenu != null && profileMenu.IsBlocking;
 
         private void Start()
         {
@@ -83,6 +85,7 @@ namespace ClickCook.Runtime
 
         private void Awake()
         {
+            profileMenu = GetComponent<ProfileMenu>();
             session = new PrototypeOrderSession(PlayerProfileRuntime.Current);
             if (!HasRequiredReferences() || !session.ConfigureUpgrades(upgradeCatalog))
             {
@@ -162,7 +165,7 @@ namespace ClickCook.Runtime
 
         public void ExitGame()
         {
-            if (!enabled || !locationSelectionScreen.activeSelf) return;
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf) return;
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -172,17 +175,17 @@ namespace ClickCook.Runtime
 
         public void OpenUpgrades()
         {
-            if (!enabled || !locationSelectionScreen.activeSelf || session.IsDayActive) return;
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || session.IsDayActive) return;
             locationSelectionScreen.SetActive(false);
             upgradeScreen.SetActive(true);
-            upgradeStatusText.text = "Покращення діють у поточному запуску гри. Збереження — незабаром.";
+            upgradeStatusText.text = "Придбані покращення зберігаються автоматично.";
             RefreshUpgrade();
             FocusUi(buyUpgradeButton.interactable ? buyUpgradeButton : closeUpgradesButton);
         }
 
         public void CloseUpgrades()
         {
-            if (!enabled || !upgradeScreen.activeSelf) return;
+            if (!enabled || GameplayBlocked || !upgradeScreen.activeSelf) return;
             displayedUpgradeQuote = null;
             refreshUpgradeNextFrame = false;
             upgradeScreen.SetActive(false);
@@ -193,7 +196,7 @@ namespace ClickCook.Runtime
 
         public void BuyUpgrade()
         {
-            if (!enabled || !upgradeScreen.activeSelf || session.IsDayActive || displayedUpgradeQuote == null) return;
+            if (!enabled || GameplayBlocked || !upgradeScreen.activeSelf || session.IsDayActive || displayedUpgradeQuote == null) return;
             var quote = displayedUpgradeQuote;
             displayedUpgradeQuote = null;
             buyUpgradeButton.interactable = false;
@@ -206,7 +209,7 @@ namespace ClickCook.Runtime
 
         private void LateUpdate()
         {
-            if (!refreshUpgradeNextFrame) return;
+            if (GameplayBlocked || !refreshUpgradeNextFrame) return;
             refreshUpgradeNextFrame = false;
             if (upgradeScreen.activeSelf)
             {
@@ -254,7 +257,7 @@ namespace ClickCook.Runtime
         public void CookSelectedLocation()
         {
             LocationData selectedLocation = CurrentLocation;
-            if (!enabled || !locationSelectionScreen.activeSelf || selectedLocation == null)
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || selectedLocation == null)
             {
                 return;
             }
@@ -292,13 +295,13 @@ namespace ClickCook.Runtime
 
         public void FinishDay()
         {
-            if (!enabled || !workDayScreen.activeSelf || session.ActiveOrder != null) return;
+            if (!enabled || GameplayBlocked || !workDayScreen.activeSelf || session.ActiveOrder != null) return;
             EndWorkDay(false);
         }
 
         public void SelectOrder(int slotIndex)
         {
-            if (!enabled || !workDayScreen.activeSelf || !session.TrySelect(slotIndex)) return;
+            if (!enabled || GameplayBlocked || !workDayScreen.activeSelf || !session.TrySelect(slotIndex)) return;
             PrototypeOrder order = session.ActiveOrder;
             displayedCookingOrder = order;
             cookingDishLabel.text = "Натискай на страву";
@@ -312,7 +315,7 @@ namespace ClickCook.Runtime
 
         public void BackToBoard()
         {
-            if (!enabled || !cookingPrototypeScreen.activeSelf) return;
+            if (!enabled || GameplayBlocked || !cookingPrototypeScreen.activeSelf) return;
             session.ReturnToBoard();
             displayedCookingOrder = null;
             RefreshCookingHp();
@@ -325,7 +328,7 @@ namespace ClickCook.Runtime
         public void ClickCookingDish()
         {
             PrototypeOrder completedOrder = displayedCookingOrder;
-            if (!enabled || !cookingPrototypeScreen.activeSelf) return;
+            if (!enabled || GameplayBlocked || !cookingPrototypeScreen.activeSelf) return;
             bool completed = session.TryCookClick(completedOrder);
             RefreshCookingHp();
             if (!completed) return;
@@ -352,7 +355,7 @@ namespace ClickCook.Runtime
 
         public void ContinueFromDishResult()
         {
-            if (!enabled || !dishResultScreen.activeSelf || !session.IsDayActive) return;
+            if (!enabled || GameplayBlocked || !dishResultScreen.activeSelf || !session.IsDayActive) return;
             if (session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY)
             {
                 EndWorkDay(true);
@@ -396,8 +399,7 @@ namespace ClickCook.Runtime
         {
             dayWalletText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
             dayCompletedText.text = $"Приготовано: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}";
-            bool physicalBoard = orderButtons[0].GetComponentInParent<Canvas>(true)?.renderMode == RenderMode.WorldSpace;
-            orderBoardStatusText.text = (physicalBoard ? "Дошка праворуч · " : string.Empty) + $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
+            orderBoardStatusText.text = (session.Orders.Count>0 ? "Оберіть замовлення · " : string.Empty) + $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
                 (session.Orders.Count == 0 ? "\nНемає доступних замовлень" : string.Empty);
             for (int i = 0; i < orderButtons.Length; i++)
             {
@@ -432,6 +434,7 @@ namespace ClickCook.Runtime
 
         private void LayoutOrderCards()
         {
+            if(GetComponent<CounterScenePresentation>()?.OwnsOrderCardLayout==true)return;
             var canvas = orderButtons[0].GetComponentInParent<Canvas>(true);
             if (canvas != null && canvas.renderMode == RenderMode.WorldSpace) return;
             int count = session.BoardCapacity;
@@ -492,7 +495,7 @@ namespace ClickCook.Runtime
 
         private void SelectRelativeLocation(int offset)
         {
-            if (!enabled || !locationSelectionScreen.activeSelf || locationCatalog == null || locationCatalog.Locations.Count == 0)
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || locationCatalog == null || locationCatalog.Locations.Count == 0)
             {
                 return;
             }
@@ -515,6 +518,31 @@ namespace ClickCook.Runtime
             progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
             dishSlotsText.text = ClickCookUiCopy.DishPreview(location);
             incomeText.text = $"Дохід локації: {location.PassiveIncomePerSecond} у.е./с";
+        }
+
+        public void ReturnToProfileMenu()
+        {
+            session.EndDay();
+            displayedCookingOrder = null;
+            displayedUpgradeQuote = null;
+            refreshUpgradeNextFrame = false;
+            ClearDishResult();
+            cookingPrototypeScreen.SetActive(false);
+            workDayScreen.SetActive(false);
+            upgradeScreen.SetActive(false);
+            locationSelectionScreen.SetActive(true);
+            RefreshLocationSelection();
+        }
+
+        public void FocusLocationMenu() => FocusUi(cookButton);
+
+        public void BindNewProfile()
+        {
+            session.EndDay();
+            session = new PrototypeOrderSession(PlayerProfileRuntime.Current);
+            session.ConfigureUpgrades(upgradeCatalog);
+            currentLocationIndex = 0;
+            ReturnToProfileMenu();
         }
 
         private static string Money(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture) + " у.е.";

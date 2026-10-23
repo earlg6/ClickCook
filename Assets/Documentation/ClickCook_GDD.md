@@ -1,5 +1,16 @@
 # ClickCook — Game Design Document
 
+**Актуальне рішення — 2026-10-23: U0 завершено.** [Повний план дерева](ClickCook_Upgrade_Node_Manifest.md): 92 окремі плитки, 38 effect families + root; 76 референсних записів FishSim і 16 власних доповнень. Усі popup із черги прочитано. Збережені crit, double/triple, hold, auto chance/count/strength/frequency, passive, окремі timing-вікна, XP/quality/economy й зменшення роботи страви. Назви/описи кухонні; кожна плитка має stable nodeId і прийняті prerequisites ClickCook. Повнота інших версій FishSim і буквальне копіювання ребер не заявляються. Погоджені власником бонусний вибір без штрафу й bounded carry від критів залишаються чинними. Наступний milestone — U1; він продає лише working legacy Click Strength. Баланс та реалізація інших effects — окремі U2–U6 slices. Manifest має пріоритет над історичними counts/відкритим source gate нижче.
+
+**Продовження source audit — 2026-10-23:** Звірено й записано додаткові popup-спостереження; зарезервовано 36 сімейств. Нові відносно попереднього checkpoint: day_income_bonus, location_value, selection_precision_window, order_tracker_tier, order_tracker_frequency. На огляді 76 плиток, але детальні знімки містять додаткові ступені; повний count/graph ще не доведений. Source gate перед U1 лишається відкритим. Погоджені правила швидкого вибору та переносу часу від критів збережено. Поточна матриця/перелік непрочитаного: [FishSim audit](ClickCook_FishSim_Upgrade_Audit.md).
+
+
+**Уточнення власника / source audit — 2026-10-22:** Перед U1 потрібна повна відповідність плиткам і механікам FishSim, а не лише 27 сімейств. [Матриця звірки](ClickCook_FishSim_Upgrade_Audit.md) фіксує прочитані вузли, кухонні назви та прогалини. Наразі зарезервовано 31 сімейство (+auto_action_chance, +selection_start_progress, +critical_time_bonus, +triple_strike_chance). На огляді пораховано 76 плиток; повний manifest ще уточнюється. Погоджено: бонусний таймер швидкого вибору дає стартовий прогрес, повільний вибір без штрафу. **Source gate U0 перед U1 відкритий; екран ще не впроваджувати.**
+
+
+**U0 checkpoint — 2026-10-22:** Design/data contract completed: [U0 upgrade contract](ClickCook_U0_Upgrade_Contract.md). All 27 family IDs reserved, existing 16 retained, initial manual branch prerequisites/prices/effects fixed as adopted initial balance; purchased ranks separated from achievement grants. No runtime/catalog/save changes. Next milestone: U1. Later implementation reports below remain historical.
+
+
 **Current implementation checkpoint — 2026-10-22:** 7B local persistence, Main Menu/Continue/New Game and minimal Pause implemented. Owner approved one local profile + backup; immediate save of earned wallet/Dish XP/purchases; interrupted days discarded without extra rewards; confirmed New Game resets wallet/XP/ranks and backup; pause blocks gameplay. Editor verification passed; Windows build verification is recorded in IMPLEMENTATION_STATUS.md. Historical milestone reports below retain their original scope. Next numbered work is U0, then U1; recipes/unlocks, the other upgrade effects, full Settings and summary remain planned.
 
 ## 0. Source authority and designer synchronization — 2026-10-15

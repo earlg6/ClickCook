@@ -1,5 +1,40 @@
 # ClickCook Implementation Status
 
+## Current checkpoint — U0 complete after Chrome source reading — 2026-10-23
+
+Read all 25 remaining FishSim popup images through the connected Chrome Computer Use session. The completed design manifest defines 92 kitchen nodes: 76 reference records and 16 explicitly marked ClickCook additions, covering 38 effect families plus a free root. Every node has a stable ID, kitchen title/description and adopted ClickCook prerequisites. Added preparation_efficiency and auto_action_count; corrected the earlier conflation of automatic action count with action strength. Preserved crit, double/triple, hold, automation, passive income, XP/quality/economy, optional bonus timing and the owner-approved bounded critical-time carry.
+
+The source audit is complete for the supplied image set. One original title is physically cropped; its effect/tier is legible and its kitchen copy is defined. Source graph identity and completeness across other FishSim versions are not claimed. The manifest explicitly distinguishes observed source facts from kitchen design decisions. Tracker tiers, auto-hook trigger, location-level ownership and preparation work reduction now have concrete adopted kitchen behavior; numeric rank/price contracts remain gates before their effect slices.
+
+U1 implementation has not started. Next: 92-node UI, detail/statistics and pan/zoom, with only legacy Click Strength purchasable. Schema-1 profile and current gameplay remain unchanged. Earlier checkpoints below are historical and superseded by this contract.
+
+Verification PASS: 92 unique nodes, 76 distinct source image references plus 16 additions, 38 registered effect families matching the manifest; every node has kitchen copy and reaches the root through existing prerequisites, no cycles, legacy Click Strength mapping documented. The first family check omitted the mixed manual/choice category in its parser; narrowing extraction to the registry section resolved that check without changing data. Scoped tracked-document whitespace check passed. No Unity compilation, Play Mode or Player build: runtime behavior did not change. Numeric gameplay balance and perceived pacing remain untested until their effect slices.
+
+## Current checkpoint — continued FishSim audit — 2026-10-23
+
+Continued the source review before U1 and recorded missing observations from the end of the prior session. The audit now records 51 popup images (not 51 distinct upgrade nodes) and kitchen copy for 36 reserved effect families. Added distinct day_income_bonus, location_value, selection_precision_window, order_tracker_tier and order_tracker_frequency. The overview contains 76 visible tiles, but detail screenshots show additional tiers; 76 is a confirmed overview count/minimum breadth, not a proven complete source inventory. Source graph/tile manifest remains incomplete, and U1 implementation has not started.
+
+The approved no-penalty timely-choice starting progress and bounded critical-time carry remain intact. Triple strikes stay in scope as a separate later slice. Tracker II/III source previews are ambiguous; location-level ownership, pulse units and numeric balance remain future effect gates, not fabricated source facts. Runtime, scene, static gameplay assets and save schema are unchanged. Figma MCP reading resumed, then returned the Starter call limit again. Chrome extension was absent from browser inventory when checked. Next action is to read the remaining exact image IDs listed in the audit and complete node/edge mapping; no Unity tests or build are warranted for documentation-only work.
+
+Local documentation check PASS: 36 unique registry IDs match 36 kitchen-copy rows; 51 unique source image records; scoped tracked-document whitespace check passed. Historical 27/29/31-family checkpoints below are superseded by this inventory and do not close the remaining source gate.
+
+
+## Current checkpoint — FishSim source audit before U1 — 2026-10-22
+
+Owner requires FishSim-equivalent breadth and mechanics with kitchen names/descriptions. U0's one-node-per-family assumption is superseded; U1 source gate is open. See ClickCook_FishSim_Upgrade_Audit.md: 13 source popup images and one overview read, kitchen copy for 29 reserved families, separate tier node identity/rank and effect-family identity, source facts distinguished from adopted design. auto_action_chance and selection_start_progress added to design registry only. Owner approved timely-choice starting progress with no slow-choice penalty; no cooking expiry/spoilage. 78 selected reference objects are not an upgrade count. Exact source tile count, unread effects and full prerequisite mapping remain unverified.
+
+Figma MCP returned Starter call limit. Chrome Browser Use successfully read the live board via the extension; large selection copy/export stalled the tab/tool, reload recovered it once, then export timed out and the reconnected tab returned Debugger unattached. No UI tree implementation or runtime changes were made. Only local documentation consistency checks are appropriate; no Unity build or regression suite is required.
+
+
+## Current checkpoint — U0 — 2026-10-22
+
+Completed the documentation/data-contract milestone in ClickCook_U0_Upgrade_Contract.md: reserved all 27 family IDs, retained all 16 serialized IDs, fixed the initial manual-branch graph and adopted starting price/effect/rounding contracts, separated purchased ranks from future achievement source grants, and recorded the save-schema boundary. Only Click Strength remains implemented/purchasable. Next milestone: U1; U2+ effects remain future work.
+
+Owner verification policy is persisted repository-wide in root AGENTS.md: checks must address a concrete changed risk, remain local, reuse unchanged evidence, and avoid unnecessary repeats/builds. U0 validation is limited to ID/catalog consistency, prerequisite bounds/reachability/cycle checks and a few price/damage examples. No C# or runtime assets changed, so compilation, Play Mode, regression suites and Player build are unnecessary for this checkpoint.
+
+Local validation PASS: 27 unique IDs, all 16 current catalog IDs preserved, 3 valid prerequisite edges with all 4 initial-branch families reachable and acyclic; documented third-rank price and damage examples match decimal calculations. Scoped tracked-document whitespace check PASS. No runtime verification was run or claimed.
+
+
 ## Current checkpoint — Milestone 7B — 2026-10-22
 
 7B local save/load, Main Menu/Continue/New Game and minimal Pause are completed and verified in Editor and a Windows x64 Player. The owner explicitly approved one local profile + backup, immediate persistence of earned rewards/purchases, discarding interrupted days without new rewards, confirmed New Game reset and blocked gameplay while paused. Earlier sections are historical reports; their statements that persistence is absent no longer describe the current implementation.

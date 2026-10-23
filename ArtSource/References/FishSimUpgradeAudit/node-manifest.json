@@ -1,0 +1,922 @@
+[
+  {
+    "id": "node.auto_action_chance.01",
+    "family": "auto_action_chance",
+    "tier": 1,
+    "title": "Пильний помічник I",
+    "description": "Підвищує шанс автоматичного виконання дії помічником.",
+    "source": "7:1453",
+    "observation": "Крючки-кольца I; 4/5, шанс автопідсічки 17 → 19% (+2 п.п.)",
+    "prerequisite": "node.click_strength.01:2"
+  },
+  {
+    "id": "node.auto_action_chance.02",
+    "family": "auto_action_chance",
+    "tier": 2,
+    "title": "Реакція помічника II",
+    "description": "Підвищує шанс автоматичного виконання дії помічником.",
+    "source": "7:1454",
+    "observation": "Датчик движения II; 4/5, шанс автопідсічки 17 → 19% (+2 п.п.)",
+    "prerequisite": "node.auto_action_chance.01:max"
+  },
+  {
+    "id": "node.auto_action_chance.03",
+    "family": "auto_action_chance",
+    "tier": 3,
+    "title": "Досвідчений помічник III",
+    "description": "Підвищує шанс автоматичного виконання дії помічником.",
+    "source": "7:1455",
+    "observation": "ИИ-ассистент III; 0/5, автопідсічка 17 → 20%",
+    "prerequisite": "node.auto_action_chance.02:max"
+  },
+  {
+    "id": "node.auto_action_count.01",
+    "family": "auto_action_count",
+    "tier": 1,
+    "title": "Вправний помічник I",
+    "description": "Помічники виконують більше дій за один автоматичний цикл.",
+    "source": "27:2392",
+    "observation": "Нанять соседского мальца I; 4/5, автокліки 20 → 21",
+    "prerequisite": "node.click_strength.01:2"
+  },
+  {
+    "id": "node.auto_action_count.02",
+    "family": "auto_action_count",
+    "tier": 2,
+    "title": "Найняти бригаду II",
+    "description": "Помічники виконують більше дій за один автоматичний цикл.",
+    "source": "27:2413",
+    "observation": "Нанять команду; II, 4/5; Автокліки +2 (20→22)",
+    "prerequisite": "node.auto_action_count.01:max"
+  },
+  {
+    "id": "node.auto_action_count.03",
+    "family": "auto_action_count",
+    "tier": 3,
+    "title": "Старший помічник III",
+    "description": "Помічники виконують більше дій за один автоматичний цикл.",
+    "source": "27:2500",
+    "observation": "Первый помощник; III, 4/5; Автокліки 20→22 (+2)",
+    "prerequisite": "node.auto_action_count.02:max"
+  },
+  {
+    "id": "node.auto_frequency.01",
+    "family": "auto_frequency",
+    "tier": 1,
+    "title": "Темп помічника I",
+    "description": "Помічник виконує автоматичні дії частіше.",
+    "source": "27:2399",
+    "observation": "Кофе-пауза I; 4/5, швидкість автокліку 7.00 → 7.15/с",
+    "prerequisite": "node.auto_action_count.01:1"
+  },
+  {
+    "id": "node.auto_frequency.02",
+    "family": "auto_frequency",
+    "tier": 2,
+    "title": "Злагоджена зміна II",
+    "description": "Помічник виконує автоматичні дії частіше.",
+    "source": "27:2420",
+    "observation": "Энергетики; II, 4/5; Автоклік +0.30/с (7→7.30)",
+    "prerequisite": "node.auto_frequency.01:max"
+  },
+  {
+    "id": "node.auto_frequency.03",
+    "family": "auto_frequency",
+    "tier": 3,
+    "title": "Енергійна зміна III",
+    "description": "Помічник виконує автоматичні дії частіше.",
+    "source": "27:2510",
+    "observation": "Эспрессо; III, 4/5; Автоклік +0.45/с (7→7.45)",
+    "prerequisite": "node.auto_frequency.02:max"
+  },
+  {
+    "id": "node.auto_frequency.04",
+    "family": "auto_frequency",
+    "tier": 4,
+    "title": "Бригада на піку IV",
+    "description": "Помічник виконує автоматичні дії частіше.",
+    "source": "27:2532",
+    "observation": "Разогнанная команда; IV, ранг закритий toolbar; Автоклік +0.60/с (7→7.60)",
+    "prerequisite": "node.auto_frequency.03:max"
+  },
+  {
+    "id": "node.auto_strength.01",
+    "family": "auto_strength",
+    "tier": 1,
+    "title": "Навчання бригади I",
+    "description": "Збільшує прогрес від автоматичної дії помічника.",
+    "source": "27:2493",
+    "observation": "Абонемент в зал; I, 4/5; Сила автокліка 292→294 (+2)",
+    "prerequisite": "node.auto_action_count.01:1"
+  },
+  {
+    "id": "node.auto_strength.02",
+    "family": "auto_strength",
+    "tier": 2,
+    "title": "Вишкіл су-шефа II",
+    "description": "Збільшує прогрес від автоматичної дії помічника.",
+    "source": "27:2542",
+    "observation": "Протеиновый коктейль; II, 4/5; Сила автокліка +36 (292→328)",
+    "prerequisite": "node.auto_strength.01:max"
+  },
+  {
+    "id": "node.auto_strength.03",
+    "family": "auto_strength",
+    "tier": 3,
+    "title": "Майстерність бригади III",
+    "description": "Збільшує прогрес від автоматичної дії помічника.",
+    "source": "27:2549",
+    "observation": "Стероиды; III, 1/5; Сила автокліка +130 (292→422)",
+    "prerequisite": "node.auto_strength.02:max"
+  },
+  {
+    "id": "node.auto_strength_multiplier.01",
+    "family": "auto_strength_multiplier",
+    "tier": 1,
+    "title": "Школа су-шефа I",
+    "description": "Множить силу автоматичних дій помічника.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.auto_strength.01:1"
+  },
+  {
+    "id": "node.auto_strength_multiplier.02",
+    "family": "auto_strength_multiplier",
+    "tier": 2,
+    "title": "Академія су-шефа II",
+    "description": "Множить силу автоматичних дій помічника.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.auto_strength_multiplier.01:max"
+  },
+  {
+    "id": "node.character_xp.01",
+    "family": "character_xp",
+    "tier": 1,
+    "title": "Зростання кухаря I",
+    "description": "Множить особистий досвід кухаря.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.character_xp_flat.01:1"
+  },
+  {
+    "id": "node.character_xp.02",
+    "family": "character_xp",
+    "tier": 2,
+    "title": "Розвиток шефа II",
+    "description": "Множить особистий досвід кухаря.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.character_xp.01:max"
+  },
+  {
+    "id": "node.character_xp_flat.01",
+    "family": "character_xp_flat",
+    "tier": 1,
+    "title": "Кулінарна освіта I",
+    "description": "Додає особистий досвід кухаря до відповідної нагороди.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.dish_xp_flat.01:1"
+  },
+  {
+    "id": "node.character_xp_flat.02",
+    "family": "character_xp_flat",
+    "tier": 2,
+    "title": "Курс шефа II",
+    "description": "Додає особистий досвід кухаря до відповідної нагороди.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.character_xp_flat.01:max"
+  },
+  {
+    "id": "node.click_hold.01",
+    "family": "click_hold",
+    "tier": 1,
+    "title": "Впевнена рука",
+    "description": "Утримуйте кнопку на страві, щоб повторювати дії.",
+    "source": "7:1442",
+    "observation": "Тренировка хвата; Enable Hold To Reel, max",
+    "prerequisite": "node.click_strength.01:2"
+  },
+  {
+    "id": "node.click_multiplier.01",
+    "family": "click_multiplier",
+    "tier": 1,
+    "title": "Техніка шефа I",
+    "description": "Множить силу ваших ручних дій.",
+    "source": "27:2618",
+    "observation": "Продвинутая оснастка; I, 4/5; Множник кліку 3.18→3.26; source label ×1.08",
+    "prerequisite": "node.click_strength.04:max"
+  },
+  {
+    "id": "node.click_multiplier.02",
+    "family": "click_multiplier",
+    "tier": 2,
+    "title": "Техніка шефа II",
+    "description": "Множить силу ваших ручних дій.",
+    "source": "27:2635",
+    "observation": "Тяжёлая снасть; II, 3/5; Множник кліку 3.18→3.30; source label ×1.12",
+    "prerequisite": "node.click_multiplier.01:max"
+  },
+  {
+    "id": "node.click_multiplier.03",
+    "family": "click_multiplier",
+    "tier": 3,
+    "title": "Техніка шефа III",
+    "description": "Множить силу ваших ручних дій.",
+    "source": "27:2642",
+    "observation": "Глубоководная оснастка; III, 3/5; Множник кліку 3.18→3.48; source label ×1.30",
+    "prerequisite": "node.click_multiplier.02:max"
+  },
+  {
+    "id": "node.click_multiplier.04",
+    "family": "click_multiplier",
+    "tier": 4,
+    "title": "Професійне лезо IV",
+    "description": "Множить силу ваших ручних дій.",
+    "source": "27:2649",
+    "observation": "Стальной трос IV; 0/5, множник кліку ×3.18 → ×3.43; приріст ×1.25 показано джерелом",
+    "prerequisite": "node.click_multiplier.03:max"
+  },
+  {
+    "id": "node.click_strength.01",
+    "family": "click_strength",
+    "tier": 1,
+    "title": "Перший кухонний ніж",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "7:1441",
+    "observation": "Деревянная удочка I; 0/6, сила 1 → 2 (+1)",
+    "prerequisite": "node.kitchen_license.01:1"
+  },
+  {
+    "id": "node.click_strength.02",
+    "family": "click_strength",
+    "tier": 2,
+    "title": "Надійний ніж II",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "27:2385",
+    "observation": "Прочная удочка II; максимум 13/13, базова сила 9.0K",
+    "prerequisite": "node.click_strength.01:max"
+  },
+  {
+    "id": "node.click_strength.03",
+    "family": "click_strength",
+    "tier": 3,
+    "title": "Карбоновий ніж III",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "27:2403",
+    "observation": "Карбоновая удочка; III, 8/10; Базова сила +17; округлене 9.0K→9.0K",
+    "prerequisite": "node.click_strength.02:max"
+  },
+  {
+    "id": "node.click_strength.04",
+    "family": "click_strength",
+    "tier": 4,
+    "title": "Професійний ніж IV",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "27:2438",
+    "observation": "Профессиональная удочка; IV, ранг частково закритий toolbar; Базова сила +80",
+    "prerequisite": "node.click_strength.03:max"
+  },
+  {
+    "id": "node.click_strength.05",
+    "family": "click_strength",
+    "tier": 5,
+    "title": "Елітний ніж V",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "27:2611",
+    "observation": "Элитная удочка; V, 4/5; Базова сила +180",
+    "prerequisite": "node.click_strength.04:max"
+  },
+  {
+    "id": "node.click_strength.06",
+    "family": "click_strength",
+    "tier": 6,
+    "title": "Титановий ніж VI",
+    "description": "Кожна ручна дія просуває приготування сильніше.",
+    "source": "27:2625",
+    "observation": "Титановая удочка; VI, 4/5; Базова сила +400",
+    "prerequisite": "node.click_strength.05:max"
+  },
+  {
+    "id": "node.critical_chance.01",
+    "family": "critical_chance",
+    "tier": 1,
+    "title": "Гостра заточка I",
+    "description": "Підвищує шанс особливо сильного руху під час готування.",
+    "source": "27:2427",
+    "observation": "Острые крючки; I, 4/5; Крит +1 п.п. (20→21%)",
+    "prerequisite": "node.click_strength.01:3"
+  },
+  {
+    "id": "node.critical_chance.02",
+    "family": "critical_chance",
+    "tier": 2,
+    "title": "Зубчаста заточка II",
+    "description": "Підвищує шанс особливо сильного руху під час готування.",
+    "source": "27:2445",
+    "observation": "Зазубренные крючки; II, 4/5; Крит +2 п.п. (20→22%)",
+    "prerequisite": "node.critical_chance.01:max"
+  },
+  {
+    "id": "node.critical_chance.03",
+    "family": "critical_chance",
+    "tier": 3,
+    "title": "Діамантова заточка III",
+    "description": "Підвищує шанс особливо сильного руху під час готування.",
+    "source": "27:2574",
+    "observation": "Алмазное остриё III; 4/5, шанс криту 20 → 22% (+2 п.п.)",
+    "prerequisite": "node.critical_chance.02:max"
+  },
+  {
+    "id": "node.critical_multiplier.01",
+    "family": "critical_multiplier",
+    "tier": 1,
+    "title": "Сильний прийом I",
+    "description": "Посилює критичні рухи.",
+    "source": "27:2434",
+    "observation": "Крепкая хватка; I, 4/5; Множник криту +0.30 (6.60→6.90)",
+    "prerequisite": "node.critical_chance.01:1"
+  },
+  {
+    "id": "node.critical_multiplier.02",
+    "family": "critical_multiplier",
+    "tier": 2,
+    "title": "Відточений прийом II",
+    "description": "Посилює критичні рухи.",
+    "source": "27:2452",
+    "observation": "Железные руки II; 4/5, множник криту ×6.60 → ×6.95 (+0.35)",
+    "prerequisite": "node.critical_multiplier.01:max"
+  },
+  {
+    "id": "node.critical_multiplier.03",
+    "family": "critical_multiplier",
+    "tier": 3,
+    "title": "Фірмовий прийом III",
+    "description": "Посилює критичні рухи.",
+    "source": "27:2593",
+    "observation": "Глубокая подсечка; III, 4/5; Множник криту +0.50 (6.60→7.10)",
+    "prerequisite": "node.critical_multiplier.02:max"
+  },
+  {
+    "id": "node.critical_time_bonus.01",
+    "family": "critical_time_bonus",
+    "tier": 1,
+    "title": "Виграні секунди",
+    "description": "Критичні рухи дають додатковий час на бонусний вибір наступного замовлення.",
+    "source": "27:2604",
+    "observation": "Ткач времени I; критичні кліки додають час мінігри, 0 → 0.05 с за крит",
+    "prerequisite": "node.critical_multiplier.01:1"
+  },
+  {
+    "id": "node.day_income_bonus.01",
+    "family": "day_income_bonus",
+    "tier": 1,
+    "title": "Контракти закладу I",
+    "description": "Збільшує підсумкову винагороду за завершений робочий день.",
+    "source": "27:2280",
+    "observation": "Рекламная сделка I; 3/5, гроші за поїздку, sponsorship 6 → 8%",
+    "prerequisite": "node.dish_value.02:1"
+  },
+  {
+    "id": "node.day_income_bonus.02",
+    "family": "day_income_bonus",
+    "tier": 2,
+    "title": "Контракти закладу II",
+    "description": "Збільшує підсумкову винагороду за завершений робочий день.",
+    "source": "27:2284",
+    "observation": "Продажный тип II; 0/5, гроші за поїздку, sponsorship 6 → 7%",
+    "prerequisite": "node.day_income_bonus.01:max"
+  },
+  {
+    "id": "node.dish_value.01",
+    "family": "dish_value",
+    "tier": 1,
+    "title": "Вигідне меню",
+    "description": "Збільшує оплату за готові страви.",
+    "source": "7:1456",
+    "observation": "Торговля I; 0/5, цінність ×1.00 → ×1.03",
+    "prerequisite": "node.click_strength.01:1"
+  },
+  {
+    "id": "node.dish_value.02",
+    "family": "dish_value",
+    "tier": 2,
+    "title": "Вигідні пропозиції II",
+    "description": "Збільшує оплату за готові страви.",
+    "source": "27:2217",
+    "observation": "Жёсткий торг II; збільшує базову цінність риби",
+    "prerequisite": "node.dish_value.01:max"
+  },
+  {
+    "id": "node.dish_value.03",
+    "family": "dish_value",
+    "tier": 3,
+    "title": "Майстер меню III",
+    "description": "Збільшує оплату за готові страви.",
+    "source": "27:2258",
+    "observation": "Мастер продаж III; збільшує базову цінність риби",
+    "prerequisite": "node.dish_value.02:max"
+  },
+  {
+    "id": "node.dish_value.04",
+    "family": "dish_value",
+    "tier": 4,
+    "title": "Популярне меню IV",
+    "description": "Збільшує оплату за готові страви.",
+    "source": "27:2265",
+    "observation": "Высокий спрос IV; 3/5, цінність ×1.93 → ×1.99",
+    "prerequisite": "node.dish_value.03:max"
+  },
+  {
+    "id": "node.dish_xp.01",
+    "family": "dish_xp",
+    "tier": 1,
+    "title": "Швидке навчання рецепта",
+    "description": "Множить досвід, отриманий конкретною стравою.",
+    "source": "27:2302",
+    "observation": "Быстрый ученик I; 0/5, множник XP риби ×1.10 → ×1.17",
+    "prerequisite": "node.dish_xp_flat.01:1"
+  },
+  {
+    "id": "node.dish_xp_flat.01",
+    "family": "dish_xp_flat",
+    "tier": 1,
+    "title": "Нотатки до рецепта",
+    "description": "Додає досвід страви за успішне завершення.",
+    "source": "7:1447",
+    "observation": "Полевые заметки I; 0/5, XP за рибу 0 → 3 (+3)",
+    "prerequisite": "node.click_strength.01:1"
+  },
+  {
+    "id": "node.dish_xp_flat.02",
+    "family": "dish_xp_flat",
+    "tier": 2,
+    "title": "Будова рецепта II",
+    "description": "Додає досвід страви за успішне завершення.",
+    "source": "27:2288",
+    "observation": "Изучение анатомии II; 7/8, XP за рибу +5",
+    "prerequisite": "node.dish_xp_flat.01:max"
+  },
+  {
+    "id": "node.dish_xp_flat.03",
+    "family": "dish_xp_flat",
+    "tier": 3,
+    "title": "Дослідження рецепта III",
+    "description": "Додає досвід страви за успішне завершення.",
+    "source": "27:2295",
+    "observation": "Научная работа III; 4/5, XP за рибу +14",
+    "prerequisite": "node.dish_xp_flat.02:max"
+  },
+  {
+    "id": "node.double_strike_chance.01",
+    "family": "double_strike_chance",
+    "tier": 1,
+    "title": "Подвійний рух I",
+    "description": "Підвищує шанс додаткового руху по поточній страві.",
+    "source": "27:2235",
+    "observation": "Двойная оснастка I; 4/5, подвійний улов 15.5 → 16.8%",
+    "prerequisite": "node.click_strength.01:2"
+  },
+  {
+    "id": "node.double_strike_chance.02",
+    "family": "double_strike_chance",
+    "tier": 2,
+    "title": "Другий рух II",
+    "description": "Підвищує шанс додаткового руху по поточній страві.",
+    "source": "27:2243",
+    "observation": "Запутанный клубок II; шанс зловити додаткову рибу",
+    "prerequisite": "node.double_strike_chance.01:max"
+  },
+  {
+    "id": "node.double_strike_chance.03",
+    "family": "double_strike_chance",
+    "tier": 3,
+    "title": "Серійна підготовка III",
+    "description": "Підвищує шанс додаткового руху по поточній страві.",
+    "source": "27:2247",
+    "observation": "Заброс сети III; 4/5, шанс подвійного улову 15.5 → 16.5% (+1 п.п.)",
+    "prerequisite": "node.double_strike_chance.02:max"
+  },
+  {
+    "id": "node.double_strike_power.01",
+    "family": "double_strike_power",
+    "tier": 1,
+    "title": "Відточений повтор I",
+    "description": "Посилює додатковий рух.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.double_strike_chance.01:1"
+  },
+  {
+    "id": "node.double_strike_power.02",
+    "family": "double_strike_power",
+    "tier": 2,
+    "title": "Сильний повтор II",
+    "description": "Посилює додатковий рух.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.double_strike_power.01:max"
+  },
+  {
+    "id": "node.hold_frequency.01",
+    "family": "hold_frequency",
+    "tier": 1,
+    "title": "Робочий ритм I",
+    "description": "Прискорює повтори під час утримання.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.click_hold.01:1"
+  },
+  {
+    "id": "node.hold_frequency.02",
+    "family": "hold_frequency",
+    "tier": 2,
+    "title": "Ритм шефа II",
+    "description": "Прискорює повтори під час утримання.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.hold_frequency.01:max"
+  },
+  {
+    "id": "node.kitchen_license.01",
+    "family": "kitchen_license",
+    "tier": 1,
+    "title": "Допуск до кухні",
+    "description": "Відкриває дерево розвитку кухні без витрати грошей.",
+    "source": "7:1446",
+    "observation": "Рыболовная лицензия; відкриває дерево, 0 G",
+    "prerequisite": "—"
+  },
+  {
+    "id": "node.location_value.01",
+    "family": "location_value",
+    "tier": 1,
+    "title": "Престиж локації",
+    "description": "Посилює вартість страв залежно від рівня обраної локації.",
+    "source": "27:2276",
+    "observation": "Место решает I; цінність за рівень зони",
+    "prerequisite": "node.dish_value.02:1"
+  },
+  {
+    "id": "node.order_tracker_frequency.01",
+    "family": "order_tracker_frequency",
+    "tier": 1,
+    "title": "Швидкий диспетчер I",
+    "description": "Прискорює імпульси підказок диспетчера кухні.",
+    "source": "7:1458",
+    "observation": "Разогнанный сонар I; 4/5, швидкість імпульсу 24 → 30%",
+    "prerequisite": "node.order_tracker_tier.01:1"
+  },
+  {
+    "id": "node.order_tracker_frequency.02",
+    "family": "order_tracker_frequency",
+    "tier": 2,
+    "title": "Миттєві підказки II",
+    "description": "Прискорює імпульси підказок диспетчера кухні.",
+    "source": "7:1459",
+    "observation": "Турбо-сонар II; 0/5, швидкість імпульсу 24 → 34%",
+    "prerequisite": "node.order_tracker_frequency.01:max"
+  },
+  {
+    "id": "node.order_tracker_tier.01",
+    "family": "order_tracker_tier",
+    "tier": 1,
+    "title": "Диспетчер кухні I",
+    "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.click_strength.01:1"
+  },
+  {
+    "id": "node.order_tracker_tier.02",
+    "family": "order_tracker_tier",
+    "tier": 2,
+    "title": "Диспетчер кухні II",
+    "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+    "source": "7:1457",
+    "observation": "Эхолокация II; відкриття трекера 2-го рівня; preview Expert/гарячі точки",
+    "prerequisite": "node.order_tracker_tier.01:max"
+  },
+  {
+    "id": "node.order_tracker_tier.03",
+    "family": "order_tracker_tier",
+    "tier": 3,
+    "title": "Диспетчер кухні III",
+    "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+    "source": "7:1460",
+    "observation": "Трекер Mk III; відкриття трекера 3-го рівня; знову Expert/гарячі точки",
+    "prerequisite": "node.order_tracker_tier.02:max"
+  },
+  {
+    "id": "node.passive_flat.01",
+    "family": "passive_flat",
+    "tier": 1,
+    "title": "Скринька чайових I",
+    "description": "Додає до базового автоматичного доходу закладу.",
+    "source": "27:2213",
+    "observation": "Банка для чаевых I; генерує стабільний пасивний дохід",
+    "prerequisite": "node.passive_unlock.01:1"
+  },
+  {
+    "id": "node.passive_flat.02",
+    "family": "passive_flat",
+    "tier": 2,
+    "title": "Налагоджений сервіс II",
+    "description": "Додає до базового автоматичного доходу закладу.",
+    "source": "27:2224",
+    "observation": "Торговый автомат II; генерує пасивний дохід",
+    "prerequisite": "node.passive_flat.01:max"
+  },
+  {
+    "id": "node.passive_unlock.01",
+    "family": "passive_unlock",
+    "tier": 1,
+    "title": "Налагоджена кухня I",
+    "description": "Відкриває автоматичний дохід закладу.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.dish_value.01:1"
+  },
+  {
+    "id": "node.passive_value.01",
+    "family": "passive_value",
+    "tier": 1,
+    "title": "Господар кухні I",
+    "description": "Множить автоматичний дохід закладу.",
+    "source": "27:2231",
+    "observation": "Хозяин причала I; множить загальний пасивний дохід",
+    "prerequisite": "node.passive_flat.01:1"
+  },
+  {
+    "id": "node.preparation_efficiency.01",
+    "family": "preparation_efficiency",
+    "tier": 1,
+    "title": "Раціональна підготовка I",
+    "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+    "source": "27:2459",
+    "observation": "Мастер натяжения; I, 4/5; Потрібно кліків −5.5→−6.0%, зміна −0.5 п.п.",
+    "prerequisite": "node.click_strength.03:1"
+  },
+  {
+    "id": "node.preparation_efficiency.02",
+    "family": "preparation_efficiency",
+    "tier": 2,
+    "title": "Продумана підготовка II",
+    "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+    "source": "27:2553",
+    "observation": "Плавный фрикцион; II, 4/5; Потрібно кліків −5.5→−5.8%",
+    "prerequisite": "node.preparation_efficiency.01:max"
+  },
+  {
+    "id": "node.preparation_efficiency.03",
+    "family": "preparation_efficiency",
+    "tier": 3,
+    "title": "Налагоджена підготовка III",
+    "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+    "source": "27:2560",
+    "observation": "Полное истощение; III, 4/5; Потрібно кліків −5.5→−6.0%",
+    "prerequisite": "node.preparation_efficiency.02:max"
+  },
+  {
+    "id": "node.preparation_efficiency.04",
+    "family": "preparation_efficiency",
+    "tier": 4,
+    "title": "Бездоганна підготовка IV",
+    "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+    "source": "27:2567",
+    "observation": "Идеальный фрикцион; IV, 1/5; Потрібно кліків −5.5→−6.0%",
+    "prerequisite": "node.preparation_efficiency.03:max"
+  },
+  {
+    "id": "node.rarity_chance.01",
+    "family": "rarity_chance",
+    "tier": 1,
+    "title": "Чуття смаку I",
+    "description": "Покращує шанси отримати страву вищої якості.",
+    "source": "27:2354",
+    "observation": "Талисман удачи; I, 4/5; Рідкість +0.10 п.п. (0.84→0.94%)",
+    "prerequisite": "node.dish_xp.01:1"
+  },
+  {
+    "id": "node.rarity_chance.02",
+    "family": "rarity_chance",
+    "tier": 2,
+    "title": "Чуття смаку II",
+    "description": "Покращує шанси отримати страву вищої якості.",
+    "source": "27:2361",
+    "observation": "Четырёхлистный клевер II; 4/5, flat rare chance 0.84 → 0.94%",
+    "prerequisite": "node.rarity_chance.01:max"
+  },
+  {
+    "id": "node.rarity_chance.03",
+    "family": "rarity_chance",
+    "tier": 3,
+    "title": "Чуття смаку III",
+    "description": "Покращує шанси отримати страву вищої якості.",
+    "source": "27:2368",
+    "observation": "Кроличья лапка III; 0/5, flat rare chance 0.84 → 0.94%",
+    "prerequisite": "node.rarity_chance.02:max"
+  },
+  {
+    "id": "node.rarity_multiplier.01",
+    "family": "rarity_multiplier",
+    "tier": 1,
+    "title": "Око шефа",
+    "description": "Посилює погоджені модифікатори якості страв.",
+    "source": "27:2375",
+    "observation": "Поляризованные очки I; 0/5, множник загального rare chance ×1.25 → ×1.35",
+    "prerequisite": "node.rarity_chance.01:1"
+  },
+  {
+    "id": "node.recipe_discount.01",
+    "family": "recipe_discount",
+    "tier": 1,
+    "title": "Закупівля знань I",
+    "description": "Зменшує ціну придбання нових рецептів.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.dish_value.01:1"
+  },
+  {
+    "id": "node.restaurant_xp.01",
+    "family": "restaurant_xp",
+    "tier": 1,
+    "title": "Легенда кухні I",
+    "description": "Множить досвід закладу.",
+    "source": "27:2340",
+    "observation": "Местная легенда I; 4/5, множник XP водойми ×1.32 → ×1.40",
+    "prerequisite": "node.restaurant_xp_flat.01:1"
+  },
+  {
+    "id": "node.restaurant_xp.02",
+    "family": "restaurant_xp",
+    "tier": 2,
+    "title": "Легенда кухні II",
+    "description": "Множить досвід закладу.",
+    "source": "27:2347",
+    "observation": "Заклинатель лягушек II; 0/5, множник XP водойми ×1.32 → ×1.42",
+    "prerequisite": "node.restaurant_xp.01:max"
+  },
+  {
+    "id": "node.restaurant_xp_flat.01",
+    "family": "restaurant_xp_flat",
+    "tier": 1,
+    "title": "Знання кухні I",
+    "description": "Додає досвід закладу до відповідної нагороди.",
+    "source": "27:2316",
+    "observation": "Местные знания I; 4/5, XP водойми +12",
+    "prerequisite": "node.dish_xp_flat.01:1"
+  },
+  {
+    "id": "node.restaurant_xp_flat.02",
+    "family": "restaurant_xp_flat",
+    "tier": 2,
+    "title": "Знання кухні II",
+    "description": "Додає досвід закладу до відповідної нагороди.",
+    "source": "27:2323",
+    "observation": "Эхолот; II, 4/5; XP водойми +35 (668→703)",
+    "prerequisite": "node.restaurant_xp_flat.01:max"
+  },
+  {
+    "id": "node.restaurant_xp_flat.03",
+    "family": "restaurant_xp_flat",
+    "tier": 3,
+    "title": "Майстер закладу III",
+    "description": "Додає досвід закладу до відповідної нагороди.",
+    "source": "27:2330",
+    "observation": "Шептун воды III; 4/5, XP водойми +120",
+    "prerequisite": "node.restaurant_xp_flat.02:max"
+  },
+  {
+    "id": "node.selection_bonus.01",
+    "family": "selection_bonus",
+    "tier": 1,
+    "title": "Премія за оперативність I",
+    "description": "Збільшує грошовий бонус за своєчасно вибране замовлення.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.selection_window.01:1"
+  },
+  {
+    "id": "node.selection_bonus.02",
+    "family": "selection_bonus",
+    "tier": 2,
+    "title": "Вчасна подача II",
+    "description": "Збільшує грошовий бонус за своєчасно вибране замовлення.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.selection_bonus.01:max"
+  },
+  {
+    "id": "node.selection_precision_window.01",
+    "family": "selection_precision_window",
+    "tier": 1,
+    "title": "Точний вибір I",
+    "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+    "source": "7:1448",
+    "observation": "Твёрдые руки I; 0/5, вікно ідеальної дії +0.02 с",
+    "prerequisite": "node.selection_window.01:1"
+  },
+  {
+    "id": "node.selection_precision_window.02",
+    "family": "selection_precision_window",
+    "tier": 2,
+    "title": "Зосереджений вибір II",
+    "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+    "source": "ClickCook",
+    "observation": "Додатковий вузол ClickCook, source popup не заявляється",
+    "prerequisite": "node.selection_precision_window.01:max"
+  },
+  {
+    "id": "node.selection_precision_window.03",
+    "family": "selection_precision_window",
+    "tier": 3,
+    "title": "Бездоганний вибір III",
+    "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+    "source": "7:1449",
+    "observation": "Безупречный фокус III; 4/5, вікно ідеальної дії 0.28 → 0.31 с",
+    "prerequisite": "node.selection_precision_window.02:max"
+  },
+  {
+    "id": "node.selection_start_progress.01",
+    "family": "selection_start_progress",
+    "tier": 1,
+    "title": "Точна підготовка I",
+    "description": "Швидко вибране замовлення починається частково підготовленим.",
+    "source": "7:1452",
+    "observation": "Точный заброс I; 4/5, початковий прогрес 24 → 25% (+1 п.п.)",
+    "prerequisite": "node.selection_precision_window.01:1"
+  },
+  {
+    "id": "node.selection_start_progress.02",
+    "family": "selection_start_progress",
+    "tier": 2,
+    "title": "Бездоганна підготовка II",
+    "description": "Швидко вибране замовлення починається частково підготовленим.",
+    "source": "7:1450",
+    "observation": "Снайперский заброс II; 0/5, початковий прогрес 24 → 25.5% (+1.5 п.п.)",
+    "prerequisite": "node.selection_start_progress.01:max"
+  },
+  {
+    "id": "node.selection_window.01",
+    "family": "selection_window",
+    "tier": 1,
+    "title": "Ритм замовлень I",
+    "description": "Дає більше часу для вибору замовлення з бонусом.",
+    "source": "7:1443",
+    "observation": "Ритмичная намотка I; 4/5, таймер 4.80 → 5.10 с (+0.30)",
+    "prerequisite": "node.click_strength.01:1"
+  },
+  {
+    "id": "node.selection_window.02",
+    "family": "selection_window",
+    "tier": 2,
+    "title": "Зосередженість на кухні II",
+    "description": "Дає більше часу для вибору замовлення з бонусом.",
+    "source": "7:1444",
+    "observation": "Концентрация тиши II; 4/5, таймер 5.00 → 5.20 с (+0.20)",
+    "prerequisite": "node.selection_window.01:max"
+  },
+  {
+    "id": "node.selection_window.03",
+    "family": "selection_window",
+    "tier": 3,
+    "title": "Потік шефа III",
+    "description": "Дає більше часу для вибору замовлення з бонусом.",
+    "source": "7:1445",
+    "observation": "Назва обрізана; текст «Растворяешься в ритме катушки»; III, таймер 5.00 → 5.25 с (+0.25)",
+    "prerequisite": "node.selection_window.02:max"
+  },
+  {
+    "id": "node.triple_strike_chance.01",
+    "family": "triple_strike_chance",
+    "tier": 1,
+    "title": "Потрійний рух I",
+    "description": "Відкриває шанс виконати ще два рухи по поточній страві.",
+    "source": "27:2239",
+    "observation": "Широкая сеть I; 4/5, потрійний улов 4 → 5%",
+    "prerequisite": "node.double_strike_chance.02:1"
+  },
+  {
+    "id": "node.triple_strike_chance.02",
+    "family": "triple_strike_chance",
+    "tier": 2,
+    "title": "Потрійний рух II",
+    "description": "Відкриває шанс виконати ще два рухи по поточній страві.",
+    "source": "27:2254",
+    "observation": "Траловая сеть II; 0/5, шанс потрійного улову 4 → 5% (+1 п.п.)",
+    "prerequisite": "node.triple_strike_chance.01:max"
+  },
+  {
+    "id": "node.upgrade_discount.01",
+    "family": "upgrade_discount",
+    "tier": 1,
+    "title": "Розумне оснащення",
+    "description": "Зменшує ціну майбутніх покращень.",
+    "source": "27:2272",
+    "observation": "Библиотечный билет I; 4/5, вартість навичок −6 → −7%",
+    "prerequisite": "node.dish_value.01:1"
+  }
+]

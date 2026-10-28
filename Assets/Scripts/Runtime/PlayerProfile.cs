@@ -9,6 +9,8 @@ namespace ClickCook.Runtime
     {
         private readonly Dictionary<string, int> upgradeRanks = new(StringComparer.Ordinal);
         private PrototypeOrderSession activeDay;
+        private readonly HashSet<int> ownedRecipes = new() { 1 };
+        public bool OwnsRecipe(int id) => ownedRecipes.Contains(id);
 
         public PrototypeDishRewards Rewards { get; } = new();
         public bool HasActiveDay => activeDay != null;
@@ -28,7 +30,21 @@ namespace ClickCook.Runtime
             id != null && upgradeRanks.TryGetValue(UpgradeNodeRules.CanonicalId(id), out int rank) ? rank : 0;
 
         public PlayerProfileSnapshot CaptureSnapshot() =>
-            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks, Rewards.CopyDishXpHundredths());
+            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks, Rewards.CopyDishXpHundredths(), ownedRecipes);
+
+        internal void RestoreRecipes(IEnumerable<int> recipes)
+        {
+            ownedRecipes.Clear();
+            foreach (int id in recipes) ownedRecipes.Add(id);
+        }
+
+        internal bool TryPurchaseRecipe(int id, decimal price)
+        {
+            if (HasActiveDay || id < 2 || id > 32 || ownedRecipes.Contains(id) || price <= 0 || !Rewards.TrySpend(price)) return false;
+            ownedRecipes.Add(id);
+            NotifyChanged();
+            return true;
+        }
 
         internal bool TryBeginDay(PrototypeOrderSession session)
         {

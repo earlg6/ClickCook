@@ -1,5 +1,12 @@
 # ClickCook — Game Design Document
 
+**Поточний checkpoint — 2026-10-28: 8B завершено — рецепти й eligibility.** Додано магазин32 рецептів (8 на сторінку), постійне володіння, точну одноразову купівлю за наявними цінами та фільтрацію початкових/замінних замовлень за власними рецептами. Новий профіль має сендвічі; без власних рецептів у локації Cook заблоковано з підказкою та доступною навігацією до магазину. Авторитетний serving map — чинні списки LocationData; за рішенням власника Michelin має лише4 страви29–32. Схема17 читає1–16: зберігає точний прогрес, надає старим профілям рецепти вже приготованих страв за позитивним Dish XP, не переписує файл під час читання. Нова гра скидає рецепти в обох копіях. Контракт: [8B](ClickCook_8B_Recipe_Contract.md).
+
+Compilation, scoped model/storage/Play та native mouse пройдено. Купівля кексів150: wallet1000.25→850.25, рецепт2 і точний баланс збережено й відновлено після stop/restart/Continue. Перевірено owned/all-owned pools11 локацій, replay/pause/day/price guards, immutable snapshot, backup/reset/malformed/future protection,32 UI labels/details, paging та навігацію без disabled Cook. Новий Player build/широкі suites не потрібні. Play stopped; save override removed; scene clean. Попередні checkpoints нижче історичні.
+
+**Наступний крок — 8C: Player XP/level і відкриття локацій.** Перед runtime реалізацією зафіксувати cumulative/per-level пороги, округлення/момент видачі earnings/100 та відповідність player levels1–10 і location levels0–10. Фінальний pacing, Journal, recipe discount, Restaurant XP та U6 лишаються окремими етапами.
+
+
 **Поточний checkpoint — 2026-10-28: 8A, підсумок дня, завершено.** Звіт показує локацію, до десяти фактичних receipts (страва/якість/гроші/Dish XP), точні суми доходу та XP. Ранній Finish Day і Continue після десятої страви відкривають звіт. Сам звіт не платить, не додає XP і не змінює save: нагороди вже збережені на receipt boundary. Порожній день дає нулі, незавершена робота не враховується. Апгрейди повертають до того самого звіту; Next Day одноразово повертає до вибору локації, Cook починає нову дошку. Календар, Player/Restaurant XP та збереження історії звітів не додано. Контракт: [8A](ClickCook_8A_Day_Summary_Contract.md).
 
 Локальна compilation/model/Play перевірка пройшла: empty/early/ten-receipt totals, fractional XP, immutable snapshot, paused/active/stale guards, owner cleanup, summary→upgrades→summary→Next Day, focus/text fit та точний reload тимчасового save. Native Computer Use огляд і кнопки пройдено у Game View Full HD (відображення 0.45×): звіт 90/110 XP, покупка strength за20, wallet70/rank1 у save, звіт залишився90/110. Зміни моделей/налаштувань інших робіт збережено окремо. Player build і широка регресія не потрібні. Нижчі checkpoints історичні.
@@ -217,7 +224,7 @@ Main Menu
 - [HISTORICAL INFERENCE — superseded] A completed/selected slot might become blank. Selection now reserves the order without removing it; successful completion removes that exact order and permits replacement as specified below.
 - [DESIGNED] Orders are selected by the player before cooking.
 - [APPROVED — Milestone 4 design] Capacity depends on location: early locations approximately 2–3 simultaneous orders, later locations up to six. Exact per-location capacities are not approved.
-- [APPROVED PROTOTYPE RULE] Generate orders uniformly at random from the selected `LocationData.DocumentedAvailableDishes`. Duplicates are allowed as independent runtime instances. No recipe ownership, progression, economy, rarity, or weighted filtering. Empty pools generate no orders; missing references must be handled safely without invented dishes.
+- [IMPLEMENTED — 8B, supersedes the unfiltered prototype pool] Generate orders uniformly from distinct valid dish IDs in selected `LocationData.DocumentedAvailableDishes` intersected with owned recipes. Initial and replacement orders use the same filter. Duplicate orders remain independent runtime instances. A zero-owned location cannot start through Cook; its UI offers recipes or another location. No rarity weighting is inferred.
 - [APPROVED — selection] Clicking a populated card immediately enters cooking, without confirmation. Only one order may be active. Preserve its runtime identity, dish, slot, and location; selection is not completion and other orders cannot be selected while it is reserved.
 - [ADOPTED DESIGN — Figma reconciliation, 2026-10-15] Other choice cards hide or become visibly unavailable during close-up cooking; their runtime orders are retained. Back restores the same board and exact orders. The original Figma phrase about other options disappearing is not interpreted as deleting/regenerating all unselected orders. The source's timely-choice bonus is planned as a separate optional bonus window; no forced selection/expiry is added to the existing prototype.
 - [APPROVED PROTOTYPE CHOICE — 4A] Use a screen labeled `Cooking Prototype — Not Implemented`, showing the selected order identity, dish ID/name, and location. Back releases the active reservation and returns to the unchanged board without completion, regeneration, or counter changes. Final close-up art and clicking remain deferred.
@@ -268,7 +275,7 @@ Main Menu
 
 - [DESIGNED] The table label is `Количество кликов` / number of clicks.
 - [APPROVED — Milestone 4B baseline; UI-A3 visibility] Base dish HP equals the documented `ClickRequirement`; each unupgraded discrete click subtracts one HP, and zero completes the selected dish. All documented values are preserved, including 70,000 for the final dish. UI-A3 displays this HP; 6A upgrades affect damage.
-- [TBD] Recipe-purchase behavior, dish unlock representation, recipe UI, dish art, and future modifiers. Base Dish XP awards are approved in Section 10.
+- [IMPLEMENTED — 8B] Permanent recipe ownership by stable dish ID, individual purchase at authored RecipeCost, paginated recipe shop and schema17 persistence/migration. Starter Sandwiches is free; existing recipes with positive Dish XP migrate as owned. Dish art, Journal content UI and recipe-price modifiers remain separate work. Base Dish XP awards are approved in Section 10.
 
 ## 9. Cooking / Clicking Mechanics
 
@@ -443,8 +450,8 @@ Passives / Пассивки
 - [DESIGNED] Each dish has a recipe cost.
 - [DESIGNED] Location table lists new recipe groups.
 - [DESIGNED] Locations also have separately documented dishes-served lists.
-- [TBD] Whether recipes are automatically granted, individually purchased, required before orders spawn, visible in Journal, or shared across locations.
-- [TBD] Exact interpretation of Michelin location’s “all dishes starting from the third restaurant.”
+- [IMPLEMENTED — 8B] Sandwiches is granted at start; other recipes are bought individually and required before their orders spawn. Ownership is shared across serving locations. The purchase shop is implemented; the later Journal remains separate.
+- [OWNER DECISION — 2026-10-28, 8B] Retain the current Unity Michelin pool: only dishes29–32. The broader source interpretations are not used by runtime. LocationData is authoritative for all11 serving pools; reverse dish→location lists remain reference data.
 
 ## 16. Achievements
 
@@ -625,7 +632,7 @@ This is a design-to-technical mapping, not existing implementation.
 |---|---|---|---|
 | Game flow | Partially implemented: Location Selection → board → base cooking → rarity/payout/XP result → board or day end | Existing prototype controller/session/rewards | Final summary, visuals and persistent progression remain unimplemented |
 | Locations | Partially implemented: 11 static data assets, ordered catalog, placeholder carousel | Data assets/serializable location definitions | Unlocks, ownership, progress, and income runtime remain TBD/unimplemented |
-| Dishes/recipes | Partially implemented: 32 static dish data assets; no runtime recipe system | Data assets/serializable dish and recipe definitions | Recipe ownership/purchase behavior remains TBD/unimplemented |
+| Dishes/recipes | 32 static dishes plus recipe ownership, purchase shop, order filtering and schema17 saves | Existing DishData plus RecipeCatalog/profile/session | Final dish art, Journal and recipe discounts remain unfinished |
 | Orders | Partially implemented: random instances, reservation, completion/replacement, daily cap and cleanup (4B) | PrototypeOrder / PrototypeOrderSession | Final capacities and advanced eligibility remain TBD |
 | Cooking | Partially implemented: base HP, 6A Click Strength, visible HP and UI-A4 collider-clickable 3D sketch on the existing plate | Existing controller/session and scene-only CounterScenePresentation/CounterDishPointer | Final art, effects and other click modifiers remain absent |
 | Rarity | Baseline levels 1–18 implemented (5B) | PrototypeDishRewards / approved table | Future modifiers and final reveal presentation |

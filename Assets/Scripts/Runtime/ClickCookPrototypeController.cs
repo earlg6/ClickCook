@@ -78,6 +78,10 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Button summaryUpgradesButton;
         public PrototypeDaySummary DaySummary { get; private set; }
         private bool upgradesFromSummary;
+        [Header("Milestone 8B — recipe ownership")]
+        [SerializeField] private RecipeCatalog recipeCatalog;
+        [SerializeField] private RecipeShopView recipeShop;
+        [SerializeField] private UnityEngine.UI.Button openRecipesButton;
         public bool GameplayBlocked => profileMenu != null && profileMenu.IsBlocking;
         public bool CanCookDisplayedOrder => enabled && !GameplayBlocked && cookingPrototypeScreen.activeInHierarchy &&
             session != null && !session.IsPaused && displayedCookingOrder != null && session.ActiveOrder == displayedCookingOrder;
@@ -133,6 +137,10 @@ namespace ClickCook.Runtime
             }
 
             previousButton.onClick.AddListener(ShowPreviousLocation);
+            session.ConfigureRecipes(recipeCatalog);
+            recipeShop.Initialize(this);
+            recipeShop.gameObject.SetActive(false);
+            openRecipesButton.onClick.AddListener(OpenRecipes);
             nextDayButton.onClick.AddListener(NextDay);
             summaryUpgradesButton.onClick.AddListener(OpenUpgrades);
             daySummaryScreen.SetActive(false);
@@ -180,7 +188,8 @@ namespace ClickCook.Runtime
             }
 
             return locationCatalog != null &&
-                   locationSelectionScreen != null && daySummaryScreen != null && daySummaryText != null &&
+                   locationSelectionScreen != null && recipeCatalog != null && recipeShop != null && openRecipesButton != null &&
+                   daySummaryScreen != null && daySummaryText != null &&
                    nextDayButton != null && summaryUpgradesButton != null &&
                    workDayScreen != null &&
                    locationNameText != null &&
@@ -312,7 +321,7 @@ namespace ClickCook.Runtime
         public void CookSelectedLocation()
         {
             LocationData selectedLocation = CurrentLocation;
-            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || selectedLocation == null)
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || selectedLocation == null || session.AvailableRecipeCount(selectedLocation) == 0)
             {
                 return;
             }
@@ -606,11 +615,29 @@ namespace ClickCook.Runtime
             locationLevelText.text = $"Рівень локації: {location.LevelRequirement}";
             progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
             dishSlotsText.text = ClickCookUiCopy.DishPreview(location);
+            int eligible = session.AvailableRecipeCount(location);
+            dishSlotsText.text += $"\nКуплених рецептів: {eligible} / {location.DocumentedAvailableDishes.Count}";
+            cookButton.interactable = eligible > 0;
+            if (eligible == 0) dishSlotsText.text += "\nКупи рецепт або обери іншу локацію.";
+            var controls = new System.Collections.Generic.List<UnityEngine.UI.Button> { previousButton, nextButton };
+            if (cookButton.interactable) controls.Add(cookButton);
+            controls.Add(openRecipesButton); controls.Add(openUpgradesButton); controls.Add(exitGameButton);
+            for (int i = 0; i < controls.Count; i++)
+            {
+                var nav = controls[i].navigation; nav.mode = UnityEngine.UI.Navigation.Mode.Explicit;
+                nav.selectOnUp = nav.selectOnLeft = controls[(i + controls.Count - 1) % controls.Count];
+                nav.selectOnDown = nav.selectOnRight = controls[(i + 1) % controls.Count];
+                if (controls[i] == previousButton) nav.selectOnLeft = nav.selectOnRight = nextButton;
+                if (controls[i] == nextButton) nav.selectOnLeft = nav.selectOnRight = previousButton;
+                if (controls[i] == cookButton) { nav.selectOnLeft = previousButton; nav.selectOnRight = nextButton; }
+                controls[i].navigation = nav;
+            }
             incomeText.text = $"Дохід локації: {location.PassiveIncomePerSecond} у.е./с";
         }
 
         public void ReturnToProfileMenu()
         {
+            recipeShop.gameObject.SetActive(false);
             DaySummary = null;
             upgradesFromSummary = false;
             daySummaryScreen.SetActive(false);
@@ -626,17 +653,31 @@ namespace ClickCook.Runtime
             RefreshLocationSelection();
         }
 
-        public void FocusLocationMenu() => FocusUi(cookButton);
+        public void FocusLocationMenu() => FocusUi(cookButton.interactable ? cookButton : openRecipesButton);
 
         public void BindNewProfile()
         {
             session.EndDay();
             session = new PrototypeOrderSession(PlayerProfileRuntime.Current);
             session.ConfigureUpgrades(upgradeCatalog);
+            session.ConfigureRecipes(recipeCatalog);
             currentLocationIndex = 0;
             ReturnToProfileMenu();
         }
 
         private static string Money(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture) + " у.е.";
+
+        public void OpenRecipes()
+        {
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || session.Profile.HasActiveDay) return;
+            locationSelectionScreen.SetActive(false);
+            recipeShop.gameObject.SetActive(true); recipeShop.Show();
+        }
+        public void CloseRecipes()
+        {
+            if (!enabled || GameplayBlocked || !recipeShop.gameObject.activeSelf) return;
+            recipeShop.gameObject.SetActive(false); locationSelectionScreen.SetActive(true);
+            RefreshLocationSelection(); FocusUi(openRecipesButton);
+        }
     }
 }

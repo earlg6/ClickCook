@@ -10,11 +10,13 @@ namespace ClickCook.Runtime
         public IReadOnlyDictionary<int, int> DishXpById { get; }
         public IReadOnlyDictionary<int, int> DishXpHundredthsById { get; }
         public IReadOnlyDictionary<string, int> UpgradeRanksById { get; }
+        public IReadOnlyList<int> OwnedRecipeIds { get; }
 
         internal PlayerProfileSnapshot(decimal wallet, IDictionary<int, int> dishXp,
-            IDictionary<string, int> upgradeRanks, IDictionary<int, int> hundredths = null)
+            IDictionary<string, int> upgradeRanks, IDictionary<int, int> hundredths = null, IEnumerable<int> recipes = null)
         {
             Wallet = wallet;
+            OwnedRecipeIds = new List<int>(recipes ?? new[] { 1 }).AsReadOnly();
             DishXpHundredthsById = new ReadOnlyDictionary<int, int>(hundredths != null ? new Dictionary<int, int>(hundredths) : new Dictionary<int, int>());
             DishXpById = new ReadOnlyDictionary<int, int>(new Dictionary<int, int>(dishXp));
             UpgradeRanksById = new ReadOnlyDictionary<string, int>(

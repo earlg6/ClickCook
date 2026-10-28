@@ -72,7 +72,7 @@ namespace ClickCook.EditorTools
             var toMenu = Button("menuButton", card, "До головного меню", -90);
             var pauseQuit = Button("pauseQuitButton", card, "Зберегти й вийти", -195); Navigation(resume, toMenu, pauseQuit);
             var confirmation = FullPanel("NewGameConfirmation", root.transform); Bind("confirmationPanel", confirmation); card = Card(confirmation, "НОВА ГРА?");
-            UiA2Setup.Label("ResetWarning", card, "Баланс, досвід усіх страв і придбані покращення буде скинуто.\nПопередній прогрес і резервну копію буде замінено.", new Vector2(780, 200), new Vector2(0, 135), 30);
+            UiA2Setup.Label("ResetWarning", card, "Баланс, досвід усіх страв, куплені рецепти й покращення буде скинуто.\nПопередній прогрес і резервну копію буде замінено.", new Vector2(780, 200), new Vector2(0, 135), 30);
             var cancel = Button("cancelButton", card, "Скасувати", -60, true);
             var confirm = Button("confirmButton", card, "Скинути прогрес і почати", -170); Navigation(cancel, confirm);
             var pauseControl = Button("pauseButton", root.transform, "Пауза · Esc", 0);

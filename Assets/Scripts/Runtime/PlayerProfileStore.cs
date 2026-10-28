@@ -15,9 +15,9 @@ namespace ClickCook.Runtime
     /// <summary>Versioned local profile. Temporary day/order/result state is deliberately excluded.</summary>
     public sealed class PlayerProfileStore
     {
-        public const int CurrentVersion = 16;
+        public const int CurrentVersion = 17;
         [Serializable] private sealed class Envelope { public int version; public string payload; public string checksum; }
-        [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; }
+        [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; public int[] recipes; }
         [Serializable] private sealed class DishEntry { public int id; public int xp; public int hundredths; }
         [Serializable] private sealed class RankEntry { public string id; public int rank; }
         public string SavePath { get; }
@@ -117,6 +117,7 @@ namespace ClickCook.Runtime
         {
             string payload = JsonUtility.ToJson(new Payload {
                 wallet = snapshot.Wallet.ToString(CultureInfo.InvariantCulture),
+                recipes = snapshot.OwnedRecipeIds.OrderBy(id => id).ToArray(),
                 dishes = snapshot.DishXpById.OrderBy(p => p.Key).Select(p => new DishEntry { id = p.Key, xp = p.Value, hundredths = snapshot.DishXpHundredthsById.TryGetValue(p.Key, out int value) ? value : 0 }).ToArray(),
                 upgrades = snapshot.UpgradeRanksById.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => new RankEntry { id = p.Key, rank = p.Value }).ToArray()
             });
@@ -177,8 +178,26 @@ namespace ClickCook.Runtime
                 int Rank(string id) => ranks.TryGetValue(id, out int value) ? value : 0;
                 foreach (var pair in ranks)
                     if (pair.Value > 0 && !UpgradeNodeRules.PrerequisitesMet(pair.Key, Rank)) return null;
+                var recipes = new HashSet<int> { 1 };
+                if (envelope.version >= 17)
+                {
+                    if (payload.recipes == null || payload.recipes.Length == 0 || payload.recipes.Length > 32) return null;
+                    recipes.Clear();
+                    foreach (int id in payload.recipes)
+                        if (id < 1 || id > 32 || !recipes.Add(id)) return null;
+                    if (!recipes.Contains(1)) return null;
+                }
+                else
+                {
+                    if (payload.recipes != null && payload.recipes.Length != 0) return null;
+                    foreach (var pair in xp)
+                        if (pair.Value > 0 || hundredths.ContainsKey(pair.Key)) recipes.Add(pair.Key);
+                }
+                var profile = PlayerProfile.Restore(wallet, xp, ranks, hundredths);
+                if (xp.Any(pair => (pair.Value > 0 || hundredths.ContainsKey(pair.Key)) && !recipes.Contains(pair.Key))) return null;
+                profile.RestoreRecipes(recipes);
                 status = ProfileLoadStatus.Loaded;
-                return PlayerProfile.Restore(wallet, xp, ranks, hundredths);
+                return profile;
             }
             catch (Exception ex) when (ex is ArgumentException || ex is FormatException || ex is OverflowException) { return null; }
         }

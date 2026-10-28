@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace ClickCook.Runtime
 {
+    public sealed class RecipePurchaseQuote
+    {
+        internal PrototypeOrderSession Owner { get; }
+        public DishData Dish { get; }
+        public decimal Price { get; }
+        public int DishId { get; }
+        internal RecipePurchaseQuote(PrototypeOrderSession owner, DishData dish)
+        { Owner = owner; Dish = dish; DishId = dish.DishId; Price = dish.RecipeCost; }
+    }
     /// <summary>Immutable offer bound to one session and one owned rank.</summary>
     public sealed class UpgradePurchaseQuote
     {
@@ -48,6 +57,23 @@ namespace ClickCook.Runtime
         public PrototypeDishRewards Rewards => Profile.Rewards;
         public PrototypeDishResult LastResult { get; private set; }
         private UpgradeCatalog upgradeCatalog;
+        private RecipeCatalog recipeCatalog;
+        public void ConfigureRecipes(RecipeCatalog catalog) { if (!IsDayActive) recipeCatalog = catalog; }
+        public bool TryQuoteRecipe(int id, out RecipePurchaseQuote quote)
+        {
+            quote = null;
+            var dish = recipeCatalog != null ? recipeCatalog.Find(id) : null;
+            if (IsPaused || Profile.HasActiveDay || dish == null || id < 2 || id > 32 || dish.RecipeCost <= 0 || Profile.OwnsRecipe(id)) return false;
+            quote = new RecipePurchaseQuote(this, dish);
+            return true;
+        }
+        public bool TryPurchaseRecipe(RecipePurchaseQuote quote)
+        {
+            if (quote == null || quote.Dish == null || quote.Owner != this || IsPaused || Profile.HasActiveDay || recipeCatalog == null ||
+                recipeCatalog.Find(quote.DishId) != quote.Dish || quote.Dish.DishId != quote.DishId || quote.Dish.RecipeCost != quote.Price) return false;
+            return Profile.TryPurchaseRecipe(quote.DishId, quote.Price);
+        }
+        public int AvailableRecipeCount(LocationData location) => GetValidCandidates(location).Count;
         public int ClickStrengthRank => Profile.GetUpgradeRank(UpgradeCatalog.ClickStrengthId);
         public decimal ClickMultiplier => UpgradeNodeRules.AdditionalFactor("click_multiplier", Profile.GetUpgradeRank);
         public int ClickDamage => (int)decimal.Ceiling((UpgradeCatalog.ClickDamageAtRank(ClickStrengthRank) + UpgradeNodeRules.AdditionalContribution("click_strength", Profile.GetUpgradeRank)) * ClickMultiplier);
@@ -351,13 +377,15 @@ namespace ClickCook.Runtime
             Profile.ReleaseDay(this);
         }
 
-        private List<DishData> GetValidCandidates()
+        private List<DishData> GetValidCandidates() => GetValidCandidates(SelectedLocation);
+        private List<DishData> GetValidCandidates(LocationData location)
         {
             var candidates = new List<DishData>();
-            if (SelectedLocation == null) return candidates;
-            foreach (DishData dish in SelectedLocation.DocumentedAvailableDishes)
+            if (location == null) return candidates;
+            var seen = new HashSet<int>();
+            foreach (DishData dish in location.DocumentedAvailableDishes)
             {
-                if (dish != null) candidates.Add(dish);
+                if (dish != null && dish.ClickRequirement > 0 && Profile.OwnsRecipe(dish.DishId) && seen.Add(dish.DishId)) candidates.Add(dish);
             }
             return candidates;
         }

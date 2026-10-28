@@ -74,7 +74,7 @@ namespace ClickCook.UI
                 status == ProfileLoadStatus.Unavailable ? "Немає доступу до збереження. Перевір доступ і перезапусти гру." :
                 PlayerProfileRuntime.RecoveredBackup ? "Відновлено резервну копію. Остання зміна могла не зберегтися." :
                 PlayerProfileRuntime.HasProgress ? $"Баланс: {ClickCookUiCopy.Money(PlayerProfileRuntime.Current.Rewards.Wallet)}\nПрогрес зберігається автоматично." :
-                "Почни нову гру. Гроші, досвід страв і покращення зберігатимуться автоматично.";
+                "Почни нову гру. Гроші, досвід страв, рецепти й покращення зберігатимуться автоматично.";
         }
         public void Continue()
         {

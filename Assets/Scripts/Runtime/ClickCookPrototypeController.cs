@@ -71,6 +71,13 @@ namespace ClickCook.Runtime
 
         public PrototypeOrderSession OrderSession => session;
         private ProfileMenu profileMenu;
+        [Header("Milestone 8A — receipt-based day report")]
+        [SerializeField] private GameObject daySummaryScreen;
+        [SerializeField] private UnityEngine.UI.Text daySummaryText;
+        [SerializeField] private UnityEngine.UI.Button nextDayButton;
+        [SerializeField] private UnityEngine.UI.Button summaryUpgradesButton;
+        public PrototypeDaySummary DaySummary { get; private set; }
+        private bool upgradesFromSummary;
         public bool GameplayBlocked => profileMenu != null && profileMenu.IsBlocking;
         public bool CanCookDisplayedOrder => enabled && !GameplayBlocked && cookingPrototypeScreen.activeInHierarchy &&
             session != null && !session.IsPaused && displayedCookingOrder != null && session.ActiveOrder == displayedCookingOrder;
@@ -126,6 +133,9 @@ namespace ClickCook.Runtime
             }
 
             previousButton.onClick.AddListener(ShowPreviousLocation);
+            nextDayButton.onClick.AddListener(NextDay);
+            summaryUpgradesButton.onClick.AddListener(OpenUpgrades);
+            daySummaryScreen.SetActive(false);
             nextButton.onClick.AddListener(ShowNextLocation);
             cookButton.onClick.AddListener(CookSelectedLocation);
             finishDayButton.onClick.AddListener(FinishDay);
@@ -170,7 +180,8 @@ namespace ClickCook.Runtime
             }
 
             return locationCatalog != null &&
-                   locationSelectionScreen != null &&
+                   locationSelectionScreen != null && daySummaryScreen != null && daySummaryText != null &&
+                   nextDayButton != null && summaryUpgradesButton != null &&
                    workDayScreen != null &&
                    locationNameText != null &&
                    locationLevelText != null &&
@@ -207,7 +218,12 @@ namespace ClickCook.Runtime
 
         public void OpenUpgrades()
         {
-            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || session.IsDayActive) return;
+            if (!enabled || GameplayBlocked || session.IsDayActive ||
+                (!locationSelectionScreen.activeSelf && !(DaySummary != null && daySummaryScreen.activeSelf))) return;
+            upgradesFromSummary = daySummaryScreen.activeSelf;
+            closeUpgradesButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
+                upgradesFromSummary ? "До підсумку" : "До локацій";
+            daySummaryScreen.SetActive(false);
             locationSelectionScreen.SetActive(false);
             upgradeScreen.SetActive(true);
             upgradeStatusText.text = "Придбані покращення зберігаються автоматично.";
@@ -222,6 +238,13 @@ namespace ClickCook.Runtime
             displayedUpgradeQuote = null;
             refreshUpgradeNextFrame = false;
             upgradeScreen.SetActive(false);
+            if (upgradesFromSummary && DaySummary != null)
+            {
+                upgradesFromSummary = false;
+                daySummaryScreen.SetActive(true);
+                FocusUi(summaryUpgradesButton);
+                return;
+            }
             locationSelectionScreen.SetActive(true);
             RefreshLocationSelection();
             FocusUi(openUpgradesButton);
@@ -328,7 +351,7 @@ namespace ClickCook.Runtime
         public void FinishDay()
         {
             if (!enabled || GameplayBlocked || !workDayScreen.activeSelf || session.ActiveOrder != null) return;
-            EndWorkDay(false);
+            EndWorkDay();
         }
 
         public void SelectOrder(int slotIndex)
@@ -397,7 +420,7 @@ namespace ClickCook.Runtime
             if (!enabled || GameplayBlocked || !dishResultScreen.activeSelf || !session.IsDayActive) return;
             if (session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY)
             {
-                EndWorkDay(true);
+                EndWorkDay();
                 return;
             }
             ClearDishResult();
@@ -414,23 +437,41 @@ namespace ClickCook.Runtime
             resultMasteryFill.fillAmount = 0f;
         }
 
-        private void EndWorkDay(bool limitReached)
+        private void EndWorkDay()
         {
-            string location = ClickCookUiCopy.Location(session.SelectedLocation);
-            int completed = session.CompletedDishes;
-            session.EndDay();
+            if (!session.TryFinishDay(out var summary)) return;
+            DaySummary = summary;
             ClearDishResult();
             displayedCookingOrder = null;
             cookingOrderText.text = string.Empty;
             cookingDishLabel.text = string.Empty;
             cookingPrototypeScreen.SetActive(false);
             workDayScreen.SetActive(false);
-            locationSelectionScreen.SetActive(true);
+            locationSelectionScreen.SetActive(false);
             RefreshOrderBoard();
             RefreshLocationSelection();
-            finishDayMessageText.text = $"День завершено: {location}\n" +
-                $"Приготовано: {completed} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
-                (limitReached ? " — Ліміт дня досягнуто" : string.Empty);
+            var report = new StringBuilder();
+            report.AppendLine(ClickCookUiCopy.Location(summary.Location));
+            report.AppendLine($"Приготовано: {summary.Receipts.Count} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
+                (summary.LimitReached ? " · Ліміт дня" : ""));
+            report.AppendLine($"Зароблено: {ClickCookUiCopy.Money(summary.Earnings)} · Досвід страв: +{summary.DishXp:0.##} XP");
+            report.AppendLine("Нагороди вже зараховано.");
+            if (summary.Receipts.Count == 0) report.AppendLine("Цього дня немає готових страв.");
+            foreach (var receipt in summary.Receipts)
+                report.AppendLine($"{ClickCookUiCopy.Dish(receipt.Dish)} · {ClickCookUiCopy.Rarity(receipt.Rarity)} · {ClickCookUiCopy.Money(receipt.Payout)} · +{receipt.XpGained:0.##} XP");
+            daySummaryText.text = report.ToString();
+            daySummaryScreen.SetActive(true);
+            FocusUi(nextDayButton);
+        }
+
+        public void NextDay()
+        {
+            if (!enabled || GameplayBlocked || DaySummary == null || !daySummaryScreen.activeSelf || session.IsDayActive) return;
+            DaySummary = null;
+            daySummaryScreen.SetActive(false);
+            locationSelectionScreen.SetActive(true);
+            finishDayMessageText.text = string.Empty;
+            RefreshLocationSelection();
             FocusUi(cookButton);
         }
 
@@ -570,6 +611,9 @@ namespace ClickCook.Runtime
 
         public void ReturnToProfileMenu()
         {
+            DaySummary = null;
+            upgradesFromSummary = false;
+            daySummaryScreen.SetActive(false);
             session.EndDay();
             displayedCookingOrder = null;
             displayedUpgradeQuote = null;

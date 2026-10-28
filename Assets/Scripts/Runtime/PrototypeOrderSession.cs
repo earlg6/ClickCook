@@ -29,6 +29,7 @@ namespace ClickCook.Runtime
         public const int MAX_COMPLETED_DISHES_PER_DAY = 10;
 
         private readonly List<PrototypeOrder> orders = new();
+        private readonly List<PrototypeDishResult> dayReceipts = new();
         private readonly IReadOnlyList<PrototypeOrder> readOnlyOrders;
 
         public LocationData SelectedLocation { get; private set; }
@@ -270,6 +271,7 @@ namespace ClickCook.Runtime
             orders.RemoveAt(index);
             CompletedDishes++;
             LastResult = Rewards.Complete(expectedOrder.Dish, DishXpBonus, DishXpMultiplier, DishValueMultiplier);
+            dayReceipts.Add(LastResult);
             Profile.NotifyChanged();
             if (CompletedDishes < MAX_COMPLETED_DISHES_PER_DAY)
             {
@@ -325,11 +327,21 @@ namespace ClickCook.Runtime
             ResetHitFeedback();
         }
 
+        public bool TryFinishDay(out PrototypeDaySummary summary)
+        {
+            summary = null;
+            if (IsPaused || !IsDayActive || ActiveOrder != null) return false;
+            summary = new PrototypeDaySummary(SelectedLocation, dayReceipts);
+            EndDay();
+            return true;
+        }
+
         public void EndDay()
         {
             IsPaused = false;
             ReturnToBoard();
             orders.Clear();
+            dayReceipts.Clear();
             SelectedLocation = null;
             BoardCapacity = 0;
             CompletedDishes = 0;

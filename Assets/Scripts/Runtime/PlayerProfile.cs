@@ -16,19 +16,19 @@ namespace ClickCook.Runtime
 
         internal void NotifyChanged() => Changed?.Invoke();
 
-        internal static PlayerProfile Restore(decimal wallet, Dictionary<int, int> xp, Dictionary<string, int> ranks)
+        internal static PlayerProfile Restore(decimal wallet, Dictionary<int, int> xp, Dictionary<string, int> ranks, Dictionary<int, int> hundredths = null)
         {
             var profile = new PlayerProfile();
-            profile.Rewards.Restore(wallet, xp);
+            profile.Rewards.Restore(wallet, xp, hundredths);
             foreach (var pair in ranks) profile.upgradeRanks.Add(pair.Key, pair.Value);
             return profile;
         }
 
         public int GetUpgradeRank(string id) =>
-            id != null && upgradeRanks.TryGetValue(id, out int rank) ? rank : 0;
+            id != null && upgradeRanks.TryGetValue(UpgradeNodeRules.CanonicalId(id), out int rank) ? rank : 0;
 
         public PlayerProfileSnapshot CaptureSnapshot() =>
-            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks);
+            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks, Rewards.CopyDishXpHundredths());
 
         internal bool TryBeginDay(PrototypeOrderSession session)
         {
@@ -43,10 +43,16 @@ namespace ClickCook.Runtime
         }
 
         internal bool TryPurchaseClickStrength(int expectedRank, decimal price)
+            => TryPurchaseNode(UpgradeNodeRules.Strength, expectedRank, price);
+
+        internal bool TryPurchaseNode(string nodeId, int expectedRank, decimal price)
         {
-            if (HasActiveDay || GetUpgradeRank(UpgradeCatalog.ClickStrengthId) != expectedRank ||
+            nodeId = UpgradeNodeRules.CanonicalId(nodeId);
+            if (HasActiveDay || UpgradeNodeRules.MaximumRank(nodeId) == 0 || expectedRank < 0 ||
+                expectedRank >= UpgradeNodeRules.MaximumRank(nodeId) || !UpgradeNodeRules.PrerequisitesMet(nodeId, GetUpgradeRank) ||
+                GetUpgradeRank(nodeId) != expectedRank || price <= 0 ||
                 !Rewards.TrySpend(price)) return false;
-            upgradeRanks[UpgradeCatalog.ClickStrengthId] = expectedRank + 1;
+            upgradeRanks[nodeId] = expectedRank + 1;
             NotifyChanged();
             return true;
         }

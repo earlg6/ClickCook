@@ -13,6 +13,7 @@ namespace ClickCook.Runtime
         public bool IsReserved { get; internal set; }
         public bool IsCompleted { get; internal set; }
         public int RemainingClicks { get; internal set; }
+        public bool AutoStartChecked { get; internal set; }
 
         internal PrototypeOrder(DishData dish, LocationData location, int slotIndex)
         {

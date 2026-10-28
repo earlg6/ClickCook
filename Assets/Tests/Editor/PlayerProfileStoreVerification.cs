@@ -81,7 +81,7 @@ namespace ClickCook.Verification
                 var recovered = new PlayerProfileStore(path); var restored = recovered.Load();
                 Check(restored != null && recovered.Status == ProfileLoadStatus.Recovered, "corrupt primary falls back to backup");
                 Check(recovered.Save(restored) && File.ReadAllText(recovered.BackupPath) == original, "repair never rotates corruption over backup");
-                File.WriteAllText(path, original.Replace("\"version\": 1", "\"version\": 99"));
+                File.WriteAllText(path, original.Replace("\"version\": " + PlayerProfileStore.CurrentVersion, "\"version\": 99"));
                 var future = new PlayerProfileStore(path);
                 Check(!store.Save(profile), "newer file appearing after load cannot be overwritten");
                 Check(future.Load() == null && future.Status == ProfileLoadStatus.Unsupported, "future schema protected");
@@ -101,7 +101,7 @@ namespace ClickCook.Verification
                 File.WriteAllText(emptyPath + ".bak", original);
                 Check(new PlayerProfileStore(emptyPath).Load() != null, "backup without primary recovers");
                 var decode = typeof(PlayerProfileStore).GetMethod("Decode", BindingFlags.Static | BindingFlags.NonPublic);
-                foreach (string input in new[] { "", "null", "{}", "[]", original.Replace(".25", ".75"), original.Replace("\"version\": 1", "\"version\": 0") })
+                foreach (string input in new[] { "", "null", "{}", "[]", original.Replace(".25", ".75"), original.Replace("\"version\": " + PlayerProfileStore.CurrentVersion, "\"version\": 0") })
                     Check(decode.Invoke(null, new object[] { input, ProfileLoadStatus.Invalid }) == null, "invalid/corrupt payload rejected");
                 foreach (string payload in new[] {
                     "{}", "{\"wallet\":\"-1\",\"dishes\":[],\"upgrades\":[]}",

@@ -1,0 +1,1103 @@
+{
+  "nodes": [
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 2
+        }
+      ],
+      "familyId": "auto_action_chance",
+      "description": "Підвищує шанс автоматичного виконання дії помічником.",
+      "title": "Пильний помічник I",
+      "id": "node.auto_action_chance.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_chance.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_action_chance",
+      "description": "Підвищує шанс автоматичного виконання дії помічником.",
+      "title": "Реакція помічника II",
+      "id": "node.auto_action_chance.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_chance.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_action_chance",
+      "description": "Підвищує шанс автоматичного виконання дії помічником.",
+      "title": "Досвідчений помічник III",
+      "id": "node.auto_action_chance.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 2
+        }
+      ],
+      "familyId": "auto_action_count",
+      "description": "Помічники виконують більше дій за один автоматичний цикл.",
+      "title": "Вправний помічник I",
+      "id": "node.auto_action_count.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_count.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_action_count",
+      "description": "Помічники виконують більше дій за один автоматичний цикл.",
+      "title": "Найняти бригаду II",
+      "id": "node.auto_action_count.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_count.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_action_count",
+      "description": "Помічники виконують більше дій за один автоматичний цикл.",
+      "title": "Старший помічник III",
+      "id": "node.auto_action_count.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_count.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "auto_frequency",
+      "description": "Помічник виконує автоматичні дії частіше.",
+      "title": "Темп помічника I",
+      "id": "node.auto_frequency.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_frequency.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_frequency",
+      "description": "Помічник виконує автоматичні дії частіше.",
+      "title": "Злагоджена зміна II",
+      "id": "node.auto_frequency.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_frequency.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_frequency",
+      "description": "Помічник виконує автоматичні дії частіше.",
+      "title": "Енергійна зміна III",
+      "id": "node.auto_frequency.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_frequency.03",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_frequency",
+      "description": "Помічник виконує автоматичні дії частіше.",
+      "title": "Бригада на піку IV",
+      "id": "node.auto_frequency.04"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_action_count.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "auto_strength",
+      "description": "Збільшує прогрес від автоматичної дії помічника.",
+      "title": "Навчання бригади I",
+      "id": "node.auto_strength.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_strength.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_strength",
+      "description": "Збільшує прогрес від автоматичної дії помічника.",
+      "title": "Вишкіл су-шефа II",
+      "id": "node.auto_strength.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_strength.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_strength",
+      "description": "Збільшує прогрес від автоматичної дії помічника.",
+      "title": "Майстерність бригади III",
+      "id": "node.auto_strength.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_strength.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "auto_strength_multiplier",
+      "description": "Множить силу автоматичних дій помічника.",
+      "title": "Школа су-шефа I",
+      "id": "node.auto_strength_multiplier.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.auto_strength_multiplier.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "auto_strength_multiplier",
+      "description": "Множить силу автоматичних дій помічника.",
+      "title": "Академія су-шефа II",
+      "id": "node.auto_strength_multiplier.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.character_xp_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "character_xp",
+      "description": "Множить особистий досвід кухаря.",
+      "title": "Зростання кухаря I",
+      "id": "node.character_xp.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.character_xp.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "character_xp",
+      "description": "Множить особистий досвід кухаря.",
+      "title": "Розвиток шефа II",
+      "id": "node.character_xp.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "character_xp_flat",
+      "description": "Додає особистий досвід кухаря до відповідної нагороди.",
+      "title": "Кулінарна освіта I",
+      "id": "node.character_xp_flat.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.character_xp_flat.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "character_xp_flat",
+      "description": "Додає особистий досвід кухаря до відповідної нагороди.",
+      "title": "Курс шефа II",
+      "id": "node.character_xp_flat.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 2
+        }
+      ],
+      "familyId": "click_hold",
+      "description": "Утримуйте кнопку на страві, щоб повторювати дії.",
+      "title": "Впевнена рука",
+      "id": "node.click_hold.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.04",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_multiplier",
+      "description": "Множить силу ваших ручних дій.",
+      "title": "Техніка шефа I",
+      "id": "node.click_multiplier.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_multiplier.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_multiplier",
+      "description": "Множить силу ваших ручних дій.",
+      "title": "Техніка шефа II",
+      "id": "node.click_multiplier.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_multiplier.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_multiplier",
+      "description": "Множить силу ваших ручних дій.",
+      "title": "Техніка шефа III",
+      "id": "node.click_multiplier.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_multiplier.03",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_multiplier",
+      "description": "Множить силу ваших ручних дій.",
+      "title": "Професійне лезо IV",
+      "id": "node.click_multiplier.04"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.kitchen_license.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Перший кухонний ніж",
+      "id": "node.click_strength.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Надійний ніж II",
+      "id": "node.click_strength.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Карбоновий ніж III",
+      "id": "node.click_strength.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.03",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Професійний ніж IV",
+      "id": "node.click_strength.04"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.04",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Елітний ніж V",
+      "id": "node.click_strength.05"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.05",
+          "rank": -1
+        }
+      ],
+      "familyId": "click_strength",
+      "description": "Кожна ручна дія просуває приготування сильніше.",
+      "title": "Титановий ніж VI",
+      "id": "node.click_strength.06"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 3
+        }
+      ],
+      "familyId": "critical_chance",
+      "description": "Підвищує шанс особливо сильного руху під час готування.",
+      "title": "Гостра заточка I",
+      "id": "node.critical_chance.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_chance.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "critical_chance",
+      "description": "Підвищує шанс особливо сильного руху під час готування.",
+      "title": "Зубчаста заточка II",
+      "id": "node.critical_chance.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_chance.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "critical_chance",
+      "description": "Підвищує шанс особливо сильного руху під час готування.",
+      "title": "Діамантова заточка III",
+      "id": "node.critical_chance.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_chance.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "critical_multiplier",
+      "description": "Посилює критичні рухи.",
+      "title": "Сильний прийом I",
+      "id": "node.critical_multiplier.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_multiplier.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "critical_multiplier",
+      "description": "Посилює критичні рухи.",
+      "title": "Відточений прийом II",
+      "id": "node.critical_multiplier.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_multiplier.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "critical_multiplier",
+      "description": "Посилює критичні рухи.",
+      "title": "Фірмовий прийом III",
+      "id": "node.critical_multiplier.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.critical_multiplier.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "critical_time_bonus",
+      "description": "Критичні рухи дають додатковий час на бонусний вибір наступного замовлення.",
+      "title": "Виграні секунди",
+      "id": "node.critical_time_bonus.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.02",
+          "rank": 1
+        }
+      ],
+      "familyId": "day_income_bonus",
+      "description": "Збільшує підсумкову винагороду за завершений робочий день.",
+      "title": "Контракти закладу I",
+      "id": "node.day_income_bonus.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.day_income_bonus.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "day_income_bonus",
+      "description": "Збільшує підсумкову винагороду за завершений робочий день.",
+      "title": "Контракти закладу II",
+      "id": "node.day_income_bonus.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "dish_value",
+      "description": "Збільшує оплату за готові страви.",
+      "title": "Вигідне меню",
+      "id": "node.dish_value.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "dish_value",
+      "description": "Збільшує оплату за готові страви.",
+      "title": "Вигідні пропозиції II",
+      "id": "node.dish_value.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "dish_value",
+      "description": "Збільшує оплату за готові страви.",
+      "title": "Майстер меню III",
+      "id": "node.dish_value.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.03",
+          "rank": -1
+        }
+      ],
+      "familyId": "dish_value",
+      "description": "Збільшує оплату за готові страви.",
+      "title": "Популярне меню IV",
+      "id": "node.dish_value.04"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "dish_xp",
+      "description": "Множить досвід, отриманий конкретною стравою.",
+      "title": "Швидке навчання рецепта",
+      "id": "node.dish_xp.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "dish_xp_flat",
+      "description": "Додає досвід страви за успішне завершення.",
+      "title": "Нотатки до рецепта",
+      "id": "node.dish_xp_flat.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp_flat.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "dish_xp_flat",
+      "description": "Додає досвід страви за успішне завершення.",
+      "title": "Будова рецепта II",
+      "id": "node.dish_xp_flat.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp_flat.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "dish_xp_flat",
+      "description": "Додає досвід страви за успішне завершення.",
+      "title": "Дослідження рецепта III",
+      "id": "node.dish_xp_flat.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 2
+        }
+      ],
+      "familyId": "double_strike_chance",
+      "description": "Підвищує шанс додаткового руху по поточній страві.",
+      "title": "Подвійний рух I",
+      "id": "node.double_strike_chance.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.double_strike_chance.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "double_strike_chance",
+      "description": "Підвищує шанс додаткового руху по поточній страві.",
+      "title": "Другий рух II",
+      "id": "node.double_strike_chance.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.double_strike_chance.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "double_strike_chance",
+      "description": "Підвищує шанс додаткового руху по поточній страві.",
+      "title": "Серійна підготовка III",
+      "id": "node.double_strike_chance.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.double_strike_chance.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "double_strike_power",
+      "description": "Посилює додатковий рух.",
+      "title": "Відточений повтор I",
+      "id": "node.double_strike_power.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.double_strike_power.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "double_strike_power",
+      "description": "Посилює додатковий рух.",
+      "title": "Сильний повтор II",
+      "id": "node.double_strike_power.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_hold.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "hold_frequency",
+      "description": "Прискорює повтори під час утримання.",
+      "title": "Робочий ритм I",
+      "id": "node.hold_frequency.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.hold_frequency.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "hold_frequency",
+      "description": "Прискорює повтори під час утримання.",
+      "title": "Ритм шефа II",
+      "id": "node.hold_frequency.02"
+    },
+    {
+      "prerequisites": [],
+      "familyId": "kitchen_license",
+      "description": "Відкриває дерево розвитку кухні без витрати грошей.",
+      "title": "Допуск до кухні",
+      "id": "node.kitchen_license.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.02",
+          "rank": 1
+        }
+      ],
+      "familyId": "location_value",
+      "description": "Посилює вартість страв залежно від рівня обраної локації.",
+      "title": "Престиж локації",
+      "id": "node.location_value.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.order_tracker_tier.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "order_tracker_frequency",
+      "description": "Прискорює імпульси підказок диспетчера кухні.",
+      "title": "Швидкий диспетчер I",
+      "id": "node.order_tracker_frequency.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.order_tracker_frequency.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "order_tracker_frequency",
+      "description": "Прискорює імпульси підказок диспетчера кухні.",
+      "title": "Миттєві підказки II",
+      "id": "node.order_tracker_frequency.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "order_tracker_tier",
+      "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+      "title": "Диспетчер кухні I",
+      "id": "node.order_tracker_tier.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.order_tracker_tier.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "order_tracker_tier",
+      "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+      "title": "Диспетчер кухні II",
+      "id": "node.order_tracker_tier.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.order_tracker_tier.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "order_tracker_tier",
+      "description": "Відкриває нові підказки для вибору вигідних замовлень.",
+      "title": "Диспетчер кухні III",
+      "id": "node.order_tracker_tier.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.passive_unlock.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "passive_flat",
+      "description": "Додає до базового автоматичного доходу закладу.",
+      "title": "Скринька чайових I",
+      "id": "node.passive_flat.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.passive_flat.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "passive_flat",
+      "description": "Додає до базового автоматичного доходу закладу.",
+      "title": "Налагоджений сервіс II",
+      "id": "node.passive_flat.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "passive_unlock",
+      "description": "Відкриває автоматичний дохід закладу.",
+      "title": "Налагоджена кухня I",
+      "id": "node.passive_unlock.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.passive_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "passive_value",
+      "description": "Множить автоматичний дохід закладу.",
+      "title": "Господар кухні I",
+      "id": "node.passive_value.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.03",
+          "rank": 1
+        }
+      ],
+      "familyId": "preparation_efficiency",
+      "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+      "title": "Раціональна підготовка I",
+      "id": "node.preparation_efficiency.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.preparation_efficiency.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "preparation_efficiency",
+      "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+      "title": "Продумана підготовка II",
+      "id": "node.preparation_efficiency.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.preparation_efficiency.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "preparation_efficiency",
+      "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+      "title": "Налагоджена підготовка III",
+      "id": "node.preparation_efficiency.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.preparation_efficiency.03",
+          "rank": -1
+        }
+      ],
+      "familyId": "preparation_efficiency",
+      "description": "Зменшує обсяг роботи над стравою для вас і помічників.",
+      "title": "Бездоганна підготовка IV",
+      "id": "node.preparation_efficiency.04"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "rarity_chance",
+      "description": "Покращує шанси отримати страву вищої якості.",
+      "title": "Чуття смаку I",
+      "id": "node.rarity_chance.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.rarity_chance.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "rarity_chance",
+      "description": "Покращує шанси отримати страву вищої якості.",
+      "title": "Чуття смаку II",
+      "id": "node.rarity_chance.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.rarity_chance.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "rarity_chance",
+      "description": "Покращує шанси отримати страву вищої якості.",
+      "title": "Чуття смаку III",
+      "id": "node.rarity_chance.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.rarity_chance.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "rarity_multiplier",
+      "description": "Посилює погоджені модифікатори якості страв.",
+      "title": "Око шефа",
+      "id": "node.rarity_multiplier.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "recipe_discount",
+      "description": "Зменшує ціну придбання нових рецептів.",
+      "title": "Закупівля знань I",
+      "id": "node.recipe_discount.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.restaurant_xp_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "restaurant_xp",
+      "description": "Множить досвід закладу.",
+      "title": "Легенда кухні I",
+      "id": "node.restaurant_xp.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.restaurant_xp.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "restaurant_xp",
+      "description": "Множить досвід закладу.",
+      "title": "Легенда кухні II",
+      "id": "node.restaurant_xp.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_xp_flat.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "restaurant_xp_flat",
+      "description": "Додає досвід закладу до відповідної нагороди.",
+      "title": "Знання кухні I",
+      "id": "node.restaurant_xp_flat.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.restaurant_xp_flat.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "restaurant_xp_flat",
+      "description": "Додає досвід закладу до відповідної нагороди.",
+      "title": "Знання кухні II",
+      "id": "node.restaurant_xp_flat.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.restaurant_xp_flat.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "restaurant_xp_flat",
+      "description": "Додає досвід закладу до відповідної нагороди.",
+      "title": "Майстер закладу III",
+      "id": "node.restaurant_xp_flat.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_window.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "selection_bonus",
+      "description": "Збільшує грошовий бонус за своєчасно вибране замовлення.",
+      "title": "Премія за оперативність I",
+      "id": "node.selection_bonus.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_bonus.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_bonus",
+      "description": "Збільшує грошовий бонус за своєчасно вибране замовлення.",
+      "title": "Вчасна подача II",
+      "id": "node.selection_bonus.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_window.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "selection_precision_window",
+      "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+      "title": "Точний вибір I",
+      "id": "node.selection_precision_window.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_precision_window.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_precision_window",
+      "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+      "title": "Зосереджений вибір II",
+      "id": "node.selection_precision_window.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_precision_window.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_precision_window",
+      "description": "Розширює раннє вікно ідеального вибору для початкової підготовки страви.",
+      "title": "Бездоганний вибір III",
+      "id": "node.selection_precision_window.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_precision_window.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "selection_start_progress",
+      "description": "Швидко вибране замовлення починається частково підготовленим.",
+      "title": "Точна підготовка I",
+      "id": "node.selection_start_progress.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_start_progress.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_start_progress",
+      "description": "Швидко вибране замовлення починається частково підготовленим.",
+      "title": "Бездоганна підготовка II",
+      "id": "node.selection_start_progress.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.click_strength.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "selection_window",
+      "description": "Дає більше часу для вибору замовлення з бонусом.",
+      "title": "Ритм замовлень I",
+      "id": "node.selection_window.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_window.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_window",
+      "description": "Дає більше часу для вибору замовлення з бонусом.",
+      "title": "Зосередженість на кухні II",
+      "id": "node.selection_window.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.selection_window.02",
+          "rank": -1
+        }
+      ],
+      "familyId": "selection_window",
+      "description": "Дає більше часу для вибору замовлення з бонусом.",
+      "title": "Потік шефа III",
+      "id": "node.selection_window.03"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.double_strike_chance.02",
+          "rank": 1
+        }
+      ],
+      "familyId": "triple_strike_chance",
+      "description": "Відкриває шанс виконати ще два рухи по поточній страві.",
+      "title": "Потрійний рух I",
+      "id": "node.triple_strike_chance.01"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.triple_strike_chance.01",
+          "rank": -1
+        }
+      ],
+      "familyId": "triple_strike_chance",
+      "description": "Відкриває шанс виконати ще два рухи по поточній страві.",
+      "title": "Потрійний рух II",
+      "id": "node.triple_strike_chance.02"
+    },
+    {
+      "prerequisites": [
+        {
+          "nodeId": "node.dish_value.01",
+          "rank": 1
+        }
+      ],
+      "familyId": "upgrade_discount",
+      "description": "Зменшує ціну майбутніх покращень.",
+      "title": "Розумне оснащення",
+      "id": "node.upgrade_discount.01"
+    }
+  ]
+}

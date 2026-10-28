@@ -1,0 +1,12 @@
+# U4e — частота автоматичних циклів
+
+ADOPTED IMPLEMENTATION CONTRACT — 2026-10-26. `node.auto_frequency.01` / «Темп помічника I», prerequisite `node.auto_action_count.01:1` за manifest. Чинні catalog B=600, G=1.8, cap=15 прийнято: `ceil(600 × 1.8^N)`, N=0–14; сума 5059237. Початковий баланс ClickCook, не source reward/pacing proof. Source +0.15/с адаптовано до чинного одного базового циклу/с.
+
+- Purchased rank N=0–15: `frequency = 1 + 0.15N` (1–3.25 циклу/с), `interval = 1 / frequency`. Actual frequency=0 без action_count 1; frequency тоді не продається. Мінімальний дозволений interval=4/13 с; додатковий прихований cap не потрібний.
+- Scheduler використовує точний interval для першого та наступних deadlines. Перший tick після повного interval; затриманий кадр виконує максимум один bounded batch та ставить новий deadline від now, без catch-up/carry. Покупки під час дня заборонені. Pause/focus/system pause/disable/Back/result/end/зміна order чинно скидають таймер; Resume/reselect чекає повний interval. Unscaled clock як у U4a.
+- Count/strength/multiplier/start chance/manual/crit/Hold не змінюються. Стартовий roll незалежний від частоти, Back його не повторює. Periodic lethal зупиняє batch, одна receipt/XP/виплата, без автоматичного вибору наступної страви.
+- Detail/current→next, count preview і шість рядків actual statistics показують реальні цикли/с; округлення до двох знаків лише для UI.
+- Schema 11 додає тільки canonical frequency.01 з cap 15/purchased prerequisite. Schema 1–10 відхиляють ID навіть при rank 0. Load зберігає точні wallet/XP/всі ранги/backup без eager write/безкоштовного прискорення; Save пише 11, >11 захищено. Day/order/таймер/input/feedback transient.
+- Frequency II–IV та пізні auto tiers лишаються недоступними. U4a–e закривають перші вузли п'яти базових auto families, але не всі tiers дерева. Наступна глава U5: перший незалежний Dish XP slice може спиратися на чинну базову систему; інші XP/recipe/economy гілки потребують власних базових milestones.
+
+Мінімальна перевірка за AGENTS.md: compilation; exact prices/cap/quotes; early/exact/delayed deadlines на всіх рангах, rank-zero compatibility, pause/Back/suspend/invalid clock/reset, start/manual isolation та periodic lethal single reward; schemas 1–10→11, backup/roundtrip/invalid/future; native mouse purchase на Temp-профілі, live controller частота/пауза/result/autosave/Continue, один rendered size. Player build, широка регресія та pacing поза scope.

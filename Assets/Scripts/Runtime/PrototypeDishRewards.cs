@@ -12,12 +12,12 @@ namespace ClickCook.Runtime
         public DishData Dish { get; }
         public DishRarity Rarity { get; }
         public decimal Payout { get; }
-        public int XpGained { get; }
+        public decimal XpGained { get; }
         public int PreviousLevel { get; }
         public int Level { get; }
 
         internal PrototypeDishResult(DishData dish, DishRarity rarity, decimal payout,
-            int xpGained, int previousLevel, int level)
+            decimal xpGained, int previousLevel, int level)
         {
             Dish = dish;
             Rarity = rarity;
@@ -43,16 +43,20 @@ namespace ClickCook.Runtime
         private static readonly int[] XpAwards = {10,12,16,22,30};
         private static readonly decimal[] PayoutMultipliers = {1m,1.25m,1.75m,2.5m,4m};
         private readonly Dictionary<int, int> dishXp = new();
+        private readonly Dictionary<int, int> dishXpHundredths = new();
 
         public decimal Wallet { get; private set; }
 
         internal Dictionary<int, int> CopyDishXp() => new(dishXp);
+        internal Dictionary<int, int> CopyDishXpHundredths() => new(dishXpHundredths);
 
-        internal void Restore(decimal wallet, Dictionary<int, int> xp)
+        internal void Restore(decimal wallet, Dictionary<int, int> xp, Dictionary<int, int> hundredths = null)
         {
             Wallet = wallet;
             dishXp.Clear();
             foreach (var pair in xp) dishXp.Add(pair.Key, pair.Value);
+            dishXpHundredths.Clear();
+            if (hundredths != null) foreach (var pair in hundredths) dishXpHundredths.Add(pair.Key, pair.Value);
         }
 
         internal bool TrySpend(decimal amount)
@@ -61,6 +65,10 @@ namespace ClickCook.Runtime
             Wallet -= amount;
             return true;
         }
+
+        public int GetXpHundredths(DishData dish) => dish != null && dishXpHundredths.TryGetValue(dish.DishId, out int value) ? value : 0;
+        public decimal GetExactTotalXp(DishData dish) => GetTotalXp(dish) + GetXpHundredths(dish) / 100m;
+        public decimal GetExactLevelXp(DishData dish) => GetLevelXp(dish) + GetXpHundredths(dish) / 100m;
 
         public int GetTotalXp(DishData dish) => dish != null && dishXp.TryGetValue(dish.DishId, out int xp) ? xp : 0;
 
@@ -105,16 +113,21 @@ namespace ClickCook.Runtime
         }
 
         // Only the exact-successful-completion branch of PrototypeOrderSession calls this.
-        internal PrototypeDishResult Complete(DishData dish)
+        internal PrototypeDishResult Complete(DishData dish, int flatXpBonus = 0, decimal xpMultiplier = 1m, decimal valueMultiplier = 1m)
         {
             int previousLevel = GetLevel(dish);
             DishRarity rarity = ResolveRarity(previousLevel, UnityEngine.Random.Range(0, 100));
-            decimal payout = dish.SaleValue * PayoutMultipliers[(int)rarity];
+            decimal payout = decimal.Round(dish.SaleValue * PayoutMultipliers[(int)rarity] * valueMultiplier, 2, MidpointRounding.AwayFromZero);
             int maximumXp = 0;
             for (int level = 1; level < MaximumDishLevel; level++) maximumXp += RequiredXp(level);
-            int previousXp = GetTotalXp(dish);
-            int gained = Math.Min(XpAwards[(int)rarity], maximumXp - previousXp);
-            dishXp[dish.DishId] = previousXp + gained;
+            decimal previousXp = GetExactTotalXp(dish);
+            decimal gained = Math.Min((XpAwards[(int)rarity] + flatXpBonus) * xpMultiplier, maximumXp - previousXp);
+            decimal total = previousXp + gained;
+            int whole = (int)decimal.Truncate(total);
+            dishXp[dish.DishId] = whole;
+            int hundredths = (int)((total - whole) * 100m);
+            if (hundredths == 0) dishXpHundredths.Remove(dish.DishId);
+            else dishXpHundredths[dish.DishId] = hundredths;
             Wallet += payout;
             return new PrototypeDishResult(dish, rarity, payout, gained, previousLevel, GetLevel(dish));
         }

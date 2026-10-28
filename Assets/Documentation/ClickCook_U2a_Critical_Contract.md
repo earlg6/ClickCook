@@ -1,0 +1,12 @@
+# U2a — критичні удари та node-state save
+
+ADOPTED IMPLEMENTATION CONTRACT — 2026-10-24. Перший execution slice U2: тільки node.critical_chance.01 та node.critical_multiplier.01. Hold/частота і наступні ступені залишаються окремими slices. Джерела: U0 contract, node manifest, roadmap U2.
+
+- Шанс: 15 рангів; ціна ceil(150 × 1.9^N); шанс N/50, максимум 30%; prerequisite node.click_strength.01:3.
+- Множник: 15 рангів; ціна ceil(200 × 1.9^N); множник 2 + 0.1N, максимум ×3.5; prerequisite node.critical_chance.01:1. Перший шанс одразу працює з базовим ×2.
+- Кожний прийнятий ручний удар робить один roll u у [0,1), крит якщо u < chance. При нульовому шансі RNG не споживається. Damage = ceil(baseManualDamage × multiplier); округлення один раз, HP мінімум 0. Відхилені/paused/stale удари не споживають roll. Один order дає один completion/receipt, без переносу надлишку на наступний. Auto в цьому slice немає; майбутній auto має окремий некритичний шлях.
+- Купівля: окремий nodeId/rank у quote, перевірені prerequisites, активний день/пауза/чужий або повторний quote блокують транзакцію. UI показує поточний/наступний ефект, точну ціну, lock/funds/max та фактичний шанс/множник. Решта вузлів не продається. Лічильник кліків при активному криті позначає кількість без критів; accepted крит має текстовий HP feedback.
+- Schema 2: upgrades містить тільки canonical nodeId → purchasedRank для першого Click Strength і цих двох вузлів. Root/інші ступені/невідомі IDs, duplicate, alias, rank поза 0–15 та придбані ранги без prerequisites не приймаються. Дані source grants не створюються.
+- Schema 1 завантажується без запису: лише legacy click_strength переноситься в node.click_strength.01 з тим самим рангом; decimal wallet і Dish XP зберігаються точно. Сила не застосовується двічі. Наступний звичайний save пише schema 2 через чинний atomic/backup механізм, backup schema 1 залишається читабельним. Версії >2 захищені від перезапису. Оновлення не скидає профіль і не записує його до першої звичайної зміни/SaveNow.
+
+Перевірки локальні: deterministic RNG/threshold/rounding/completion; quote/prerequisites/node ownership; signed schema-1 migration і schema-2 roundtrip/backup/невідомі дані/future protection; нові detail/buy/statistics та HP feedback у Play Mode на тимчасовому профілі. Без build і широкої gameplay/resolution регресії. Темп окупності й повний баланс проходження не доведені цим slice.

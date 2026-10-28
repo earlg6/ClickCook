@@ -155,7 +155,7 @@ namespace ClickCook.Verification
             Check(!c.OrderSession.IsDayActive && c.OrderSession.Orders.Count == 0 && !beforeReload.HasActiveDay, "reload retains no unfinished orders");
             c.CookSelectedLocation();
             Check(c.OrderSession.IsDayActive && c.OrderSession.CompletedDishes == 0 && c.OrderSession.Orders.Count == 2, "fresh day after screen reload");
-            Check(c.OrderSession.ClickStrengthRank == snapshotBeforeReload.UpgradeRanksById[UpgradeCatalog.ClickStrengthId], "damage rank retained after reload");
+            Check(c.OrderSession.ClickStrengthRank == snapshotBeforeReload.UpgradeRanksById[UpgradeNodeRules.Strength], "damage rank retained after reload");
             c.FinishDay();
             SameValues(snapshotBeforeReload, c.OrderSession.Profile.CaptureSnapshot());
             return "PASS " + checks + " Play Mode scene-reload/profile retention checks; scene asset not modified. Callbacks, not physical input.";

@@ -49,6 +49,7 @@ namespace ClickCook.Runtime
         [SerializeField] private UnityEngine.UI.Button buyUpgradeButton;
         [SerializeField] private UnityEngine.UI.Text upgradeDetailsText;
         [SerializeField] private UnityEngine.UI.Text upgradeStatusText;
+        [SerializeField] private UpgradeTreeView upgradeTreeView;
         [Header("UI-A2 — Work Day / result presentation")]
         [SerializeField] private UnityEngine.UI.Text dayWalletText;
         [SerializeField] private UnityEngine.UI.Text dayCompletedText;
@@ -71,6 +72,36 @@ namespace ClickCook.Runtime
         public PrototypeOrderSession OrderSession => session;
         private ProfileMenu profileMenu;
         public bool GameplayBlocked => profileMenu != null && profileMenu.IsBlocking;
+        public bool CanCookDisplayedOrder => enabled && !GameplayBlocked && cookingPrototypeScreen.activeInHierarchy &&
+            session != null && !session.IsPaused && displayedCookingOrder != null && session.ActiveOrder == displayedCookingOrder;
+
+        public bool BeginCookingHold()
+        {
+            if (!CanCookDisplayedOrder || !session.TryBeginHold(displayedCookingOrder, Time.unscaledTimeAsDouble)) return false;
+            ClickCookingDish();
+            return true;
+        }
+        public void CancelCookingHold() => session?.CancelHold();
+        private void AdvanceCookingHold()
+        {
+            if (session == null || !session.IsHolding) return;
+            if (!CanCookDisplayedOrder) { session.CancelHold(); return; }
+            if (session.TryTakeHoldRepeat(Time.unscaledTimeAsDouble)) ClickCookingDish();
+        }
+        private bool applicationHasFocus = true;
+        private bool applicationPaused;
+        private void AdvanceAutoCooking()
+        {
+            if (session == null) return;
+            if (!CanCookDisplayedOrder || !applicationHasFocus || applicationPaused) { session.SuspendAuto(); return; }
+            var order = displayedCookingOrder;
+            int before = order.RemainingClicks;
+            bool completed = session.TryCookAuto(order, Time.unscaledTimeAsDouble);
+            if (completed || order.RemainingClicks != before) HandleCookingOutcome(completed);
+        }
+        private void OnDisable() { CancelCookingHold(); session?.SuspendAuto(); }
+        private void OnApplicationFocus(bool focused) { applicationHasFocus = focused; if (!focused) { CancelCookingHold(); session?.SuspendAuto(); } }
+        private void OnApplicationPause(bool paused) { applicationPaused = paused; if (paused) { CancelCookingHold(); session?.SuspendAuto(); } }
 
         private void Start()
         {
@@ -105,6 +136,7 @@ namespace ClickCook.Runtime
             closeUpgradesButton.onClick.AddListener(CloseUpgrades);
             exitGameButton.onClick.AddListener(ExitGame);
             buyUpgradeButton.onClick.AddListener(BuyUpgrade);
+            upgradeTreeView.Initialize(this, closeUpgradesButton, buyUpgradeButton, upgradeDetailsText, upgradeStatusText);
             for (int i = 0; i < orderButtons.Length; i++)
             {
                 int slot = i;
@@ -157,7 +189,7 @@ namespace ClickCook.Runtime
                    dishResultScreen != null && dishResultText != null && continueFromResultButton != null &&
                    upgradeCatalog != null && upgradeScreen != null && openUpgradesButton != null &&
                    closeUpgradesButton != null && buyUpgradeButton != null &&
-                   upgradeDetailsText != null && upgradeStatusText != null &&
+                   upgradeDetailsText != null && upgradeStatusText != null && upgradeTreeView != null &&
                    dayWalletText != null && dayCompletedText != null && resultRarityText != null &&
                    resultMasteryText != null && resultMasteryFill != null && exitGameButton != null &&
                    cookingHpFill != null && cookingHpText != null;
@@ -180,6 +212,7 @@ namespace ClickCook.Runtime
             upgradeScreen.SetActive(true);
             upgradeStatusText.text = "Придбані покращення зберігаються автоматично.";
             RefreshUpgrade();
+            upgradeTreeView.RevealSelection();
             FocusUi(buyUpgradeButton.interactable ? buyUpgradeButton : closeUpgradesButton);
         }
 
@@ -196,12 +229,13 @@ namespace ClickCook.Runtime
 
         public void BuyUpgrade()
         {
-            if (!enabled || GameplayBlocked || !upgradeScreen.activeSelf || session.IsDayActive || displayedUpgradeQuote == null) return;
+            if (!enabled || GameplayBlocked || !upgradeScreen.activeSelf || session.IsDayActive ||
+                displayedUpgradeQuote == null || displayedUpgradeQuote.NodeId != upgradeTreeView.SelectedId) return;
             var quote = displayedUpgradeQuote;
             displayedUpgradeQuote = null;
             buyUpgradeButton.interactable = false;
             upgradeStatusText.text = session.TryPurchaseUpgrade(quote)
-                ? $"Силу кліку покращено до рангу {session.ClickStrengthRank}!"
+                ? $"{upgradeTreeView.Definition.Find(quote.NodeId).title}: ранг {session.Profile.GetUpgradeRank(quote.NodeId)} придбано!"
                 : "Не вдалося придбати. Перевір баланс і поточну ціну.";
             // Consume this offer for the rest of the frame: repeated callbacks cannot buy twice.
             refreshUpgradeNextFrame = true;
@@ -209,6 +243,9 @@ namespace ClickCook.Runtime
 
         private void LateUpdate()
         {
+            // Pointer up/exit and keyboard focus changes finish in EventSystem.Update before repeats run.
+            AdvanceCookingHold();
+            AdvanceAutoCooking();
             if (GameplayBlocked || !refreshUpgradeNextFrame) return;
             refreshUpgradeNextFrame = false;
             if (upgradeScreen.activeSelf)
@@ -223,25 +260,20 @@ namespace ClickCook.Runtime
 
         private void RefreshUpgrade()
         {
-            var definition = upgradeCatalog.Find(UpgradeCatalog.ClickStrengthId);
-            bool hasNext = session.TryQuoteUpgrade(UpgradeCatalog.ClickStrengthId, out displayedUpgradeQuote);
-            upgradeDetailsText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n\n" +
-                $"Ранг: {session.ClickStrengthRank} / {definition.MaximumRank}\n" +
-                $"Сила кліку: {session.ClickDamage}" +
-                (hasNext ? $" → {UpgradeCatalog.ClickDamageAtRank(session.ClickStrengthRank + 1)}\n\n" +
-                    $"Ціна: {ClickCookUiCopy.Money(displayedUpgradeQuote.Price)}\n" +
-                    (session.Rewards.Wallet >= displayedUpgradeQuote.Price ? "Можна придбати" : "Недостатньо коштів")
-                    : "\n\nМаксимальний ранг");
-            buyUpgradeButton.interactable = hasNext && session.Rewards.Wallet >= displayedUpgradeQuote.Price;
-            buyUpgradeButton.GetComponentInChildren<UnityEngine.UI.Text>().text = hasNext
-                ? $"Придбати за {ClickCookUiCopy.Money(displayedUpgradeQuote.Price)}" : "Максимальний ранг";
-            var navigation = closeUpgradesButton.navigation;
-            var nextFocus = buyUpgradeButton.interactable ? buyUpgradeButton : null;
-            navigation.selectOnLeft = navigation.selectOnRight = navigation.selectOnUp = navigation.selectOnDown = nextFocus;
-            closeUpgradesButton.navigation = navigation;
+            displayedUpgradeQuote = null;
+            session.TryQuoteUpgrade(upgradeTreeView.SelectedId, out displayedUpgradeQuote);
+            upgradeTreeView.Refresh(upgradeCatalog, displayedUpgradeQuote);
             var events = UnityEngine.EventSystems.EventSystem.current;
             if (!buyUpgradeButton.interactable && events != null && events.currentSelectedGameObject == buyUpgradeButton.gameObject)
                 FocusUi(closeUpgradesButton);
+        }
+
+        public void SelectUpgradeNode(string nodeId)
+        {
+            if (!enabled || GameplayBlocked || !upgradeScreen.activeSelf || session.IsDayActive ||
+                refreshUpgradeNextFrame || upgradeTreeView.Definition.Find(nodeId) == null) return;
+            upgradeTreeView.Select(nodeId);
+            RefreshUpgrade();
         }
 
         public void ShowPreviousLocation()
@@ -311,6 +343,8 @@ namespace ClickCook.Runtime
             workDayScreen.SetActive(false);
             cookingPrototypeScreen.SetActive(true);
             FocusUi(cookingDishButton.gameObject.activeInHierarchy ? cookingDishButton : backToBoardButton);
+            bool completedByStart = session.TryCookAutoStart(order);
+            if (completedByStart || session.LastActionWasAuto) HandleCookingOutcome(completedByStart);
         }
 
         public void BackToBoard()
@@ -330,15 +364,20 @@ namespace ClickCook.Runtime
             PrototypeOrder completedOrder = displayedCookingOrder;
             if (!enabled || GameplayBlocked || !cookingPrototypeScreen.activeSelf) return;
             bool completed = session.TryCookClick(completedOrder);
+            HandleCookingOutcome(completed);
+        }
+
+        private void HandleCookingOutcome(bool completed)
+        {
             RefreshCookingHp();
             if (!completed) return;
             displayedCookingOrder = null;
             cookingPrototypeScreen.SetActive(false);
             PrototypeDishResult result = session.LastResult;
             bool mastered = result.Level == PrototypeDishRewards.MaximumDishLevel;
-            int xp = session.Rewards.GetLevelXp(result.Dish);
+            decimal xp = session.Rewards.GetExactLevelXp(result.Dish);
             int needed = mastered ? 1 : PrototypeDishRewards.RequiredXp(result.Level);
-            resultMasteryText.text = mastered ? "Майстерність: максимум" : $"Досвід до наступного рівня: {xp} / {needed} XP";
+            resultMasteryText.text = mastered ? "Майстерність: максимум" : $"Досвід до наступного рівня: {xp:0.##} / {needed} XP";
             resultMasteryFill.fillAmount = mastered ? 1f : (float)xp / needed;
             resultRarityText.text = ClickCookUiCopy.Rarity(result.Rarity);
             Color[] rarityInk = { new Color(.23f,.16f,.11f), new Color(.17f,.34f,.17f),
@@ -346,7 +385,7 @@ namespace ClickCook.Runtime
             resultRarityText.color = rarityInk[(int)result.Rarity];
             dishResultText.text = $"{ClickCookUiCopy.Dish(result.Dish)}\n\n" +
                 $"Зароблено: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n\n" +
-                $"Досвід страви: +{result.XpGained} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
+                $"Досвід страви: +{result.XpGained:0.##} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
             continueFromResultButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
                 session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Завершити день" : "Продовжити";
             dishResultScreen.SetActive(true);
@@ -411,11 +450,11 @@ namespace ClickCook.Runtime
                 var dish = order?.Dish;
                 int masteryLevel = dish != null ? session.Rewards.GetLevel(dish) : 1;
                 bool maximum = masteryLevel == PrototypeDishRewards.MaximumDishLevel;
-                int xp = dish != null ? session.Rewards.GetLevelXp(dish) : 0;
+                decimal xp = dish != null ? session.Rewards.GetExactLevelXp(dish) : 0;
                 int cost = maximum ? 1 : PrototypeDishRewards.RequiredXp(masteryLevel);
                 orderMasteryFills[i].fillAmount = maximum ? 1f : (float)xp / cost;
                 orderMasteryTexts[i].text = dish == null ? "Немає страви" : maximum ? "Майстерність: максимум" :
-                    session.BoardCapacity > 3 ? $"Майстерність: {xp}/{cost} XP" : $"Майстерність: рівень {masteryLevel}\n{xp} / {cost} XP";
+                    session.BoardCapacity > 3 ? $"Майстерність: {xp:0.##}/{cost} XP" : $"Майстерність: рівень {masteryLevel}\n{xp:0.##} / {cost} XP";
             }
             LayoutOrderCards();
             ConfigureBoardNavigation();
@@ -430,6 +469,15 @@ namespace ClickCook.Runtime
             int clicks = (remaining + session.ClickDamage - 1) / session.ClickDamage;
             cookingHpFill.fillAmount = maximum > 0 ? (float)remaining / maximum : 0;
             cookingHpText.text = $"HP: {remaining} / {maximum}\nЗалишилось кліків: {clicks}";
+            if (session.CriticalChanceRank > 0)
+                cookingHpText.text = $"HP: {remaining} / {maximum}\n" + (session.LastHitWasCritical
+                    ? $"Крит: −{session.LastHitDamage} HP · ≤{clicks} кліків" : $"Без критів: {clicks} кліків");
+            if (session.DoubleStrikeChanceRank > 0)
+                cookingHpText.text = $"HP: {remaining} / {maximum}\n" + (session.LastStrikeCount >= 2
+                    ? $"{session.LastStrikeCount} рухи: −{session.LastHitDamage} HP" + (session.LastHitWasCritical ? " · крит" : "") + $" · ≤{clicks} кліків"
+                    : session.LastHitWasCritical ? $"Крит: −{session.LastHitDamage} HP · ≤{clicks} кліків" : $"Без бонусів: ≤{clicks} кліків");
+            if (session.LastActionWasAuto)
+                cookingHpText.text = $"HP: {remaining} / {maximum}\nПомічник: −{session.LastHitDamage} HP · дій: {session.LastAutoActionCount}";
         }
 
         private void LayoutOrderCards()

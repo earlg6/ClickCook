@@ -1,0 +1,11 @@
+# U4c — сила авто-дії
+
+ADOPTED IMPLEMENTATION CONTRACT — 2026-10-25. `node.auto_strength.01` / «Навчання бригади I», prerequisite `node.auto_action_count.01:1` за manifest. Чинні catalog B=500, G=2, cap=15 прийнято для першого вузла: `ceil(500 × 2^N)`, без зміни попереднього catalog asset. Ефект — початковий баланс ClickCook, не source reward чи pacing proof.
+
+- Окремий purchased rank N=0–15 додає +1 HP/авто-дію: `damage = 1 + N` (1–16 HP). Перші покупки 500/1000/2000, п'ятнадцята 8192000; загалом 16383500 у.е. Не змінює manual damage/crit/proc, кількість дій, стартовий шанс або секунду циклу. Без action_count 1 вузол не продається.
+- Єдиний ApplyAutoBatch для periodic і first-entry snapshot-ить actions/damage на початку batch. Кожна фактична дія застосовує damage, HP clamp до нуля; lethal припиняє решту дій. No combat RNG/carry, completion/receipt/XP/notification один раз. LastAutoActionCount — фактичні дії, LastHitDamage — їхня розрахована сумарна шкода до HP clamp (HP=1, damage=3 → одна дія, LastHitDamage=3). First-entry checked/timer/Back правила U4a/U4b зберігаються.
+- Quote, rank/cap, ціна/current→next, actual statistics використовують реальні ранги/силу. Detail action_count та auto_action_chance теж показують поточну силу. Шість рядків статистики зберігають формат і межі.
+- Schema 9 додає тільки canonical auto_strength.01 з cap 15 та purchased prerequisite. Schema 1–8 відхиляють ID навіть при rank 0. Load зберігає точні wallet/XP/старі ранги/backup без eager write чи безкоштовної сили; Save пише 9; >9 захищено. Day/order/checked/timer/feedback залишаються transient.
+- Auto strength II/III та multiplier/frequency не продаються. Наступний окремий slice — U4d, перший auto_strength_multiplier, потім frequency. U4 ще не завершено.
+
+Локальні ризики: сила лише в одному auto path, вплив на manual/RNG, зайва дія/нагорода при overshoot, старе UI 1 HP, пошкодження старих profiles. Перевірки: точні prices/caps та periodic/start damage/mixed manual/completion, schema 1–8→9; native ComputerUse click на ізольованому профілі, реальний controller tick/start/result/autosave/Continue й один rendered size. Native Enter/Space не активували купівлю через ComputerUse; клавіатурний pass не підтверджений. Player build/широка регресія не потрібні.

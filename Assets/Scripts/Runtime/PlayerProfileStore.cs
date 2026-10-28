@@ -15,9 +15,10 @@ namespace ClickCook.Runtime
     /// <summary>Versioned local profile. Temporary day/order/result state is deliberately excluded.</summary>
     public sealed class PlayerProfileStore
     {
+        public const int CurrentVersion = 16;
         [Serializable] private sealed class Envelope { public int version; public string payload; public string checksum; }
         [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; }
-        [Serializable] private sealed class DishEntry { public int id; public int xp; }
+        [Serializable] private sealed class DishEntry { public int id; public int xp; public int hundredths; }
         [Serializable] private sealed class RankEntry { public string id; public int rank; }
         public string SavePath { get; }
         public string BackupPath => SavePath + ".bak";
@@ -116,10 +117,10 @@ namespace ClickCook.Runtime
         {
             string payload = JsonUtility.ToJson(new Payload {
                 wallet = snapshot.Wallet.ToString(CultureInfo.InvariantCulture),
-                dishes = snapshot.DishXpById.OrderBy(p => p.Key).Select(p => new DishEntry { id = p.Key, xp = p.Value }).ToArray(),
+                dishes = snapshot.DishXpById.OrderBy(p => p.Key).Select(p => new DishEntry { id = p.Key, xp = p.Value, hundredths = snapshot.DishXpHundredthsById.TryGetValue(p.Key, out int value) ? value : 0 }).ToArray(),
                 upgrades = snapshot.UpgradeRanksById.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => new RankEntry { id = p.Key, rank = p.Value }).ToArray()
             });
-            return JsonUtility.ToJson(new Envelope { version = 1, payload = payload, checksum = Hash(payload) }, true);
+            return JsonUtility.ToJson(new Envelope { version = CurrentVersion, payload = payload, checksum = Hash(payload) }, true);
         }
         private static PlayerProfile Decode(string json, out ProfileLoadStatus status)
         {
@@ -129,8 +130,8 @@ namespace ClickCook.Runtime
                 if (json.Length > 1024 * 1024) return null;
                 var envelope = JsonUtility.FromJson<Envelope>(json);
                 if (envelope == null) return null;
-                if (envelope.version > 1) { status = ProfileLoadStatus.Unsupported; return null; }
-                if (envelope.version != 1 || envelope.payload == null || envelope.checksum != Hash(envelope.payload)) return null;
+                if (envelope.version > CurrentVersion) { status = ProfileLoadStatus.Unsupported; return null; }
+                if (envelope.version < 1 || envelope.payload == null || envelope.checksum != Hash(envelope.payload)) return null;
                 var payload = JsonUtility.FromJson<Payload>(envelope.payload);
                 if (payload == null || payload.dishes == null || payload.upgrades == null ||
                     !decimal.TryParse(payload.wallet, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal wallet) ||
@@ -138,17 +139,46 @@ namespace ClickCook.Runtime
                     wallet.ToString(CultureInfo.InvariantCulture) != payload.wallet) return null;
                 int cap = Enumerable.Range(1, PrototypeDishRewards.MaximumDishLevel - 1).Sum(PrototypeDishRewards.RequiredXp);
                 var xp = new Dictionary<int, int>();
+                var hundredths = new Dictionary<int, int>();
                 foreach (var dish in payload.dishes)
                 {
-                    if (dish == null || dish.id < 1 || dish.id > 32 || dish.xp < 0 || dish.xp > cap || !xp.TryAdd(dish.id, dish.xp)) return null;
+                    if (dish == null || dish.id < 1 || dish.id > 32 || dish.xp < 0 || dish.xp > cap || !xp.TryAdd(dish.id, dish.xp) ||
+                        dish.hundredths < 0 || dish.hundredths > 99 || (dish.xp == cap && dish.hundredths != 0) ||
+                        (envelope.version < 13 && dish.hundredths != 0)) return null;
+                    if (dish.hundredths != 0) hundredths.Add(dish.id, dish.hundredths);
                 }
                 var ranks = new Dictionary<string, int>(StringComparer.Ordinal);
                 foreach (var rank in payload.upgrades)
                 {
-                    if (rank == null || rank.id != UpgradeCatalog.ClickStrengthId || rank.rank < 0 || rank.rank > 15 || !ranks.TryAdd(rank.id, rank.rank)) return null;
+                    if (rank == null) return null;
+                    string id = rank.id;
+                    if (envelope.version == 1)
+                    {
+                        if (id != UpgradeCatalog.ClickStrengthId) return null;
+                        id = UpgradeNodeRules.Strength;
+                    }
+                    if (envelope.version == 2 && id == UpgradeNodeRules.Hold) return null;
+                    if (envelope.version < 4 && id == UpgradeNodeRules.HoldFrequency) return null;
+                    if (envelope.version < 5 && (id == UpgradeNodeRules.DoubleStrikeChance || id == UpgradeNodeRules.DoubleStrikePower)) return null;
+                    if (envelope.version < 6 && (id == UpgradeNodeRules.DoubleStrikeChanceII || id == UpgradeNodeRules.TripleStrikeChance)) return null;
+                    if (envelope.version < 7 && id == UpgradeNodeRules.AutoActionCount) return null;
+                    if (envelope.version < 8 && id == UpgradeNodeRules.AutoActionChance) return null;
+                    if (envelope.version < 9 && id == UpgradeNodeRules.AutoStrength) return null;
+                    if (envelope.version < 10 && id == UpgradeNodeRules.AutoStrengthMultiplier) return null;
+                    if (envelope.version < 11 && id == UpgradeNodeRules.AutoFrequency) return null;
+                    if (envelope.version < 12 && id == UpgradeNodeRules.DishXpFlat) return null;
+                    if (envelope.version < 13 && id == UpgradeNodeRules.DishXpMultiplier) return null;
+                    if (envelope.version < 14 && id == UpgradeNodeRules.DishValue) return null;
+                    if (envelope.version < UpgradeNodeRules.IntroducedVersion(id)) return null;
+                    // Canonical implemented nodes only. Each schema retains its own content boundary.
+                    if (id == null || id != UpgradeNodeRules.CanonicalId(id) || UpgradeNodeRules.MaximumRank(id) == 0 ||
+                        rank.rank < 0 || rank.rank > UpgradeNodeRules.MaximumRank(id) || !ranks.TryAdd(id, rank.rank)) return null;
                 }
+                int Rank(string id) => ranks.TryGetValue(id, out int value) ? value : 0;
+                foreach (var pair in ranks)
+                    if (pair.Value > 0 && !UpgradeNodeRules.PrerequisitesMet(pair.Key, Rank)) return null;
                 status = ProfileLoadStatus.Loaded;
-                return PlayerProfile.Restore(wallet, xp, ranks);
+                return PlayerProfile.Restore(wallet, xp, ranks, hundredths);
             }
             catch (Exception ex) when (ex is ArgumentException || ex is FormatException || ex is OverflowException) { return null; }
         }

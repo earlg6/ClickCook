@@ -1,0 +1,11 @@
+# U5a — додаткова Dish XP
+
+ADOPTED IMPLEMENTATION CONTRACT — 2026-10-26. Перший незалежний slice U5: `node.dish_xp_flat.01` / «Нотатки до рецепта», prerequisite `node.click_strength.01:1` за manifest. П'ять рангів, +3 XP/ранг (0–15), `ceil(100 × 1.7^N)`, N=0–4; ціни 100/170/289/492/836, сума 1887. Початковий баланс ClickCook; source +3 адаптовано як contribution, pacing не підтверджено.
+
+- Receipt XP = `min(baseXpForRarity + 3 × purchasedRank, remainingMasteryXp)`. База за якістю 10/12/16/22/30 незмінна. Бонус лише завершеній страві, один раз через спільний CompleteOrder для manual/Submit/Hold/auto start/periodic; не за кожну дію/удар/цикл. Back/незавершений день не дають XP.
+- Якість визначається за рівнем ДО нагороди; payout/таблиця якостей/пороги/сила/таймери незмінні. Зберігається cap level 18. На cap actual XpGained=0; біля cap receipt показує лише фактично зараховану XP. Інші dish IDs не отримують XP. Flat bonus цілий; дробова семантика майбутнього multiplier — окремий контракт.
+- Quotes/purchase/detail/current→next/cap/locks/ціна через загальний pipeline. Actual statistics додає сьомий рядок; panel +24 px і відповідно коротша прокручувана detail область. Result показує actual XpGained через чинний binding.
+- Schema 12 додає лише canonical dish_xp_flat.01 cap 5/purchased prerequisite. Schema 1–11 відхиляють ID навіть з rank 0. Load зберігає точні wallet/XP/усі ранги/backup без eager write чи безкоштовного бонусу; Save пише 12, >12 захищено. Нових XP полів, дробових XP, Player/Restaurant XP немає.
+- Dish XP multiplier, flat II/III та інші U5 effects не продаються до власних контрактів. Наступний slice U5b — перший node.dish_xp.01 після flat rank 1; визначити factor/order/fractional XP до реалізації.
+
+Мінімальні перевірки за AGENTS.md: compilation; prices/caps/prerequisites/guards; seeded all-rarity receipts, cap/level crossing/rank-zero compatibility, manual/Hold/start/periodic shared boundary, one receipt/no stale reward/no cross-dish XP; schemas 1–11→12/backup/roundtrip/invalid/future; native purchase на Temp-профілі, result XP/autosave/restart/Continue і один Full-HD UI огляд. Без Player build/широкої регресії/pacing.

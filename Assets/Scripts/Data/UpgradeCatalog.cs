@@ -50,6 +50,7 @@ namespace ClickCook.Data
         }
 
         public UpgradeDefinition Find(string id) => upgrades?.Find(item => item != null && item.Id == id);
+        public UpgradeDefinition FindForNode(string nodeId) => Find(UpgradeNodeRules.CatalogId(nodeId));
 
         public static int ClickDamageAtRank(int rank)
         {

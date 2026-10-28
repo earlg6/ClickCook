@@ -57,6 +57,8 @@ namespace ClickCook.Verification
                     Check(!s.TryFinishDay(out _), "cannot finish active cooking");
                     Check(s.TryCookClick(order), "complete receipt");
                     earnings += s.LastResult.Payout; xp += s.LastResult.XpGained;
+                    Check(profile.Rewards.Wallet == (i < 9 ? 123.25m : 123.25m + earnings) &&
+                        s.PendingDayEarnings == (i < 9 ? earnings : 0), "money pending until tenth receipt");
                     Check(!s.TryCookClick(order), "stale completion rejected");
                 }
                 decimal wallet = profile.Rewards.Wallet, totalXp = profile.Rewards.GetExactTotalXp(dish);
@@ -76,8 +78,9 @@ namespace ClickCook.Verification
                 Check(full.Receipts.Count == 10 && full.Earnings == earnings && full.DishXp == xp && empty.Receipts.Count == 0,
                     "reports detached across new days/cleanup");
                 Pool(location, dish); s.StartDay(location, 1); s.TrySelect(0); s.TryCookClick(s.ActiveOrder); var receipt = s.LastResult;
-                Check(s.TryFinishDay(out var early) && !early.LimitReached && early.Receipts.Count == 1 && early.Earnings == receipt.Payout && early.DishXp == receipt.XpGained,
-                    "early day only counts completed receipt");
+                Check(s.TryFinishDay(out var early) && !early.LimitReached && early.Receipts.Count == 1 && early.Earnings == 0 &&
+                    early.ForfeitedEarnings == receipt.Payout && early.DishXp == receipt.XpGained && profile.Rewards.Wallet == wallet && s.PendingDayEarnings == 0,
+                    "early day voids money, preserves prior balance and Dish XP");
                 return "8A model PASS: empty/early/ten receipts, exact earnings/fraction XP, partial/paused/active/stale guards, immutable reports and owner cleanup.";
             }
             finally { UnityEngine.Random.state = random; UnityEngine.Object.DestroyImmediate(dish); UnityEngine.Object.DestroyImmediate(partial); UnityEngine.Object.DestroyImmediate(location); }

@@ -6,7 +6,7 @@ namespace ClickCook.Runtime
 {
     public enum DishRarity { Common, Uncommon, Rare, Fantastic, Legendary }
 
-    /// <summary>Immutable receipt for one successful completion, not a pending transaction.</summary>
+    /// <summary>Immutable dish receipt. Its money is settled only after a full work day.</summary>
     public sealed class PrototypeDishResult
     {
         public DishData Dish { get; }
@@ -128,8 +128,9 @@ namespace ClickCook.Runtime
             int hundredths = (int)((total - whole) * 100m);
             if (hundredths == 0) dishXpHundredths.Remove(dish.DishId);
             else dishXpHundredths[dish.DishId] = hundredths;
-            Wallet += payout;
             return new PrototypeDishResult(dish, rarity, payout, gained, previousLevel, GetLevel(dish));
         }
+
+        internal void CreditCompletedDay(decimal earnings) => Wallet += earnings;
     }
 }

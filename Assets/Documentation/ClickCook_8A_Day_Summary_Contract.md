@@ -2,16 +2,24 @@
 
 Implemented and locally verified 2026-10-28.
 
+**Owner correction, implemented 2026-10-28:** finishing before10 dishes forfeits all order money from that day. Existing wallet money is retained. Dish XP remains awarded per completed dish. This replaces the original immediate per-order wallet credit described by historical evidence below.
+
 - A day contains only successful `PrototypeDishResult` receipts issued by its session. All cooking sources already converge on that boundary. Duplicate dish types count as separate completions.
-- Earnings are the exact decimal sum of receipt payouts, including existing quality and Dish Value effects. Starting wallet, spending, unfinished HP, candidate dishes and future passive income are excluded.
+- Order values accumulate in session-only `PendingDayEarnings`, including existing quality and Dish Value effects. At the tenth successful receipt the sum moves into Wallet once, in the same autosave notification as that receipt's XP. Summary Earnings is that sum for a full day, otherwise0; ForfeitedEarnings is the pending receipt sum for an early day. Starting wallet, spending, unfinished HP, candidates and passive income are excluded.
 - Reported XP is the exact sum of **Dish XP actually granted**, including fractional hundredths and mastery caps. It is neither Player XP nor Restaurant XP. The proposed Daily Earnings / 100 formula belongs to 8C and is not awarded here.
 - Manual Finish Day is available from the board, including an empty day. It cannot finish while cooking or paused. Continue after the tenth result uses the same finish boundary. Finishing returns a detached read-only receipt list, then discards remaining orders and releases profile ownership. Repeating finish is rejected.
-- Summary is a report of completed transactions. Opening, reading, returning from upgrades, Next Day, menu/scene cleanup and replayed callbacks never pay or save an additional reward. Existing receipt/purchase autosave remains authoritative; a failed write uses the existing retry notice. No new schema is necessary.
+- Summary reports the settled or forfeited outcome. Reading, upgrade return, Next Day and replayed callbacks never pay again. Early EndDay/menu/scene cleanup discard pending money. Saving/restarting midway cannot retain it because it never enters the persistent wallet. Full payment is already final on the tenth receipt, even before Continue. Existing failed-write/retry handling is reused; no new schema is necessary.
 - Upgrades may open from either location selection or summary. Close returns to its entry screen with the corresponding button label. Purchases change the profile, while the frozen day report retains its original earnings/XP.
 - Next Day consumes the visible summary and returns to location selection once; Cook starts a fresh board at the selected location. A calendar date, day ordinal, timer or automatic idle payout is not inferred. Calendar progression remains an explicit future design decision.
 - Main menu, scene exit and a new run dismiss the report. Progress survives through the existing save; report history and unfinished days are not persisted. Restoring a profile begins idle and cannot replay a day-end reward.
 
-## Local evidence
+## Verification of the owner correction
+
+Changed behavior is the cash settlement boundary. Risks are keeping early money through autosave/restart, paying twice at full completion, carrying voided income into the next day or removing old wallet/XP. Smallest checks: compilation, all early counts1–9/full tenth with isolated save roundtrips, existing scoped summary model and controller/result/summary/restart boundaries in Play.
+
+`DaySettlementVerification.RunModelChecks` passed every early count1–9 and full tenth, exact existing balance, pending money, receipt autosave, fractional XP/value effects, replay/cleanup/no-carry and immutable settlement report. Updated DaySummary model passed. Play with three completed dishes produced Earnings0, nonzero ForfeitedEarnings and zero wallet/save money while retaining exact XP; result/summary/warning text fits. A subsequent ten-dish day settled once on its tenth receipt, with no prior-day carry, and retained its exact balance after actual stop/restart/Continue. Early summary was visually inspected in the real Game View through Computer Use. Pause and Finish warnings explicitly explain forfeiture. Play stopped, override removed and saved scene reopened clean. No Player build or unrelated suite was needed.
+
+## Historical initial8A evidence (before the cash correction)
 
 Before verification: changed behavior is receipt aggregation and day-end navigation. Risks are duplicate reward/XP, inclusion of abandoned work or starting wallet, stale callbacks, wrong upgrade-return destination, unreadable ten-row report and save mismatch. Smallest relevant checks were compilation, isolated model cases and the new controller/UI integration boundary.
 

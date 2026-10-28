@@ -416,7 +416,8 @@ namespace ClickCook.Runtime
                 new Color(.10f,.25f,.46f), new Color(.36f,.17f,.46f), new Color(.44f,.27f,.03f) };
             resultRarityText.color = rarityInk[(int)result.Rarity];
             dishResultText.text = $"{ClickCookUiCopy.Dish(result.Dish)}\n\n" +
-                $"Зароблено: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n\n" +
+                $"За замовлення: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n" +
+                (session.CompletedDishes < PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Виплата — після 10 страв; достроково — 0.\n\n" : "Дохід дня зараховано.\n\n") +
                 $"Досвід страви: +{result.XpGained:0.##} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
             continueFromResultButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
                 session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Завершити день" : "Продовжити";
@@ -464,10 +465,12 @@ namespace ClickCook.Runtime
             report.AppendLine($"Приготовано: {summary.Receipts.Count} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
                 (summary.LimitReached ? " · Ліміт дня" : ""));
             report.AppendLine($"Зароблено: {ClickCookUiCopy.Money(summary.Earnings)} · Досвід страв: +{summary.DishXp:0.##} XP");
-            report.AppendLine("Нагороди вже зараховано.");
+            report.AppendLine(summary.LimitReached ? "Дохід дня зараховано." :
+                $"День завершено достроково. Анульовано: {ClickCookUiCopy.Money(summary.ForfeitedEarnings)}. Dish XP збережено.");
             if (summary.Receipts.Count == 0) report.AppendLine("Цього дня немає готових страв.");
             foreach (var receipt in summary.Receipts)
-                report.AppendLine($"{ClickCookUiCopy.Dish(receipt.Dish)} · {ClickCookUiCopy.Rarity(receipt.Rarity)} · {ClickCookUiCopy.Money(receipt.Payout)} · +{receipt.XpGained:0.##} XP");
+                report.AppendLine($"{ClickCookUiCopy.Dish(receipt.Dish)} · {ClickCookUiCopy.Rarity(receipt.Rarity)} · " +
+                    (summary.LimitReached ? ClickCookUiCopy.Money(receipt.Payout) : "кошти анульовано") + $" · +{receipt.XpGained:0.##} XP");
             daySummaryText.text = report.ToString();
             daySummaryScreen.SetActive(true);
             FocusUi(nextDayButton);
@@ -488,6 +491,7 @@ namespace ClickCook.Runtime
         {
             dayWalletText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
             dayCompletedText.text = $"Приготовано: {session.CompletedDishes} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}";
+            finishDayButton.GetComponentInChildren<UnityEngine.UI.Text>().text = "Завершити день · дохід 0";
             orderBoardStatusText.text = (session.Orders.Count>0 ? "Оберіть замовлення · " : string.Empty) + $"Замовлення: {session.Orders.Count} / {session.BoardCapacity}" +
                 (session.Orders.Count == 0 ? "\nНемає доступних замовлень" : string.Empty);
             for (int i = 0; i < orderButtons.Length; i++)

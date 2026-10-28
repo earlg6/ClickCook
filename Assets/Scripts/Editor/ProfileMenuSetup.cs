@@ -67,7 +67,7 @@ namespace ClickCook.EditorTools
             var fresh = Button("newGameButton", card, "Нова гра", -90);
             var quit = Button("quitButton", card, "Вийти з гри", -195); Navigation(cont, fresh, quit);
             var pause = FullPanel("Pause", root.transform); Bind("pausePanel", pause); card = Card(pause, "ПАУЗА");
-            UiA2Setup.Label("PauseHint", card, "Гру призупинено. Esc — продовжити.\nДо меню: незавершені замовлення скинуться; зароблене залишиться.", new Vector2(780, 130), new Vector2(0, 175), 27);
+            UiA2Setup.Label("PauseHint", card, "Гру призупинено. Esc — продовжити.\nВихід до завершення 10 страв анулює дохід дня. Dish XP зберігається.", new Vector2(780, 130), new Vector2(0, 175), 27);
             var resume = Button("resumeButton", card, "Продовжити", 15, true);
             var toMenu = Button("menuButton", card, "До головного меню", -90);
             var pauseQuit = Button("pauseQuitButton", card, "Зберегти й вийти", -195); Navigation(resume, toMenu, pauseQuit);

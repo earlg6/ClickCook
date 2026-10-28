@@ -39,6 +39,7 @@ namespace ClickCook.Runtime
 
         private readonly List<PrototypeOrder> orders = new();
         private readonly List<PrototypeDishResult> dayReceipts = new();
+        public decimal PendingDayEarnings { get; private set; }
         private readonly IReadOnlyList<PrototypeOrder> readOnlyOrders;
 
         public LocationData SelectedLocation { get; private set; }
@@ -298,6 +299,13 @@ namespace ClickCook.Runtime
             CompletedDishes++;
             LastResult = Rewards.Complete(expectedOrder.Dish, DishXpBonus, DishXpMultiplier, DishValueMultiplier);
             dayReceipts.Add(LastResult);
+            PendingDayEarnings += LastResult.Payout;
+            // Settle in the tenth receipt's autosave transaction, even before Result Continue.
+            if (CompletedDishes == MAX_COMPLETED_DISHES_PER_DAY)
+            {
+                Rewards.CreditCompletedDay(PendingDayEarnings);
+                PendingDayEarnings = 0;
+            }
             Profile.NotifyChanged();
             if (CompletedDishes < MAX_COMPLETED_DISHES_PER_DAY)
             {
@@ -368,6 +376,7 @@ namespace ClickCook.Runtime
             ReturnToBoard();
             orders.Clear();
             dayReceipts.Clear();
+            PendingDayEarnings = 0;
             SelectedLocation = null;
             BoardCapacity = 0;
             CompletedDishes = 0;

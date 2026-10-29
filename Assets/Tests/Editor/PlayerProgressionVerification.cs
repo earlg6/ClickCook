@@ -94,7 +94,7 @@ namespace ClickCook.Verification
             }
             foreach(var bad in new[]{null,"-1","15000.0001","0.00001","NaN","Infinity","1e2","01","+1"})Check(Decode(Signed(18,Payload(bad)))==null,"invalid XP "+bad);
             Check(Decode(Signed(17,Payload("0",17)))==null,"old schema XP injection rejected");
-            string futurePath=Path.Combine(root,"future.json"),future=Signed(19,Payload("0"));File.WriteAllText(futurePath,future);var protectedStore=new PlayerProfileStore(futurePath);
+            string futurePath=Path.Combine(root,"future.json"),future=Signed(PlayerProfileStore.CurrentVersion+1,Payload("0"));File.WriteAllText(futurePath,future);var protectedStore=new PlayerProfileStore(futurePath);
             Check(protectedStore.Load()==null&&protectedStore.Status==ProfileLoadStatus.Unsupported&&!protectedStore.Save(new PlayerProfile())&&File.ReadAllText(futurePath)==future,"future19 protected");
             return "8C storage PASS: schemas1–17 exact migration to zero XP, fractional/cap boundaries, ownership/wallet retention, schema18 backup/reset, malformed/old-injection/future19 protection.";
         }

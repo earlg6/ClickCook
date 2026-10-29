@@ -35,7 +35,7 @@ namespace ClickCook.Data
             DishValue => "dish_value",
             Strength => "click_strength", CriticalChance => "critical_chance", CriticalMultiplier => "critical_multiplier", Hold => "click_hold", HoldFrequency => "hold_frequency", DoubleStrikeChance or DoubleStrikeChanceII => "double_strike_chance", DoubleStrikePower => "double_strike_power", TripleStrikeChance => "triple_strike_chance", _ => null
         }; }
-        public static string CatalogId(string id) => (TryGetAdditionalTier(id,out _) && id != UpgradeDiscount) || id == DoubleStrikeChanceII ? id : FamilyId(id);
+        public static string CatalogId(string id) => (TryGetAdditionalTier(id,out _) && id != UpgradeDiscount && id != RecipeDiscount) || id == DoubleStrikeChanceII ? id : FamilyId(id);
         public static int MaximumRank(string id) { if(TryGetAdditionalTier(id,out var tier)) return tier.Cap; return id == DoubleStrikeChanceII || id == DishXpFlat ? 5 : id == Hold ? 1 : id == HoldFrequency || id == DoubleStrikeChance || id == DoubleStrikePower || id == TripleStrikeChance || id == AutoActionCount || id == AutoActionChance || id == AutoStrengthMultiplier ? 10 : FamilyId(id) != null ? 15 : 0; }
         public static bool PrerequisitesMet(string id, Func<string,int> rank) { if(TryGetAdditionalTier(id,out var tier)) return rank(tier.Parent) >= (tier.ParentRank == -1 ? MaximumRank(tier.Parent) : tier.ParentRank); return CanonicalId(id) switch {
             AutoActionCount => rank(Strength) >= 2,

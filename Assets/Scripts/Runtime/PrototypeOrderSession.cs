@@ -10,8 +10,11 @@ namespace ClickCook.Runtime
         public DishData Dish { get; }
         public decimal Price { get; }
         public int DishId { get; }
+        public int BasePrice { get; }
+        public int DiscountRank { get; }
         internal RecipePurchaseQuote(PrototypeOrderSession owner, DishData dish)
-        { Owner = owner; Dish = dish; DishId = dish.DishId; Price = dish.RecipeCost; }
+        { Owner = owner; Dish = dish; DishId = dish.DishId; BasePrice = dish.RecipeCost;
+            DiscountRank = owner.RecipeDiscountRank; Price = owner.RecipePrice(dish); }
     }
     /// <summary>Immutable offer bound to one session and one owned rank.</summary>
     public sealed class UpgradePurchaseQuote
@@ -60,6 +63,9 @@ namespace ClickCook.Runtime
         public PrototypeDishResult LastResult { get; private set; }
         private UpgradeCatalog upgradeCatalog;
         private RecipeCatalog recipeCatalog;
+        public int RecipeDiscountRank => Profile.GetUpgradeRank(UpgradeNodeRules.RecipeDiscount);
+        public decimal RecipeDiscount => .01m * RecipeDiscountRank;
+        public decimal RecipePrice(DishData dish) => dish.RecipeCost == 0 ? 0 : System.Math.Max(1m, decimal.Ceiling(dish.RecipeCost * (1m - RecipeDiscount)));
         public void ConfigureRecipes(RecipeCatalog catalog) { if (!IsDayActive) recipeCatalog = catalog; }
         public bool TryQuoteRecipe(int id, out RecipePurchaseQuote quote)
         {
@@ -72,7 +78,8 @@ namespace ClickCook.Runtime
         public bool TryPurchaseRecipe(RecipePurchaseQuote quote)
         {
             if (quote == null || quote.Dish == null || quote.Owner != this || IsPaused || Profile.HasActiveDay || recipeCatalog == null ||
-                recipeCatalog.Find(quote.DishId) != quote.Dish || quote.Dish.DishId != quote.DishId || quote.Dish.RecipeCost != quote.Price) return false;
+                recipeCatalog.Find(quote.DishId) != quote.Dish || quote.Dish.DishId != quote.DishId || quote.Dish.RecipeCost != quote.BasePrice ||
+                quote.DiscountRank != RecipeDiscountRank || quote.Price != RecipePrice(quote.Dish)) return false;
             return Profile.TryPurchaseRecipe(quote.DishId, quote.Price);
         }
         public int AvailableRecipeCount(LocationData location) => GetValidCandidates(location).Count;

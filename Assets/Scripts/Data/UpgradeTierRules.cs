@@ -15,11 +15,13 @@ namespace ClickCook.Data
     public static partial class UpgradeNodeRules
     {
         public const string UpgradeDiscount="node.upgrade_discount.01";
+        public const string RecipeDiscount="node.recipe_discount.01";
         public const string DishXpFlatII="node.dish_xp_flat.02", DishXpFlatIII="node.dish_xp_flat.03";
         public const string DishValueII="node.dish_value.02", DishValueIII="node.dish_value.03", DishValueIV="node.dish_value.04";
         private static readonly Dictionary<string,UpgradeTierRule> additionalTiers=new(StringComparer.Ordinal)
         {
             [UpgradeDiscount]=new(UpgradeDiscount,"upgrade_discount",5,DishValue,1,15,300,200,.01m),
+            [RecipeDiscount]=new(RecipeDiscount,"recipe_discount",5,DishValue,1,19,150,200,.01m),
             [DishXpFlatII]=new(DishXpFlatII,"dish_xp_flat",8,DishXpFlat,-1,15,2500,170,5m),
             [DishXpFlatIII]=new(DishXpFlatIII,"dish_xp_flat",5,DishXpFlatII,-1,15,25000,180,14m),
             [DishValueII]=new(DishValueII,"dish_value",5,DishValue,-1,15,250000,170,.04m),

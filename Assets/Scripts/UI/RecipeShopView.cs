@@ -73,7 +73,7 @@ namespace ClickCook.UI
         private void Refresh()
         {
             var session = controller.OrderSession;
-            wallet.text = "Баланс: " + ClickCookUiCopy.Money(session.Rewards.Wallet);
+            wallet.text = "Баланс: " + ClickCookUiCopy.Money(session.Rewards.Wallet) + $" · Знижка на рецепти: {session.RecipeDiscount * 100:0}%";
             pageLabel.text = $"{page + 1} / {(catalog.Dishes.Count + rows.Length - 1) / rows.Length}";
             for (int i = 0; i < rows.Length; i++)
             {
@@ -83,12 +83,13 @@ namespace ClickCook.UI
                 var dish = catalog.Dishes[index];
                 rows[i].GetComponentInChildren<UnityEngine.UI.Text>().text =
                     (dish.DishId == selectedId ? "› " : "") + ClickCookUiCopy.Dish(dish) +
-                    (session.Profile.OwnsRecipe(dish.DishId) ? " · Є" : " · " + ClickCookUiCopy.Money(dish.RecipeCost));
+                    (session.Profile.OwnsRecipe(dish.DishId) ? " · Є" : " · " + ClickCookUiCopy.Money(session.RecipePrice(dish)));
             }
             var selected = catalog.Find(selectedId);
             bool owned = session.Profile.OwnsRecipe(selectedId);
             details.text = ClickCookUiCopy.Dish(selected) + "\n\n" +
-                (owned ? "Рецепт уже доступний" : "Ціна рецепта: " + ClickCookUiCopy.Money(selected.RecipeCost)) +
+                (owned ? "Рецепт уже доступний" : "Ціна рецепта: " + ClickCookUiCopy.Money(session.RecipePrice(selected)) +
+                    $"\nЗнижка: {session.RecipeDiscount * 100:0}% · базова {ClickCookUiCopy.Money(selected.RecipeCost)}") +
                 "\nПродаж страви: " + ClickCookUiCopy.Money(selected.SaleValue) +
                 "\n\nПодають у локаціях:\n" + string.Join("\n", locations.Locations.Where(l => l.DocumentedAvailableDishes.Contains(selected))
                     .Select(l => ClickCookUiCopy.Location(l) + $" · рівень {PlayerProgression.RequiredLevel(l)}"));

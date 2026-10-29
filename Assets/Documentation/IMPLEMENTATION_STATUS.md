@@ -1,5 +1,12 @@
 # ClickCook Implementation Status
 
+**Поточний checkpoint — 2026-10-29: U5e recipe discount завершено.** node.recipe_discount.01 має5 рангів по1%, максимум5%, після Dish Value1; ціни каталогу150/300/600/1200/2400. Новий рецепт = max(1,ceil(base × (1−discount))); starter0 лишається0. Quotes перевіряють base/dish/session/discount-rank/effective price; upgrade discount окремий. Schema19 читає1–18 без безкоштовних рангів; доступні51/91 платних вузлів. [КонтрактU5e](ClickCook_U5e_Recipe_Discount_Contract.md).
+
+Scoped model/storage/Play/native/restart пройдено:32 ціни×0–5, ceil/stale/same-rounded-price guard, точний debit, old schema/caps/prerequisites/backup/reset/PlayerXP. Native rank1 за150, рецепт2 за149, wallet9701.25/discount1/XP100.0001 точно відновлено.10-stat panel/32 details fit. Build/широкі suites/pacing не потрібні. Play stopped, override removed, scene clean. Нижчі checkpoints історичні.
+
+**Далі:** U5 flat/multiplier Player XP;9A Restaurant XP після окремого source/threshold-контракту.
+
+
 **Поточний checkpoint — 2026-10-29: 8C завершено.** Player XP зараховується один раз із виплатою повного дня: earnings/100, точно до4 знаків, cap15000/level10. Власник погодив cumulative пороги0/100/300/700/1400/2500/4200/6600/10000/15000 та доступ: Dormitory на1, Café на2, далі послідовно, Fashion/Michelin обидва на10. Model і controller блокують закриті локації незалежно від купленого рецепта. Carousel показує вимоги; summary — фактично виданий Player XP; рецептні serving pools не змінено. Schema18 читає1–17 без втрати старого прогресу й без вигаданого ретро-XP. [Контракт8C](ClickCook_8C_Player_Progression_Contract.md).
 
 Scoped compilation/model/storage/Play/restart пройдено. В ізольованому профілі повний день дав XP99.95→100.05, wallet123.25→133.25, level2/Café; restart відновив точні значення й доступ, ранній день не додав XP. Перевірено межі/cap/multi-level, рівні×локації, legacy/backup/reset/future protection, суміжні day-settlement і recipe моделі, нові UI підписи/32 shop details. Full-HD Game View оглянуто; native carousel показав level3 lock. Широкі suites/build/pacing не потрібні. Play stopped; save override removed; scene clean. Нижчі checkpoints історичні.

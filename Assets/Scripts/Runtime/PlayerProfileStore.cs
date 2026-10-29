@@ -15,7 +15,7 @@ namespace ClickCook.Runtime
     /// <summary>Versioned local profile. Temporary day/order/result state is deliberately excluded.</summary>
     public sealed class PlayerProfileStore
     {
-        public const int CurrentVersion = 18;
+        public const int CurrentVersion = 19;
         [Serializable] private sealed class Envelope { public int version; public string payload; public string checksum; }
         [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; public int[] recipes; public string playerXp; }
         [Serializable] private sealed class DishEntry { public int id; public int xp; public int hundredths; }

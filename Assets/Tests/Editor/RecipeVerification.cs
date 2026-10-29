@@ -50,6 +50,7 @@ namespace ClickCook.Verification
                 foreach (var location in Locations.Locations)
                     Check(fresh.AvailableRecipeCount(location) == location.DocumentedAvailableDishes.Count(d => d.DishId == 1), "owned pool intersection");
                 var all = Session(Decode(Signed(17, "{\"wallet\":\"0\",\"dishes\":[],\"upgrades\":[],\"recipes\":[" + string.Join(",", Enumerable.Range(1, 32)) + "]}")));
+                typeof(PlayerProfile).GetMethod("RestorePlayerXp", Private).Invoke(all.Profile, new object[] { PlayerProgression.MaximumXp });
                 foreach (var location in Locations.Locations)
                 {
                     Check(all.AvailableRecipeCount(location) == location.DocumentedAvailableDishes.Count, "all-owned exact authored pool");
@@ -68,6 +69,7 @@ namespace ClickCook.Verification
                     "exact single debit/notification/ownership");
                 Check(s.Rewards.GetExactTotalXp(Catalog.Find(2)) == 0 && s.Profile.OwnsRecipe(2) && !s.Profile.OwnsRecipe(3), "purchase no XP/unrelated grants");
                 Check(s.AvailableRecipeCount(Locations.Locations[0]) == 2 && s.AvailableRecipeCount(Locations.Locations[1]) == 2, "ownership global across eligible locations");
+                typeof(PlayerProfile).GetMethod("RestorePlayerXp", Private).Invoke(s.Profile, new object[] { PlayerProgression.MaximumXp });
                 s.StartDay(Locations.Locations[1], 6);
                 for (int n = 0; n < 10; n++)
                 {
@@ -115,7 +117,7 @@ namespace ClickCook.Verification
             foreach (var ids in new[] { null, "[]", "[2]", "[1,1]", "[1,0]", "[1,33]", "[1,-1]", "[1]" })
                 Check(Decode(Signed(17, Payload(ids, true))) == null, "invalid ownership/XP relation " + ids);
             Check(Decode(Signed(16, Payload("[1,2]", true))) == null, "legacy cannot smuggle recipe field");
-            string future = Signed(18, Payload("[1,2]", true)); File.WriteAllText(store.SavePath, future);
+            string future = Signed(PlayerProfileStore.CurrentVersion + 1, Payload("[1,2]", true)); File.WriteAllText(store.SavePath, future);
             var protectedStore = new PlayerProfileStore(store.SavePath);
             Check(protectedStore.Load() == null && protectedStore.Status == ProfileLoadStatus.Unsupported && !protectedStore.Save(new PlayerProfile()) && File.ReadAllText(store.SavePath) == future, "future protected");
             return "8B storage PASS: schema1–16 migration, exact money/fraction XP, no eager rewrite/free locked recipes, schema17 ownership/backup/reset, malformed data and future-version protection.";

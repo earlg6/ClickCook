@@ -40,6 +40,7 @@ namespace ClickCook.Runtime
         private readonly List<PrototypeOrder> orders = new();
         private readonly List<PrototypeDishResult> dayReceipts = new();
         public decimal PendingDayEarnings { get; private set; }
+        public decimal DayPlayerXpGained { get; private set; }
         private readonly IReadOnlyList<PrototypeOrder> readOnlyOrders;
 
         public LocationData SelectedLocation { get; private set; }
@@ -228,7 +229,7 @@ namespace ClickCook.Runtime
 
         public void StartDay(LocationData location, int capacity)
         {
-            if (IsPaused) return;
+            if (IsPaused || !Profile.CanWorkAt(location)) return;
             EndDay();
             if (location == null || !Profile.TryBeginDay(this)) return;
             SelectedLocation = location;
@@ -303,7 +304,7 @@ namespace ClickCook.Runtime
             // Settle in the tenth receipt's autosave transaction, even before Result Continue.
             if (CompletedDishes == MAX_COMPLETED_DISHES_PER_DAY)
             {
-                Rewards.CreditCompletedDay(PendingDayEarnings);
+                DayPlayerXpGained = Profile.CreditCompletedDay(PendingDayEarnings);
                 PendingDayEarnings = 0;
             }
             Profile.NotifyChanged();
@@ -365,7 +366,7 @@ namespace ClickCook.Runtime
         {
             summary = null;
             if (IsPaused || !IsDayActive || ActiveOrder != null) return false;
-            summary = new PrototypeDaySummary(SelectedLocation, dayReceipts);
+            summary = new PrototypeDaySummary(SelectedLocation, dayReceipts, DayPlayerXpGained);
             EndDay();
             return true;
         }
@@ -377,6 +378,7 @@ namespace ClickCook.Runtime
             orders.Clear();
             dayReceipts.Clear();
             PendingDayEarnings = 0;
+            DayPlayerXpGained = 0;
             SelectedLocation = null;
             BoardCapacity = 0;
             CompletedDishes = 0;

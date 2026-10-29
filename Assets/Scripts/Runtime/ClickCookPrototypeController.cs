@@ -137,6 +137,9 @@ namespace ClickCook.Runtime
             }
 
             previousButton.onClick.AddListener(ShowPreviousLocation);
+            progressText.resizeTextForBestFit = true;
+            progressText.resizeTextMinSize = 18;
+            progressText.resizeTextMaxSize = 28;
             session.ConfigureRecipes(recipeCatalog);
             recipeShop.Initialize(this);
             recipeShop.gameObject.SetActive(false);
@@ -321,7 +324,8 @@ namespace ClickCook.Runtime
         public void CookSelectedLocation()
         {
             LocationData selectedLocation = CurrentLocation;
-            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || selectedLocation == null || session.AvailableRecipeCount(selectedLocation) == 0)
+            if (!enabled || GameplayBlocked || !locationSelectionScreen.activeSelf || selectedLocation == null ||
+                !session.Profile.CanWorkAt(selectedLocation) || session.AvailableRecipeCount(selectedLocation) == 0)
             {
                 return;
             }
@@ -417,7 +421,7 @@ namespace ClickCook.Runtime
             resultRarityText.color = rarityInk[(int)result.Rarity];
             dishResultText.text = $"{ClickCookUiCopy.Dish(result.Dish)}\n\n" +
                 $"За замовлення: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n" +
-                (session.CompletedDishes < PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Виплата — після 10 страв; достроково — 0.\n\n" : "Дохід дня зараховано.\n\n") +
+                (session.CompletedDishes < PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Виплата — після 10 страв; достроково — 0.\n\n" : $"Дохід дня зараховано. Кухар: +{session.DayPlayerXpGained:0.####} XP.\n\n") +
                 $"Досвід страви: +{result.XpGained:0.##} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
             continueFromResultButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
                 session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Завершити день" : "Продовжити";
@@ -465,6 +469,7 @@ namespace ClickCook.Runtime
             report.AppendLine($"Приготовано: {summary.Receipts.Count} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
                 (summary.LimitReached ? " · Ліміт дня" : ""));
             report.AppendLine($"Зароблено: {ClickCookUiCopy.Money(summary.Earnings)} · Досвід страв: +{summary.DishXp:0.##} XP");
+            report.AppendLine($"Досвід кухаря: +{summary.PlayerXp:0.####} XP · Рівень {session.Profile.PlayerLevel}");
             report.AppendLine(summary.LimitReached ? "Дохід дня зараховано." :
                 $"День завершено достроково. Анульовано: {ClickCookUiCopy.Money(summary.ForfeitedEarnings)}. Dish XP збережено.");
             if (summary.Receipts.Count == 0) report.AppendLine("Цього дня немає готових страв.");
@@ -616,13 +621,19 @@ namespace ClickCook.Runtime
             }
 
             locationNameText.text = ClickCookUiCopy.Location(location);
-            locationLevelText.text = $"Рівень локації: {location.LevelRequirement}";
-            progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}";
+            int requiredLevel = PlayerProgression.RequiredLevel(location);
+            bool unlocked = session.Profile.CanWorkAt(location);
+            locationLevelText.text = unlocked ? $"Доступно · потрібен рівень {requiredLevel}" : $"Потрібен рівень кухаря {requiredLevel}";
+            int playerLevel = session.Profile.PlayerLevel;
+            string xpProgress = playerLevel < PlayerProgression.MaximumLevel ?
+                $"XP {session.Profile.PlayerXp:0.####} / {PlayerProgression.ThresholdForLevel(playerLevel + 1):0}" : "XP: максимум";
+            progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\nКухар: рівень {playerLevel} · {xpProgress}";
             dishSlotsText.text = ClickCookUiCopy.DishPreview(location);
             int eligible = session.AvailableRecipeCount(location);
             dishSlotsText.text += $"\nКуплених рецептів: {eligible} / {location.DocumentedAvailableDishes.Count}";
-            cookButton.interactable = eligible > 0;
-            if (eligible == 0) dishSlotsText.text += "\nКупи рецепт або обери іншу локацію.";
+            cookButton.interactable = unlocked && eligible > 0;
+            if (!unlocked) dishSlotsText.text += "\nЗавершуй повні дні, щоб підвищити рівень.";
+            else if (eligible == 0) dishSlotsText.text += "\nКупи рецепт або обери іншу локацію.";
             var controls = new System.Collections.Generic.List<UnityEngine.UI.Button> { previousButton, nextButton };
             if (cookButton.interactable) controls.Add(cookButton);
             controls.Add(openRecipesButton); controls.Add(openUpgradesButton); controls.Add(exitGameButton);

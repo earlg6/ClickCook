@@ -15,9 +15,9 @@ namespace ClickCook.Runtime
     /// <summary>Versioned local profile. Temporary day/order/result state is deliberately excluded.</summary>
     public sealed class PlayerProfileStore
     {
-        public const int CurrentVersion = 17;
+        public const int CurrentVersion = 18;
         [Serializable] private sealed class Envelope { public int version; public string payload; public string checksum; }
-        [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; public int[] recipes; }
+        [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; public int[] recipes; public string playerXp; }
         [Serializable] private sealed class DishEntry { public int id; public int xp; public int hundredths; }
         [Serializable] private sealed class RankEntry { public string id; public int rank; }
         public string SavePath { get; }
@@ -117,6 +117,7 @@ namespace ClickCook.Runtime
         {
             string payload = JsonUtility.ToJson(new Payload {
                 wallet = snapshot.Wallet.ToString(CultureInfo.InvariantCulture),
+                playerXp = snapshot.PlayerXp.ToString(CultureInfo.InvariantCulture),
                 recipes = snapshot.OwnedRecipeIds.OrderBy(id => id).ToArray(),
                 dishes = snapshot.DishXpById.OrderBy(p => p.Key).Select(p => new DishEntry { id = p.Key, xp = p.Value, hundredths = snapshot.DishXpHundredthsById.TryGetValue(p.Key, out int value) ? value : 0 }).ToArray(),
                 upgrades = snapshot.UpgradeRanksById.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => new RankEntry { id = p.Key, rank = p.Value }).ToArray()
@@ -134,6 +135,14 @@ namespace ClickCook.Runtime
                 if (envelope.version > CurrentVersion) { status = ProfileLoadStatus.Unsupported; return null; }
                 if (envelope.version < 1 || envelope.payload == null || envelope.checksum != Hash(envelope.payload)) return null;
                 var payload = JsonUtility.FromJson<Payload>(envelope.payload);
+                decimal playerXp = 0m;
+                if (envelope.version >= 18)
+                {
+                    if (payload == null || !decimal.TryParse(payload.playerXp, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out playerXp) ||
+                        playerXp < 0 || playerXp > PlayerProgression.MaximumXp || decimal.Round(playerXp, 4) != playerXp ||
+                        playerXp.ToString(CultureInfo.InvariantCulture) != payload.playerXp) return null;
+                }
+                else if (payload != null && payload.playerXp != null) return null;
                 if (payload == null || payload.dishes == null || payload.upgrades == null ||
                     !decimal.TryParse(payload.wallet, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal wallet) ||
                     wallet < 0 || wallet > decimal.MaxValue / 2 || decimal.Round(wallet, 2) != wallet ||
@@ -196,6 +205,7 @@ namespace ClickCook.Runtime
                 var profile = PlayerProfile.Restore(wallet, xp, ranks, hundredths);
                 if (xp.Any(pair => (pair.Value > 0 || hundredths.ContainsKey(pair.Key)) && !recipes.Contains(pair.Key))) return null;
                 profile.RestoreRecipes(recipes);
+                profile.RestorePlayerXp(playerXp);
                 status = ProfileLoadStatus.Loaded;
                 return profile;
             }

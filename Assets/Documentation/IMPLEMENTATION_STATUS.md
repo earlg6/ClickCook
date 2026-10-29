@@ -1,5 +1,12 @@
 # ClickCook Implementation Status
 
+**Поточний checkpoint — 2026-10-29: 8C завершено.** Player XP зараховується один раз із виплатою повного дня: earnings/100, точно до4 знаків, cap15000/level10. Власник погодив cumulative пороги0/100/300/700/1400/2500/4200/6600/10000/15000 та доступ: Dormitory на1, Café на2, далі послідовно, Fashion/Michelin обидва на10. Model і controller блокують закриті локації незалежно від купленого рецепта. Carousel показує вимоги; summary — фактично виданий Player XP; рецептні serving pools не змінено. Schema18 читає1–17 без втрати старого прогресу й без вигаданого ретро-XP. [Контракт8C](ClickCook_8C_Player_Progression_Contract.md).
+
+Scoped compilation/model/storage/Play/restart пройдено. В ізольованому профілі повний день дав XP99.95→100.05, wallet123.25→133.25, level2/Café; restart відновив точні значення й доступ, ранній день не додав XP. Перевірено межі/cap/multi-level, рівні×локації, legacy/backup/reset/future protection, суміжні day-settlement і recipe моделі, нові UI підписи/32 shop details. Full-HD Game View оглянуто; native carousel показав level3 lock. Широкі suites/build/pacing не потрібні. Play stopped; save override removed; scene clean. Нижчі checkpoints історичні.
+
+**Далі:** залежні U5 recipe/Player XP upgrades та9A Restaurant XP після окремого source/threshold-контракту.
+
+
 **Поправка власника — 2026-10-28: достроковий день не приносить грошей.** Вартість замовлень1–9 накопичується лише в тимчасовому PendingDayEarnings. Finish раніше10 страв, меню/вихід/перезапуск анулюють її; попередній баланс і Dish XP залишаються. Десята receipt один раз зараховує всю суму дня в Wallet у своїй autosave-транзакції, ще до Continue. Summary показує реальні Earnings0 та ForfeitedEarnings для раннього дня. Result, Finish і Pause пояснюють правило. Schema17 незмінна: pending income не записується. Ця поправка має пріоритет над старими описами негайної оплати нижче. [Контракт8A](ClickCook_8A_Day_Summary_Contract.md).
 
 Scoped compilation/model/save/Play перевірки пройдено: кожне раннє завершення1–9, повний день10, точний wallet/дробовий XP, replay/cleanup/no-carry, три страви→нуль грошей у save, наступний повний день→одна виплата та actual restart/Continue. Ранній summary оглянуто в Game View; тексти result/summary/Finish/Pause вміщаються. Player build/широка регресія не потрібні. Play stopped, fixture override removed, scene clean. Наступний roadmap-крок залишається8C.

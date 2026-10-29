@@ -90,7 +90,8 @@ namespace ClickCook.UI
             details.text = ClickCookUiCopy.Dish(selected) + "\n\n" +
                 (owned ? "Рецепт уже доступний" : "Ціна рецепта: " + ClickCookUiCopy.Money(selected.RecipeCost)) +
                 "\nПродаж страви: " + ClickCookUiCopy.Money(selected.SaleValue) +
-                "\n\nПодають у локаціях:\n" + string.Join("\n", locations.Locations.Where(l => l.DocumentedAvailableDishes.Contains(selected)).Select(ClickCookUiCopy.Location));
+                "\n\nПодають у локаціях:\n" + string.Join("\n", locations.Locations.Where(l => l.DocumentedAvailableDishes.Contains(selected))
+                    .Select(l => ClickCookUiCopy.Location(l) + $" · рівень {PlayerProgression.RequiredLevel(l)}"));
             session.TryQuoteRecipe(selectedId, out quote);
             buy.interactable = quote != null && session.Rewards.Wallet >= quote.Price;
             buy.GetComponentInChildren<UnityEngine.UI.Text>().text = owned ? "Придбано" : buy.interactable ? "Купити рецепт" : "Недостатньо коштів";

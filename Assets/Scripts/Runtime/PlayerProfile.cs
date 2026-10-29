@@ -11,6 +11,18 @@ namespace ClickCook.Runtime
         private PrototypeOrderSession activeDay;
         private readonly HashSet<int> ownedRecipes = new() { 1 };
         public bool OwnsRecipe(int id) => ownedRecipes.Contains(id);
+        public decimal PlayerXp { get; private set; }
+        public int PlayerLevel => PlayerProgression.LevelAt(PlayerXp);
+        public bool CanWorkAt(LocationData location) => PlayerLevel >= PlayerProgression.RequiredLevel(location);
+        internal void RestorePlayerXp(decimal value) => PlayerXp = value;
+
+        internal decimal CreditCompletedDay(decimal earnings)
+        {
+            Rewards.CreditCompletedDay(earnings);
+            decimal gained = Math.Min(earnings / 100m, PlayerProgression.MaximumXp - PlayerXp);
+            PlayerXp += gained;
+            return gained;
+        }
 
         public PrototypeDishRewards Rewards { get; } = new();
         public bool HasActiveDay => activeDay != null;
@@ -30,7 +42,7 @@ namespace ClickCook.Runtime
             id != null && upgradeRanks.TryGetValue(UpgradeNodeRules.CanonicalId(id), out int rank) ? rank : 0;
 
         public PlayerProfileSnapshot CaptureSnapshot() =>
-            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks, Rewards.CopyDishXpHundredths(), ownedRecipes);
+            new(Rewards.Wallet, Rewards.CopyDishXp(), upgradeRanks, Rewards.CopyDishXpHundredths(), ownedRecipes, PlayerXp);
 
         internal void RestoreRecipes(IEnumerable<int> recipes)
         {

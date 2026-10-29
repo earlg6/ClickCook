@@ -15,7 +15,7 @@ namespace ClickCook.Runtime
     /// <summary>Versioned local profile. Temporary day/order/result state is deliberately excluded.</summary>
     public sealed class PlayerProfileStore
     {
-        public const int CurrentVersion = 19;
+        public const int CurrentVersion = 20;
         [Serializable] private sealed class Envelope { public int version; public string payload; public string checksum; }
         [Serializable] private sealed class Payload { public string wallet; public DishEntry[] dishes; public RankEntry[] upgrades; public int[] recipes; public string playerXp; }
         [Serializable] private sealed class DishEntry { public int id; public int xp; public int hundredths; }
@@ -139,7 +139,7 @@ namespace ClickCook.Runtime
                 if (envelope.version >= 18)
                 {
                     if (payload == null || !decimal.TryParse(payload.playerXp, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out playerXp) ||
-                        playerXp < 0 || playerXp > PlayerProgression.MaximumXp || decimal.Round(playerXp, 4) != playerXp ||
+                        playerXp < 0 || playerXp > PlayerProgression.MaximumXp || decimal.Round(playerXp, envelope.version >= 20 ? 8 : 4) != playerXp ||
                         playerXp.ToString(CultureInfo.InvariantCulture) != payload.playerXp) return null;
                 }
                 else if (payload != null && payload.playerXp != null) return null;

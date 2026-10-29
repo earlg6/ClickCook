@@ -59,7 +59,7 @@ namespace ClickCook.UI
             var gesture = viewport.gameObject.AddComponent<UpgradeTreeGesture>(); gesture.View = this;
             content = Rect("TreeContent", viewport, new Vector2(.5f,.5f), new Vector2(.5f,.5f), Vector2.zero, Vector2.zero);
             content.pivot = new Vector2(.5f,.5f);
-            var sidebar = Rect("NodeDetail", root, new Vector2(1, 0), Vector2.one, new Vector2(-486, 460), new Vector2(-24, -230));
+            var sidebar = Rect("NodeDetail", root, new Vector2(1, 0), Vector2.one, new Vector2(-486, 484), new Vector2(-24, -230));
             Image(sidebar, Cream, true);
             var scrollRoot = Rect("DetailScroll", sidebar, Vector2.zero, Vector2.one, new Vector2(22, 126), new Vector2(-22, -20));
             var detailViewport = Rect("Viewport", scrollRoot, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -79,7 +79,7 @@ namespace ClickCook.UI
             Move(buy, sidebar);
             Place(buy.GetComponent<RectTransform>(), Vector2.zero, new Vector2(1,0), new Vector2(20, 20), new Vector2(-20, 90));
             StyleExisting(buy, 23);
-            statisticsPanel = Rect("ActiveStatistics", root, new Vector2(1,0), new Vector2(1,0), new Vector2(-486,120), new Vector2(-24,440));
+            statisticsPanel = Rect("ActiveStatistics", root, new Vector2(1,0), new Vector2(1,0), new Vector2(-486,120), new Vector2(-24,464));
             Image(statisticsPanel, Cream, true);
             statistics = Text("ActualEffects", statisticsPanel, "", new Vector2(18,18), new Vector2(-18,-62), 20, Ink, false);
             statisticsToggle = Button("StatisticsToggle", statisticsPanel, "Активні покращення · Сховати", Vector2.zero, Vector2.one, new Vector2(12,-56), new Vector2(-12,-8), ToggleStatistics);
@@ -191,6 +191,8 @@ namespace ClickCook.UI
                     text.AppendLine("Ціна вже враховує поточну знижку, також для цього вузла. Після покупки нова знижка діє на наступні покупки.");
                 if (node.id == UpgradeNodeRules.RecipeDiscount)
                     text.AppendLine("Діє лише на нові рецепти. Ціна = базова × (1 − знижка), округлення вгору, мінімум 1. Придбане не перераховується.");
+                if (UpgradeNodeRules.FamilyId(node.id) is "character_xp" or "character_xp_flat")
+                    text.AppendLine("Лише за повний день: (дохід / 100 + flat) × множники. Достроково — 0 XP кухаря; на межі рівня 10 надлишок не нараховується.");
                 if (node.id == UpgradeNodeRules.DishValue)
                     text.AppendLine("Множить оплату за якість. Округлення до копійок один раз наприкінці; половини вгору.");
                 if (node.id == UpgradeNodeRules.DishXpMultiplier)
@@ -238,6 +240,7 @@ namespace ClickCook.UI
             statistics.text += $"\nОплата за страву: ×{session.DishValueMultiplier:0.##}";
             statistics.text += $"\nЗнижка на покращення: {session.UpgradeDiscount * 100:0}%";
             statistics.text += $"\nЗнижка на рецепти: {session.RecipeDiscount * 100:0}%";
+            statistics.text += $"\nДосвід кухаря за день: +{session.Profile.PlayerXpFlatBonus:0.##} · ×{session.Profile.PlayerXpMultiplier:0.####}";
             foreach (var item in tree.nodes)
             {
                 bool selected = item.id == SelectedId;
@@ -266,6 +269,8 @@ namespace ClickCook.UI
             if(UpgradeNodeRules.TryGetAdditionalTier(id,out var tier)) return tier.Family switch {
                 "upgrade_discount" => $"Знижка: {rank}%",
                 "recipe_discount" => $"Знижка на рецепти: {rank}%",
+                "character_xp_flat" => $"Внесок: +{tier.Step * rank:0.##} XP за повний день",
+                "character_xp" => $"Множник вузла: ×{1 + tier.Step * rank:0.##}",
                 "dish_xp_flat" => $"Внесок досвіду: +{tier.Step * rank:0.##} XP",
                 "dish_value" => $"Внесок оплати: +{tier.Step * rank * 100:0.##}%",
                 "click_strength" or "auto_strength" => $"Внесок сили: +{tier.Step * rank:0.##} HP",

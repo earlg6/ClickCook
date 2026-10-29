@@ -84,7 +84,7 @@ namespace ClickCook.Verification
                 Check(store.Save(new PlayerProfile(),true)&&store.Load().GetUpgradeRank(UpgradeNodeRules.RecipeDiscount)==0&&new PlayerProfileStore(store.BackupPath).Load().GetUpgradeRank(UpgradeNodeRules.RecipeDiscount)==0,"reset both rank copies");
             }
             Check(Decode(Signed(19,Payload(19,6)))==null&&Decode(Signed(19,Payload(19,-1)))==null&&Decode(Signed(19,Payload(19,1,0,false)))==null,"invalid cap/negative/prerequisite");
-            string futurePath=Path.Combine(root,"future.json"),future=Signed(20,Payload(19,1));File.WriteAllText(futurePath,future);var futureStore=new PlayerProfileStore(futurePath);
+            string futurePath=Path.Combine(root,"future.json"),future=Signed(PlayerProfileStore.CurrentVersion+1,Payload(19,1));File.WriteAllText(futurePath,future);var futureStore=new PlayerProfileStore(futurePath);
             Check(futureStore.Load()==null&&futureStore.Status==ProfileLoadStatus.Unsupported&&!futureStore.Save(new PlayerProfile())&&File.ReadAllText(futurePath)==future,"future20 protected");
             return "Recipe discount storage PASS: schemas1–18 exact/no free ranks, schema19 independent discounts/PlayerXP/wallet, backup/reset/caps/prerequisite and future20 protection.";
         }

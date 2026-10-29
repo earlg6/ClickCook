@@ -421,7 +421,7 @@ namespace ClickCook.Runtime
             resultRarityText.color = rarityInk[(int)result.Rarity];
             dishResultText.text = $"{ClickCookUiCopy.Dish(result.Dish)}\n\n" +
                 $"За замовлення: {ClickCookUiCopy.Money(result.Payout)}\nБаланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\n" +
-                (session.CompletedDishes < PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Виплата — після 10 страв; достроково — 0.\n\n" : $"Дохід дня зараховано. Кухар: +{session.DayPlayerXpGained:0.####} XP.\n\n") +
+                (session.CompletedDishes < PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Виплата — після 10 страв; достроково — 0.\n\n" : $"Дохід дня зараховано. Кухар: +{session.DayPlayerXpGained:0.########} XP.\n\n") +
                 $"Досвід страви: +{result.XpGained:0.##} XP\nРівень страви: {result.PreviousLevel} → {result.Level}";
             continueFromResultButton.GetComponentInChildren<UnityEngine.UI.Text>().text =
                 session.CompletedDishes >= PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY ? "Завершити день" : "Продовжити";
@@ -469,7 +469,7 @@ namespace ClickCook.Runtime
             report.AppendLine($"Приготовано: {summary.Receipts.Count} / {PrototypeOrderSession.MAX_COMPLETED_DISHES_PER_DAY}" +
                 (summary.LimitReached ? " · Ліміт дня" : ""));
             report.AppendLine($"Зароблено: {ClickCookUiCopy.Money(summary.Earnings)} · Досвід страв: +{summary.DishXp:0.##} XP");
-            report.AppendLine($"Досвід кухаря: +{summary.PlayerXp:0.####} XP · Рівень {session.Profile.PlayerLevel}");
+            report.AppendLine($"Досвід кухаря: +{summary.PlayerXp:0.########} XP · Рівень {session.Profile.PlayerLevel}");
             report.AppendLine(summary.LimitReached ? "Дохід дня зараховано." :
                 $"День завершено достроково. Анульовано: {ClickCookUiCopy.Money(summary.ForfeitedEarnings)}. Dish XP збережено.");
             if (summary.Receipts.Count == 0) report.AppendLine("Цього дня немає готових страв.");
@@ -626,7 +626,7 @@ namespace ClickCook.Runtime
             locationLevelText.text = unlocked ? $"Доступно · потрібен рівень {requiredLevel}" : $"Потрібен рівень кухаря {requiredLevel}";
             int playerLevel = session.Profile.PlayerLevel;
             string xpProgress = playerLevel < PlayerProgression.MaximumLevel ?
-                $"XP {session.Profile.PlayerXp:0.####} / {PlayerProgression.ThresholdForLevel(playerLevel + 1):0}" : "XP: максимум";
+                $"XP {session.Profile.PlayerXp:0.########} / {PlayerProgression.ThresholdForLevel(playerLevel + 1):0}" : "XP: максимум";
             progressText.text = $"Баланс: {ClickCookUiCopy.Money(session.Rewards.Wallet)}\nКухар: рівень {playerLevel} · {xpProgress}";
             dishSlotsText.text = ClickCookUiCopy.DishPreview(location);
             int eligible = session.AvailableRecipeCount(location);

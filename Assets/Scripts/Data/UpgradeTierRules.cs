@@ -16,12 +16,18 @@ namespace ClickCook.Data
     {
         public const string UpgradeDiscount="node.upgrade_discount.01";
         public const string RecipeDiscount="node.recipe_discount.01";
+        public const string PlayerXpFlat="node.character_xp_flat.01", PlayerXpFlatII="node.character_xp_flat.02";
+        public const string PlayerXpMultiplier="node.character_xp.01", PlayerXpMultiplierII="node.character_xp.02";
         public const string DishXpFlatII="node.dish_xp_flat.02", DishXpFlatIII="node.dish_xp_flat.03";
         public const string DishValueII="node.dish_value.02", DishValueIII="node.dish_value.03", DishValueIV="node.dish_value.04";
         private static readonly Dictionary<string,UpgradeTierRule> additionalTiers=new(StringComparer.Ordinal)
         {
             [UpgradeDiscount]=new(UpgradeDiscount,"upgrade_discount",5,DishValue,1,15,300,200,.01m),
             [RecipeDiscount]=new(RecipeDiscount,"recipe_discount",5,DishValue,1,19,150,200,.01m),
+            [PlayerXpFlat]=new(PlayerXpFlat,"character_xp_flat",5,DishXpFlat,1,20,150,170,1m),
+            [PlayerXpFlatII]=new(PlayerXpFlatII,"character_xp_flat",5,PlayerXpFlat,-1,20,2000,170,5m),
+            [PlayerXpMultiplier]=new(PlayerXpMultiplier,"character_xp",15,PlayerXpFlat,1,20,200,170,.07m),
+            [PlayerXpMultiplierII]=new(PlayerXpMultiplierII,"character_xp",5,PlayerXpMultiplier,-1,20,50000,180,.07m),
             [DishXpFlatII]=new(DishXpFlatII,"dish_xp_flat",8,DishXpFlat,-1,15,2500,170,5m),
             [DishXpFlatIII]=new(DishXpFlatIII,"dish_xp_flat",5,DishXpFlatII,-1,15,25000,180,14m),
             [DishValueII]=new(DishValueII,"dish_value",5,DishValue,-1,15,250000,170,.04m),

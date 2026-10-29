@@ -13,13 +13,15 @@ namespace ClickCook.Runtime
         public bool OwnsRecipe(int id) => ownedRecipes.Contains(id);
         public decimal PlayerXp { get; private set; }
         public int PlayerLevel => PlayerProgression.LevelAt(PlayerXp);
+        public decimal PlayerXpFlatBonus => UpgradeNodeRules.AdditionalContribution("character_xp_flat", GetUpgradeRank);
+        public decimal PlayerXpMultiplier => UpgradeNodeRules.AdditionalFactor("character_xp", GetUpgradeRank);
         public bool CanWorkAt(LocationData location) => PlayerLevel >= PlayerProgression.RequiredLevel(location);
         internal void RestorePlayerXp(decimal value) => PlayerXp = value;
 
         internal decimal CreditCompletedDay(decimal earnings)
         {
             Rewards.CreditCompletedDay(earnings);
-            decimal gained = Math.Min(earnings / 100m, PlayerProgression.MaximumXp - PlayerXp);
+            decimal gained = Math.Min((earnings / 100m + PlayerXpFlatBonus) * PlayerXpMultiplier, PlayerProgression.MaximumXp - PlayerXp);
             PlayerXp += gained;
             return gained;
         }

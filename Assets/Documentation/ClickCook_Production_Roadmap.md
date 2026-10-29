@@ -1,5 +1,12 @@
 # ClickCook — roadmap до production
 
+**Поточний checkpoint — 2026-10-29: U5f Player XP гілки завершено.** Працюють4 вузли: character_xp_flat.01/.02 та character_xp.01/.02. Max flat+30, max factor×2.7675; лише за повний день: (paid earnings/100 + flat) × factors, cap15000. Достроково0 Player XP і0 грошей дня. Schema20 зберігає точні8 знаків XP, читає1–19 без free ranks;18/19 лишають4-place validation. Доступні55/91 платних вузлів. [КонтрактU5f](ClickCook_U5f_Player_Xp_Upgrades_Contract.md).
+
+Scoped model/storage/Play/native/restart пройдено: independent rational oracle, caps/prerequisites/prices,8-place fraction/final cap unit, old-schema gates/backup/reset/future protection, ранні1–9/full10. Native flat150+multiplier200, потім повний день10.25→1.179675 XP, total100.179675/wallet9999660.50 точно збережено й відновлено.11-stat/precise summary/header fit; locale assertion виправлено під фактичну кому UI. Build/широкі suites/pacing не потрібні. Play stopped, override removed, scene clean. Нижчі checkpoints історичні.
+
+**Далі:** 9A Restaurant XP за окремим контрактом джерела/порогів/користі; рішення власника запитано в поточному чаті.
+
+
 **Поточний checkpoint — 2026-10-29: U5e recipe discount завершено.** node.recipe_discount.01 має5 рангів по1%, максимум5%, після Dish Value1; ціни каталогу150/300/600/1200/2400. Новий рецепт = max(1,ceil(base × (1−discount))); starter0 лишається0. Quotes перевіряють base/dish/session/discount-rank/effective price; upgrade discount окремий. Schema19 читає1–18 без безкоштовних рангів; доступні51/91 платних вузлів. [КонтрактU5e](ClickCook_U5e_Recipe_Discount_Contract.md).
 
 Scoped model/storage/Play/native/restart пройдено:32 ціни×0–5, ceil/stale/same-rounded-price guard, точний debit, old schema/caps/prerequisites/backup/reset/PlayerXP. Native rank1 за150, рецепт2 за149, wallet9701.25/discount1/XP100.0001 точно відновлено.10-stat panel/32 details fit. Build/широкі suites/pacing не потрібні. Play stopped, override removed, scene clean. Нижчі checkpoints історичні.

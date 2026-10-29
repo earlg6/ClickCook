@@ -335,3 +335,20 @@ MonoBehaviour:
     maximumRank: 10
     basePrice: 1000000
     priceGrowthPercent: 180
+  - id: node.character_xp_flat.01
+    displayName: "\u041A\u0443\u043B\u0456\u043D\u0430\u0440\u043D\u0430 \u043E\u0441\u0432\u0456\u0442\u0430
+      I"
+    maximumRank: 5
+    basePrice: 150
+    priceGrowthPercent: 170
+  - id: node.character_xp_flat.02
+    displayName: "\u041A\u0443\u0440\u0441 \u0448\u0435\u0444\u0430 II"
+    maximumRank: 5
+    basePrice: 2000
+    priceGrowthPercent: 170
+  - id: node.character_xp.02
+    displayName: "\u0420\u043E\u0437\u0432\u0438\u0442\u043E\u043A \u0448\u0435\u0444\u0430
+      II"
+    maximumRank: 5
+    basePrice: 50000
+    priceGrowthPercent: 180
